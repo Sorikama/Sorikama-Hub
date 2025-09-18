@@ -7,8 +7,8 @@ const NavBar = () => {
         <div className="h-16 md:h-20 grid grid-cols-3 items-center">
           {/* Left: Logo */}
           <div className="flex items-center">
-            <Link to="/" className="inline-flex items-center">
-              <span className="uppercase font-bold tracking-tight text-[var(--color-primary)] md:text-3xl text-2xl">Sorikama</span>
+            <Link to="/" className="inline-flex items-center gap-2">
+              <img src="/logo.png" alt="Sorikama Logo" className="h-10 w-auto" />
             </Link>
           </div>
 
