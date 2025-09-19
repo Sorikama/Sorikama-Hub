@@ -1,478 +1,865 @@
-<div >
- <br />
-  <div align="center" >
-   <a href="https://youtu.be/pqYxZ8jd768" target="_blank">
-     <img  src="public/images/Final.png" style="border-radius:10px;"  alt="Project Banner">
-   </a></div>
- <br />
- <br />
+<div align="center">
+  <br />
+    <a href="https://youtu.be/B91wc5dCEBA" target="_blank">
+      <img src="https://i.ibb.co/Kqdv8j1/Image-from.png" alt="Project Banner">
+    </a>
+  <br />
 
- <div>
-   <img src="https://img.shields.io/badge/-React_JS_V19-black?style=for-the-badge&logoColor=white&logo=react&color=007ACC" alt="react.js" />
-   <img src="https://img.shields.io/badge/-Tailwind_CSS_v4-black?style=for-the-badge&logoColor=white&logo=tailwindcss&color=030712" alt="tailwindcss" />
-   <img src="https://img.shields.io/badge/-GSAP-black?style=for-the-badge&logoColor=white&logo=greensock&color=88CE02" alt="greensock" />
+  <div>
+    <img src="https://img.shields.io/badge/-Vite-black?style=for-the-badge&logoColor=white&logo=vite&color=646CFF" alt="vite" />
+    <img src="https://img.shields.io/badge/-React_JS-black?style=for-the-badge&logoColor=white&logo=react&color=61DAFB" alt="react.js" />
+    <img src="https://img.shields.io/badge/-Tailwind_CSS-black?style=for-the-badge&logoColor=white&logo=tailwindcss&color=06B6D4" alt="tailwindcss" />
+  </div>
 
- </div>
+  <h3 align="center">Modern UI/UX website</h3>
 
- <h3 style="font-weight:700;font-size:30px;">AWWWARDS Site of the Day Website</h3>
-
-  <div >
-    Ready to build a website that has won an Awwwards Site of the Day?
-    This tutorial guides you through creating a stunning, interactive site using <b>GSAP</b>, <b>ReactJS</b>, and <b>Tailwind CSS</b>.
-   </div>
+   <div align="center">
+     Build this project step by step with our detailed tutorial on <a href="https://www.youtube.com/@javascriptmastery/videos" target="_blank"><b>JavaScript Mastery</b></a> YouTube.
+    </div>
 </div>
 
 ## 📋 <a name="table">Table of Contents</a>
 
-1. 🚀 [Introduction](#introduction)
+1. 🤖 [Introduction](#introduction)
 2. ⚙️ [Tech Stack](#tech-stack)
-3. ✨ [Features](#features)
+3. 🔋 [Features](#features)
 4. 🤸 [Quick Start](#quick-start)
-5. 🕸️ [Snippets (Code to Copy)](#snippets)
-6. 🔗 [Assets](#links)
-7. 🌐 [Community](#more)
+5. 🕸️ [Snippets](#snippets)
+6. 🔗 [Links](#links)
+7. 🚀 [More](#more)
 
-## Introduction
+## 🚨 Tutorial
 
-Dive into creating a cutting-edge web experience designed for Awwwards recognition, with **GSAP (GreenSock Animation Platform)** at its core. This project demonstrates how to leverage GSAP's powerful animation capabilities to craft fluid transitions, captivating scroll effects, and dynamic UI interactions, combining it with React and Tailwind CSS for a truly immersive and visually stunning website.
+This repository contains the code corresponding to an in-depth tutorial available on our YouTube channel, <a href="https://www.youtube.com/@javascriptmastery/videos" target="_blank"><b>JavaScript Mastery</b></a>.
 
-## Tech Stack
+If you prefer visual learning, this is the perfect resource for you. Follow our tutorial to learn how to build projects like these step-by-step in a beginner-friendly manner!
 
-- ⚛️ React 19
-- 🌀 Tailwind CSS v4
-- 🎞️ GSAP (GreenSock Animation Platform)
+<a href="https://youtu.be/B91wc5dCEBA" target="_blank"><img src="https://github.com/sujatagunale/EasyRead/assets/151519281/1736fca5-a031-4854-8c09-bc110e3bc16d" /></a>
 
-## Features
+## <a name="introduction">🤖 Introduction</a>
 
-In this course, You’ll learn how to:
+sorikama - Modern UI/UX website, developed using React.js and Tailwind CSS, exemplifies modern UI/UX principles. Its sleek design, seamless animations, and overall user experience set a high standard, serving as a reference or inspiration for future modern applications or websites in general.
 
-- ✨ Parallax Like a Pro
-- ⚡️ Master Clip-Path Magic
-- 🕹️ Control ScrollTrigger & ScrollSmoother
-- 😉 Pin Elements with Style
-- 🧑‍💻 Reveal Text Like Awwwards Pros
-- 👏 Build GSAP Timelines that Actually Feel Good
-- 📱 It's Fully responsive and mobile-friendly
+If you're getting started and need assistance or face any bugs, join our active Discord community with over 27k+ members. It's a place where people help each other out.
 
-## Quick Start
+<a href="https://discord.com/invite/n6EdbFJ" target="_blank"><img src="https://github.com/sujatagunale/EasyRead/assets/151519281/618f4872-1e10-42da-8213-1d69e486d02e" /></a>
+
+## <a name="tech-stack">⚙️ Tech Stack</a>
+
+- Vite
+- React.js
+- Tailwind CSS
+
+## <a name="features">🔋 Features</a>
+
+👉 **Beautiful Sections**: Includes hero, services, features, how to use, roadmap, pricing, footer, and header.
+
+👉 **Parallax Animations**: Engaging effects triggered by mouse movement and scrolling
+
+👉 **Complex UI Geometry**: Utilizes tailwindcss for intricate shapes like circular feature displays, grid lines, and side lines.
+
+👉 **Latest UI Trends**: Incorporates modern design elements such as bento grids.
+
+👉 **Cool Gradients**: Enhances visuals with stylish gradients using Tailwind CSS for cards, buttons, etc.
+
+👉 **Responsive**: Ensures seamless functionality and aesthetics across all devices
+
+and many more, including code architecture and reusability
+
+## <a name="quick-start">🤸 Quick Start</a>
+
+Follow these steps to set up the project locally on your machine.
+
+**Prerequisites**
+
+Make sure you have the following installed on your machine:
+
+- [Git](https://git-scm.com/)
+- [Node.js](https://nodejs.org/en)
+- [npm](https://www.npmjs.com/) (Node Package Manager)
+
+**Cloning the Repository**
 
 ```bash
-# 1. Clone the repo
-git clone [https://github.com/FullStackEmpire/gsap-awwwards-website.git](https://github.com/FullStackEmpire/gsap-awwwards-website.git)
-
-# 2. Install dependencies
-npm install
-# or
-yarn
-
-# 3. Start the dev server
-npm run dev
-# or
-yarn dev
+git clone https://github.com/JavaScript-Mastery-Pro/sorikama.git
+cd sorikama
 ```
 
-## Snippets (Code to Copy)
+**Installation**
+
+Install the project dependencies using npm:
+
+```bash
+npm install
+```
+
+**Running the Project**
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser to view the project.
+
+## <a name="snippets">🕸️ Snippets</a>
 
 <details>
-  <summary>index.css</summary>
+<summary><code>.vscode/settings.json</code></summary>
+
+```json
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.addMissingImports": "explicit"
+  },
+  "prettier.tabWidth": 2,
+  "prettier.useTabs": false,
+  "prettier.semi": true,
+  "prettier.singleQuote": false,
+  "prettier.jsxSingleQuote": false,
+  "prettier.trailingComma": "es5",
+  "prettier.arrowParens": "always",
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "vscode.css-language-features"
+  },
+  "[svg]": {
+    "editor.defaultFormatter": "jock.svg"
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><code>tailwind.config.js</code></summary>
+
+```javascript
+/** @type {import('tailwindcss').Config} */
+import { fontFamily } from "tailwindcss/defaultTheme";
+import plugin from "tailwindcss/plugin";
+
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./public/assets/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        color: {
+          1: "#AC6AFF",
+          2: "#FFC876",
+          3: "#FF776F",
+          4: "#7ADB78",
+          5: "#858DFF",
+          6: "#FF98E2",
+        },
+        stroke: {
+          1: "#26242C",
+        },
+        n: {
+          1: "#FFFFFF",
+          2: "#CAC6DD",
+          3: "#ADA8C3",
+          4: "#757185",
+          5: "#3F3A52",
+          6: "#252134",
+          7: "#15131D",
+          8: "#0E0C15",
+          9: "#474060",
+          10: "#43435C",
+          11: "#1B1B2E",
+          12: "#2E2A41",
+          13: "#6C7275",
+        },
+      },
+      fontFamily: {
+        sans: ["var(--font-sora)", ...fontFamily.sans],
+        code: "var(--font-code)",
+        grotesk: "var(--font-grotesk)",
+      },
+      letterSpacing: {
+        tagline: ".15em",
+      },
+      spacing: {
+        0.25: "0.0625rem",
+        7.5: "1.875rem",
+        15: "3.75rem",
+      },
+      opacity: {
+        15: ".15",
+      },
+      transitionDuration: {
+        DEFAULT: "200ms",
+      },
+      transitionTimingFunction: {
+        DEFAULT: "linear",
+      },
+      zIndex: {
+        1: "1",
+        2: "2",
+        3: "3",
+        4: "4",
+        5: "5",
+      },
+      borderWidth: {
+        DEFAULT: "0.0625rem",
+      },
+      backgroundImage: {
+        "radial-gradient": "radial-gradient(var(--tw-gradient-stops))",
+        "conic-gradient":
+          "conic-gradient(from 225deg, #FFC876, #79FFF7, #9F53FF, #FF98E2, #FFC876)",
+        "benefit-card-1": "url(assets/benefits/card-1.svg)",
+        "benefit-card-2": "url(assets/benefits/card-2.svg)",
+        "benefit-card-3": "url(assets/benefits/card-3.svg)",
+        "benefit-card-4": "url(assets/benefits/card-4.svg)",
+        "benefit-card-5": "url(assets/benefits/card-5.svg)",
+        "benefit-card-6": "url(assets/benefits/card-6.svg)",
+      },
+    },
+  },
+  plugins: [
+    plugin(function ({ addBase, addComponents, addUtilities }) {
+      addBase({});
+      addComponents({
+        ".container": {
+          "@apply max-w-[77.5rem] mx-auto px-5 md:px-10 lg:px-15 xl:max-w-[87.5rem]":
+            {},
+        },
+        ".h1": {
+          "@apply font-semibold text-[2.5rem] leading-[3.25rem] md:text-[2.75rem] md:leading-[3.75rem] lg:text-[3.25rem] lg:leading-[4.0625rem] xl:text-[3.75rem] xl:leading-[4.5rem]":
+            {},
+        },
+        ".h2": {
+          "@apply text-[1.75rem] leading-[2.5rem] md:text-[2rem] md:leading-[2.5rem] lg:text-[2.5rem] lg:leading-[3.5rem] xl:text-[3rem] xl:leading-tight":
+            {},
+        },
+        ".h3": {
+          "@apply text-[2rem] leading-normal md:text-[2.5rem]": {},
+        },
+        ".h4": {
+          "@apply text-[2rem] leading-normal": {},
+        },
+        ".h5": {
+          "@apply text-2xl leading-normal": {},
+        },
+        ".h6": {
+          "@apply font-semibold text-lg leading-8": {},
+        },
+        ".body-1": {
+          "@apply text-[0.875rem] leading-[1.5rem] md:text-[1rem] md:leading-[1.75rem] lg:text-[1.25rem] lg:leading-8":
+            {},
+        },
+        ".body-2": {
+          "@apply font-light text-[0.875rem] leading-6 md:text-base": {},
+        },
+        ".caption": {
+          "@apply text-sm": {},
+        },
+        ".tagline": {
+          "@apply font-grotesk font-light text-xs tracking-tagline uppercase":
+            {},
+        },
+        ".quote": {
+          "@apply font-code text-lg leading-normal": {},
+        },
+        ".button": {
+          "@apply font-code text-xs font-bold uppercase tracking-wider": {},
+        },
+      });
+      addUtilities({
+        ".tap-highlight-color": {
+          "-webkit-tap-highlight-color": "rgba(0, 0, 0, 0)",
+        },
+      });
+    }),
+  ],
+};
+```
+
+</details>
+
+<details>
+<summary><code>index.css</code></summary>
 
 ```css
-@import url("https://fonts.googleapis.com/css2?family=Antonio:wght@100..700&display=swap");
-@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300&display=swap");
 
-@font-face {
-  font-family: "ProximaNova, sans-serif";
-  src: url("/fonts/ProximaNova-Regular.otf");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sora: "Sora", sans-serif;
+  --font-code: "Source Code Pro", monospace;
+  --font-grotesk: "Space Grotesk", sans-serif;
 }
 
-@theme {
-  --color-black: #222123;
-  --color-main-bg: #232224;
-  --color-white: #ffffff;
-  --color-dark-brown: #523122;
-  --color-mid-brown: #a26833;
-  --color-light-brown: #e3a458;
-  --color-red-brown: #7f3b2d;
-  --color-yellow-brown: #a26833;
-  --color-milk-yellow: #e3d3bc;
-  --color-red: #a02128;
-  --color-milk: #faeade;
-  --font-sans: "Antonio", sans-serif;
-  --font-paragraph: "ProximaNova, sans-serif";
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  background-color: #faeade;
-  color: #523122;
-  font-family: "Antonio", sans-serif;
-  overflow-x: hidden;
+* {
   scroll-behavior: smooth;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
 }
 
-body::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
-}
-
-@layer utilities {
-  .flex-center {
-    @apply flex justify-center items-center;
-  }
-  .col-center {
-    @apply flex flex-col justify-center items-center;
-  }
-  .abs-center {
-    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
-  }
-  .general-title {
-    @apply 2xl:text-[8.5rem] md:text-8xl text-5xl font-bold uppercase leading-[9vw] tracking-[-.35vw];
+@layer base {
+  body {
+    @apply font-sans bg-n-8 text-n-1 text-base;
   }
 }
 
-@layer components {
-  .paragraph-line {
-    @apply text-nowrap overflow-hidden;
-  }
-
-  .hero-container {
-    @apply relative bg-milk w-screen h-dvh overflow-hidden;
-
-    .hero-content {
-      @apply relative z-10 w-full h-full flex flex-col 2xl:justify-center items-center translate-y-10 2xl:pt-0 md:pt-32 pt-24;
-
-      .hero-title {
-        @apply text-dark-brown 2xl:text-[8.5rem] md:text-[6.5rem] text-[3.3rem] font-bold uppercase leading-[9vw] tracking-[-.35vw] 2xl:mb-0 mb-5;
-      }
-
-      .hero-text-scroll {
-        @apply rotate-[-3deg] mb-8 border-[.5vw] border-milk;
-
-        .hero-subtitle {
-          @apply bg-mid-brown;
-        }
-
-        h1 {
-          @apply uppercase 2xl:text-[8.5rem] md:text-[6.5rem] text-[3.3rem] font-bold text-[#fce1cd] leading-[9vw] tracking-[-.35vw] 2xl:px-[1.2vw] px-3 2xl:pb-[1vw] pb-5 2xl:py-0 py-3;
-        }
-      }
-
-      h2 {
-        @apply font-paragraph text-dark-brown text-center md:max-w-lg max-w-sm px-5 md:text-lg leading-[115%] mt-3;
-      }
-
-      .hero-button {
-        @apply md:mt-16 mt-10 text-dark-brown bg-light-brown uppercase font-bold text-lg rounded-full md:p-5 p-3 md:px-16 px-10;
-      }
-    }
-  }
-
-  .message-content {
-    @apply bg-[#7f3b2d] text-milk min-h-dvh overflow-hidden flex justify-center items-center relative z-20;
-
-    .msg-wrapper {
-      @apply 2xl:text-[8.5rem] md:text-8xl text-5xl font-bold uppercase leading-[9vw] tracking-[-.35vw] flex flex-col justify-center items-center md:gap-24 gap-14;
-
-      h1:first-of-type {
-        @apply 2xl:max-w-4xl md:max-w-2xl max-w-xs text-center  text-[#faeade10];
-      }
-
-      h1:last-of-type {
-        @apply 2xl:max-w-7xl md:max-w-4xl max-w-xs text-center  text-[#faeade10];
-      }
-    }
-
-    p {
-      @apply text-center font-paragraph;
-    }
-
-    h1,
-    h2 {
-      @apply leading-none;
-    }
-
-    .msg-text-scroll {
-      @apply rotate-[3deg] 2xl:translate-y-5 -translate-y-5 absolute z-10 border-[.5vw] border-[#7f3b2d];
-    }
-  }
-
-  .flavor-section {
-    @apply min-h-dvh bg-milk;
-
-    .flavor-text-scroll {
-      @apply rotate-[-3deg] md:translate-y-5 border-[.5vw] border-milk absolute z-10;
-    }
-
-    .first-text-split h1 {
-      @apply md:text-center text-dark-brown;
-    }
-
-    .second-text-split h1 {
-      @apply md:text-center;
-    }
-
-    .slider-wrapper {
-      @apply lg:h-dvh min-h-dvh md:min-h-fit w-full mt-0 md:mt-20 xl:mt-0;
-
-      .flavors {
-        @apply h-full w-full flex md:flex-row flex-col items-center 2xl:gap-72 lg:gap-52 md:gap-24 gap-7 flex-nowrap;
-
-        .drinks {
-          @apply absolute left-1/2 -translate-x-1/2 bottom-0 md:h-full h-80;
-        }
-
-        .elements {
-          @apply absolute md:top-0 md:bottom-auto bottom-10 w-full;
-        }
-
-        h1 {
-          @apply absolute md:bottom-10 md:left-10 bottom-5 left-5 text-milk md:text-6xl text-3xl font-semibold uppercase tracking-tighter;
-        }
-      }
-    }
-  }
-
-  .nutrition-section {
-    @apply min-h-dvh 2xl:h-[120dvh] overflow-hidden relative;
-
-    .big-img {
-      @apply w-full absolute 2xl:h-full md:h-2/3 h-1/2 left-0 bottom-0 object-bottom 2xl:object-contain object-cover;
-    }
-
-    .nutrition-title {
-      @apply 2xl:max-w-4xl xl:max-w-2xl md:py-0 py-3 md:pb-5 pb-0 lg:pb-0 md:text-center text-[#513022];
-    }
-
-    .nutrition-text-scroll {
-      @apply rotate-[-3deg] border-[.5vw] border-[#e3d3bc] text-nowrap opacity-0 md:-mt-32 -mt-24;
-    }
-
-    .nutrition-box {
-      @apply absolute md:bottom-16 bottom-5 w-full md:px-0 px-5;
-
-      .list-wrapper {
-        @apply bg-[#fdebd2] rounded-full border-[.5vw] border-[#e8ddca] mx-auto max-w-7xl md:py-8 py-5 md:px-0 px-5 flex justify-between items-center;
-
-        p {
-          @apply text-[#865720];
-        }
-      }
-
-      .spacer-border {
-        @apply absolute right-0 top-1/2 transform -translate-y-1/2 md:h-24 h-16 w-px bg-[#C89C6E];
-      }
-    }
-  }
-
-  .benefit-section {
-    @apply min-h-dvh bg-[#222123] overflow-hidden relative;
-
-    p {
-      @apply text-milk font-paragraph text-center text-lg;
-    }
-
-    .first-title {
-      @apply rotate-[3deg] relative z-10;
-    }
-
-    .second-title {
-      @apply rotate-[-1deg] md:-translate-y-5;
-    }
-
-    .third-title {
-      @apply rotate-[1deg] md:-translate-y-12 relative z-10;
-    }
-
-    .fourth-title {
-      @apply rotate-[-5deg] md:-translate-y-12;
-    }
-
-    .vd-pin-section {
-      @apply md:h-[110vh] h-dvh overflow-hidden md:!-translate-y-[15%] md:mt-0 mt-20;
-
-      video {
-        @apply size-full absolute inset-0 object-cover;
-      }
-
-      .play-btn {
-        @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[9vw] flex justify-center items-center bg-[#ffffff1a] backdrop-blur-xl rounded-full;
-      }
-
-      img:first-of-type {
-        @apply size-[15vw];
-      }
-    }
-  }
-
-  .testimonials-section {
-    @apply bg-milk relative w-full h-[120dvh];
-
-    .pin-box {
-      @apply flex items-center justify-center w-full ps-52 absolute 2xl:bottom-32 bottom-[50vh];
-
-      .vd-card {
-        @apply md:w-96 w-80 flex-none md:rounded-[2vw] rounded-3xl -ms-44 overflow-hidden 2xl:relative absolute border-[.5vw] border-milk;
-      }
-    }
-
-    h1 {
-      @apply uppercase text-[20.5vw] leading-[105%] tracking-[-.4vw] ml-[2vw] font-bold;
-    }
-  }
-
-  .footer-section {
-    @apply 2xl:min-h-dvh overflow-hidden relative bg-[#222123];
-
-    .social-btn {
-      @apply border border-[#faeade33] md:size-[5vw] size-14 md:p-0 p-3 flex justify-center items-center rounded-full hover:bg-[#ffffff1a] transition-colors cursor-pointer;
-    }
-
-    input {
-      @apply 2xl:text-4xl text-3xl placeholder:font-bold placeholder:tracking-tighter;
-    }
-
-    .copyright-box {
-      @apply 2xl:absolute w-full md:px-10 px-5 py-7 bottom-0 text-milk opacity-50 md:text-lg font-paragraph flex gap-7 md:flex-row flex-col-reverse md:justify-between justify-center items-center;
-
-      p {
-        @apply text-center;
-      }
-    }
-  }
+.rotate-45 {
+  @apply rotate-[45deg];
 }
 
-.nutrition-section {
-  background-color: #faeade00;
-  background-image: radial-gradient(circle, #f3ece2, #dcccb0);
+.rotate-90 {
+  @apply rotate-[90deg];
 }
 
-.spin-circle {
-  animation: spin 20s linear infinite;
+.rotate-135 {
+  @apply rotate-[135deg];
 }
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+
+.rotate-180 {
+  @apply rotate-[180deg];
+}
+
+.rotate-225 {
+  @apply rotate-[225deg];
+}
+
+.rotate-270 {
+  @apply rotate-[270deg];
+}
+
+.rotate-315 {
+  @apply rotate-[315deg];
+}
+
+.rotate-360 {
+  @apply rotate-[360deg];
+}
+
+.-rotate-45 {
+  @apply rotate-[-45deg];
+}
+
+.-rotate-90 {
+  @apply rotate-[-90deg];
+}
+
+.-rotate-135 {
+  @apply rotate-[-135deg];
+}
+
+.-rotate-180 {
+  @apply rotate-[-180deg];
+}
+
+.-rotate-225 {
+  @apply rotate-[-225deg];
+}
+
+.-rotate-270 {
+  @apply rotate-[-270deg];
+}
+
+.-rotate-315 {
+  @apply rotate-[-315deg];
+}
+
+.-rotate-360 {
+  @apply rotate-[-360deg];
 }
 ```
 
 </details>
 
 <details>
-  <summary>constants/index.js</summary>
+<summary><code>constants/index.js</code></summary>
 
-```js
-const flavorlists = [
+```javascript
+import {
+  benefitIcon1,
+  benefitIcon2,
+  benefitIcon3,
+  benefitIcon4,
+  benefitImage2,
+  chromecast,
+  disc02,
+  discord,
+  discordBlack,
+  facebook,
+  figma,
+  file02,
+  framer,
+  homeSmile,
+  instagram,
+  notification2,
+  notification3,
+  notification4,
+  notion,
+  photoshop,
+  plusSquare,
+  protopie,
+  raindrop,
+  recording01,
+  recording03,
+  roadmap1,
+  roadmap2,
+  roadmap3,
+  roadmap4,
+  searchMd,
+  slack,
+  sliders04,
+  telegram,
+  twitter,
+  yourlogo,
+} from "../../public/assets";
+
+export const navigation = [
   {
-    name: "Chocolate Milk",
-    color: "brown",
-    rotation: "md:rotate-[-8deg] rotate-0",
+    id: "0",
+    title: "Features",
+    url: "#features",
   },
   {
-    name: "Stawberry Milk",
-    color: "red",
-    rotation: "md:rotate-[8deg] rotate-0",
+    id: "1",
+    title: "Pricing",
+    url: "#pricing",
   },
   {
-    name: "Cookies & Cream",
-    color: "blue",
-    rotation: "md:rotate-[-8deg] rotate-0",
+    id: "2",
+    title: "How to use",
+    url: "#how-to-use",
   },
   {
-    name: "Peanut Butter Chocolate",
-    color: "orange",
-    rotation: "md:rotate-[8deg] rotate-0",
+    id: "3",
+    title: "Roadmap",
+    url: "#roadmap",
   },
   {
-    name: "Vanilla Milkshake",
-    color: "white",
-    rotation: "md:rotate-[-8deg] rotate-0",
+    id: "4",
+    title: "New account",
+    url: "#signup",
+    onlyMobile: true,
   },
   {
-    name: "Max Chocolate Milk",
-    color: "black",
-    rotation: "md:rotate-[8deg] rotate-0",
+    id: "5",
+    title: "Sign in",
+    url: "#login",
+    onlyMobile: true,
   },
 ];
 
-const nutrientLists = [
-  { label: "Potassium", amount: "245mg" },
-  { label: "Calcium", amount: "500mg" },
-  { label: "Vitamin A", amount: "176mcg" },
-  { label: "Vitamin D", amount: "5mcg" },
-  { label: "Iron", amount: "1mg" },
+export const heroIcons = [homeSmile, file02, searchMd, plusSquare];
+
+export const notificationImages = [notification4, notification3, notification2];
+
+export const companyLogos = [yourlogo, yourlogo, yourlogo, yourlogo, yourlogo];
+
+export const sorikamaServices = [
+  "Photo generating",
+  "Photo enhance",
+  "Seamless Integration",
 ];
 
-const cards = [
+export const sorikamaServicesIcons = [
+  recording03,
+  recording01,
+  disc02,
+  chromecast,
+  sliders04,
+];
+
+export const roadmap = [
   {
-    src: "/videos/f1.mp4",
-    rotation: "rotate-z-[-10deg]",
-    name: "Madison",
-    img: "/images/p1.png",
-    translation: "translate-y-[-5%]",
+    id: "0",
+    title: "Voice recognition",
+    text: "Enable the chatbot to understand and respond to voice commands, making it easier for users to interact with the app hands-free.",
+    date: "May 2023",
+    status: "done",
+    imageUrl: roadmap1,
+    colorful: true,
   },
   {
-    src: "/videos/f2.mp4",
-    rotation: "rotate-z-[4deg]",
-    name: "Alexander",
-    img: "/images/p2.png",
+    id: "1",
+    title: "Gamification",
+    text: "Add game-like elements, such as badges or leaderboards, to incentivize users to engage with the chatbot more frequently.",
+    date: "May 2023",
+    status: "progress",
+    imageUrl: roadmap2,
   },
   {
-    src: "/videos/f3.mp4",
-    rotation: "rotate-z-[-4deg]",
-    name: "Andrew",
-    img: "/images/p3.png",
-    translation: "translate-y-[-5%]",
+    id: "2",
+    title: "Chatbot customization",
+    text: "Allow users to customize the chatbot's appearance and behavior, making it more engaging and fun to interact with.",
+    date: "May 2023",
+    status: "done",
+    imageUrl: roadmap3,
   },
   {
-    src: "/videos/f4.mp4",
-    rotation: "rotate-z-[4deg]",
-    name: "Bryan",
-    img: "/images/p4.png",
-    translation: "translate-y-[5%]",
-  },
-  {
-    src: "/videos/f5.mp4",
-    rotation: "rotate-z-[-10deg]",
-    name: "Chris",
-    img: "/images/p5.png",
-  },
-  {
-    src: "/videos/f6.mp4",
-    rotation: "rotate-z-[4deg]",
-    name: "Devante",
-    img: "/images/p6.png",
-    translation: "translate-y-[5%]",
-  },
-  {
-    src: "/videos/f7.mp4",
-    rotation: "rotate-z-[-3deg]",
-    name: "Melisa",
-    img: "/images/p7.png",
-    translation: "translate-y-[10%]",
+    id: "3",
+    title: "Integration with APIs",
+    text: "Allow the chatbot to access external data sources, such as weather APIs or news APIs, to provide more relevant recommendations.",
+    date: "May 2023",
+    status: "progress",
+    imageUrl: roadmap4,
   },
 ];
 
-export { flavorlists, nutrientLists, cards };
+export const collabText =
+  "With smart automation and top-notch security, it's the perfect solution for teams looking to work smarter.";
+
+export const collabContent = [
+  {
+    id: "0",
+    title: "Seamless Integration",
+    text: collabText,
+  },
+  {
+    id: "1",
+    title: "Smart Automation",
+  },
+  {
+    id: "2",
+    title: "Top-notch Security",
+  },
+];
+
+export const collabApps = [
+  {
+    id: "0",
+    title: "Figma",
+    icon: figma,
+    width: 26,
+    height: 36,
+  },
+  {
+    id: "1",
+    title: "Notion",
+    icon: notion,
+    width: 34,
+    height: 36,
+  },
+  {
+    id: "2",
+    title: "Discord",
+    icon: discord,
+    width: 36,
+    height: 28,
+  },
+  {
+    id: "3",
+    title: "Slack",
+    icon: slack,
+    width: 34,
+    height: 35,
+  },
+  {
+    id: "4",
+    title: "Photoshop",
+    icon: photoshop,
+    width: 34,
+    height: 34,
+  },
+  {
+    id: "5",
+    title: "Protopie",
+    icon: protopie,
+    width: 34,
+    height: 34,
+  },
+  {
+    id: "6",
+    title: "Framer",
+    icon: framer,
+    width: 26,
+    height: 34,
+  },
+  {
+    id: "7",
+    title: "Raindrop",
+    icon: raindrop,
+    width: 38,
+    height: 32,
+  },
+];
+
+export const pricing = [
+  {
+    id: "0",
+    title: "Basic",
+    description: "AI chatbot, personalized recommendations",
+    price: "0",
+    features: [
+      "An AI chatbot that can understand your queries",
+      "Personalized recommendations based on your preferences",
+      "Ability to explore the app and its features without any cost",
+    ],
+  },
+  {
+    id: "1",
+    title: "Premium",
+    description: "Advanced AI chatbot, priority support, analytics dashboard",
+    price: "9.99",
+    features: [
+      "An advanced AI chatbot that can understand complex queries",
+      "An analytics dashboard to track your conversations",
+      "Priority support to solve issues quickly",
+    ],
+  },
+  {
+    id: "2",
+    title: "Enterprise",
+    description: "Custom AI chatbot, advanced analytics, dedicated account",
+    price: null,
+    features: [
+      "An AI chatbot that can understand your queries",
+      "Personalized recommendations based on your preferences",
+      "Ability to explore the app and its features without any cost",
+    ],
+  },
+];
+
+export const benefits = [
+  {
+    id: "0",
+    title: "Ask anything",
+    text: "Lets users quickly find answers to their questions without having to search through multiple sources.",
+    backgroundUrl: "assets/benefits/card-1.svg",
+    iconUrl: benefitIcon1,
+    imageUrl: benefitImage2,
+  },
+  {
+    id: "1",
+    title: "Improve everyday",
+    text: "The app uses natural language processing to understand user queries and provide accurate and relevant responses.",
+    backgroundUrl: "assets/benefits/card-2.svg",
+    iconUrl: benefitIcon2,
+    imageUrl: benefitImage2,
+    light: true,
+  },
+  {
+    id: "2",
+    title: "Connect everywhere",
+    text: "Connect with the AI chatbot from anywhere, on any device, making it more accessible and convenient.",
+    backgroundUrl: "assets/benefits/card-3.svg",
+    iconUrl: benefitIcon3,
+    imageUrl: benefitImage2,
+  },
+  {
+    id: "3",
+    title: "Fast responding",
+    text: "Lets users quickly find answers to their questions without having to search through multiple sources.",
+    backgroundUrl: "assets/benefits/card-4.svg",
+    iconUrl: benefitIcon4,
+    imageUrl: benefitImage2,
+    light: true,
+  },
+  {
+    id: "4",
+    title: "Ask anything",
+    text: "Lets users quickly find answers to their questions without having to search through multiple sources.",
+    backgroundUrl: "assets/benefits/card-5.svg",
+    iconUrl: benefitIcon1,
+    imageUrl: benefitImage2,
+  },
+  {
+    id: "5",
+    title: "Improve everyday",
+    text: "The app uses natural language processing to understand user queries and provide accurate and relevant responses.",
+    backgroundUrl: "assets/benefits/card-6.svg",
+    iconUrl: benefitIcon2,
+    imageUrl: benefitImage2,
+  },
+];
+
+export const socials = [
+  {
+    id: "0",
+    title: "Discord",
+    iconUrl: discordBlack,
+    url: "#",
+  },
+  {
+    id: "1",
+    title: "Twitter",
+    iconUrl: twitter,
+    url: "#",
+  },
+  {
+    id: "2",
+    title: "Instagram",
+    iconUrl: instagram,
+    url: "#",
+  },
+  {
+    id: "3",
+    title: "Telegram",
+    iconUrl: telegram,
+    url: "#",
+  },
+  {
+    id: "4",
+    title: "Facebook",
+    iconUrl: facebook,
+    url: "#",
+  },
+];
 ```
 
 </details>
 
-## Assets
+<details>
+<summary><code>components/Section.jsx</code></summary>
 
-- 🎥 Videos: [`/public/videos`](https://github.com/Fullstack-Empire/GSAP-Awwwards-Website/tree/main/public/videos)
-- 📚 Fonts: [`/public/fonts`](https://github.com/Fullstack-Empire/GSAP-Awwwards-Website/tree/main/public/fonts)
-- 🖼️ Images: [`/public/images`](https://github.com/Fullstack-Empire/GSAP-Awwwards-Website/tree/main/public/images)
+```javascript
+import SectionSvg from "../../public/assets/svg/SectionSvg";
 
-## Community
+const Section = ({
+  className,
+  id,
+  crosses,
+  crossesOffset,
+  customPaddings,
+  children,
+}) => (
+  <div
+    id={id}
+    className={`relative 
+    ${
+      customPaddings ||
+      `py-10 lg:py-16 xl:py-20 ${crosses ? "lg:py-32 xl:py-40" : ""}`
+    } ${className || ""}`}
+  >
+    {children}
 
-Join the community and connect with other developers!
+    <div className="hidden absolute top-0 left-5 w-0.25 h-full bg-stroke-1 pointer-events-none md:block lg:left-7.5 xl:left-10" />
+    <div className="hidden absolute top-0 right-5 w-0.25 h-full bg-stroke-1 pointer-events-none md:block lg:right-7.5 xl:right-10" />
 
-[![Discord](https://img.shields.io/discord/your-server-id?label=Join%20Discord&logo=discord&style=for-the-badge&color=5865F2)](https://discord.gg/cbtfr4BHF9)
+    {crosses && (
+      <>
+        <div
+          className={`hidden absolute top-0 left-7.5 right-7.5 h-0.25 bg-stroke-1 ${
+            crossesOffset && crossesOffset
+          } pointer-events-none lg:block xl:left-10 right-10`}
+        />
+        <SectionSvg crossesOffset={crossesOffset} />
+      </>
+    )}
+  </div>
+);
+
+export default Section;
+```
+
+</details>
+
+<details>
+<summary><code>components/Roadmap.jsx</code></summary>
+
+```javascript
+import Button from "./Button";
+import Heading from "./Heading";
+import Section from "./Section";
+import Tagline from "./TagLine";
+import { roadmap } from "../constants";
+import { check2, grid, loading1 } from "../../public/assets";
+import { Gradient } from "./design/Roadmap";
+
+const Roadmap = () => (
+  <Section className="overflow-hidden" id="roadmap">
+    <div className="container md:pb-10">
+      <Heading tag="Ready to get started" title="What we’re working on" />
+
+      <div className="relative grid gap-6 md:grid-cols-2 md:gap-4 md:pb-[7rem]">
+        {roadmap.map((item) => {
+          const status = item.status === "done" ? "Done" : "In progress";
+
+          return (
+            <div
+              className={`md:flex even:md:translate-y-[7rem] p-0.25 rounded-[2.5rem] ${
+                item.colorful ? "bg-conic-gradient" : "bg-n-6"
+              }`}
+              key={item.id}
+            >
+              <div className="relative p-8 bg-n-8 rounded-[2.4375rem] overflow-hidden xl:p-15">
+                <div className="absolute top-0 left-0 max-w-full">
+                  <img
+                    className="w-full"
+                    src={grid}
+                    width={550}
+                    height={550}
+                    alt="Grid"
+                  />
+                </div>
+                <div className="relative z-1">
+                  <div className="flex items-center justify-between max-w-[27rem] mb-8 md:mb-20">
+                    <Tagline>{item.date}</Tagline>
+
+                    <div className="flex items-center px-4 py-1 bg-n-1 rounded text-n-8">
+                      <img
+                        className="mr-2.5"
+                        src={item.status === "done" ? check2 : loading1}
+                        width={16}
+                        height={16}
+                        alt={status}
+                      />
+                      <div className="tagline">{status}</div>
+                    </div>
+                  </div>
+
+                  <div className="mb-10 -my-10 -mx-15">
+                    <img
+                      className="w-full"
+                      src={item.imageUrl}
+                      width={628}
+                      height={426}
+                      alt={item.title}
+                    />
+                  </div>
+                  <h4 className="h4 mb-4">{item.title}</h4>
+                  <p className="body-2 text-n-4">{item.text}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        <Gradient />
+      </div>
+
+      <div className="flex justify-center mt-12 md:mt-15 xl:mt-20">
+        <Button href="/roadmap">Our roadmap</Button>
+      </div>
+    </div>
+  </Section>
+);
+
+export default Roadmap;
+```
+
+</details>
+
+## <a name="links">🔗 Links</a>
+
+- [Assets](https://drive.google.com/file/d/1JKzwPl_hnpjIlNbwfjMagb4HosxnyXbf/view?usp=sharing)
+- [Design](https://drive.google.com/file/d/15WJMOchujvaQ7Kg9e0nGeGR7G7JOeX1K/view?usp=sharing)
+- [Absolute Relative Positioning](https://css-tricks.com/absolute-positioning-inside-relative-positioning/)
+- [Live Website](https://jsm-sorikama.com/)
+
+## <a name="more">🚀 More</a>
+
+**Advance your skills with Next.js Pro Course**
+
+Enjoyed creating this project? Dive deeper into our PRO courses for a richer learning experience. They're packed with detailed explanations, cool features, and exercises to boost your skills. Give it a go!
+
+<a href="https://www.jsmastery.pro/ultimate-next-course" target="_blank">
+<img src="https://i.ibb.co/804sPK6/Image-720.png" alt="Project Banner">
+</a>

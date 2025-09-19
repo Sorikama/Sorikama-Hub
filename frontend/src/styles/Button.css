@@ -1,0 +1,25 @@
+/* Styles pour les boutons */
+:root {
+  --btn-stroke: #1B1B2E; /* Couleur par défaut pour le mode clair */
+}
+
+.dark {
+  --btn-stroke: white; /* Bordure blanche en mode sombre */
+}
+
+/* Style pour le bouton en mode clair */
+:root:not(.dark) .button {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Effet de survol pour les boutons */
+.button:hover {
+  transform: translateY(-2px);
+  transition: transform 0.3s ease;
+}
+
+/* Animation au clic */
+.button:active {
+  transform: translateY(1px);
+}

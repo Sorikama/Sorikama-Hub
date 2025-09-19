@@ -1,32 +1,67 @@
-import NavBar from "./components/NavBar";
-import { Routes, Route, useLocation } from "react-router-dom";
-import Home from "./pages/Home";
-import Solutions from "./pages/Solutions";
-import Partners from "./pages/Partners";
-import Account from "./pages/Account";
-import About from "./pages/About";
+import { Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+import ButtonGradient from "./assets/svg/ButtonGradient";
+import Benefits from "./components/Benefits";
+import Collaboration from "./components/Collaboration";
+import Contribute from "./components/Contribute";
+import Roadmap from "./components/Roadmap";
+import Ecosystem from "./components/Ecosystem";
+import Hero from "./components/Hero";
+import Layout from "./components/Layout";
+
+// Pages
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import FooterSection from "./sections/FooterSection";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyCode from "./pages/VerifyCode";
+import ResetPassword from "./pages/ResetPassword";
+import NotFound from "./pages/NotFound";
+import About from "./pages/About";
+
+// Home page component
+const Home = () => (
+  <>
+    <Hero />
+    <Ecosystem />
+    <Benefits />
+    <Collaboration />
+    <Contribute />
+    <Roadmap />
+  </>
+);
 
 const App = () => {
-  const location = useLocation();
   return (
-    <main>
-      <NavBar />
-      <div className="pt-16 md:pt-20">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/solutions" element={<Solutions />} />
-          <Route path="/partners" element={<Partners />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-        </Routes>
-        {location.pathname !== "/" && <FooterSection />}
-      </div>
-    </main>
+    <>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="about" element={<About />} />
+          <Route path="login" element={<Login />} />
+          <Route path="signup" element={<Signup />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="verify-code" element={<VerifyCode />} />
+          <Route path="reset-password" element={<ResetPassword />} />
+        </Route>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      
+      <ButtonGradient />
+      <ToastContainer 
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+    </>
   );
 };
 

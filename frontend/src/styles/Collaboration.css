@@ -1,0 +1,12 @@
+@keyframes dashMove {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: -100px 0;
+  }
+}
+
+.dash-animation {
+  animation: dashMove 3s linear infinite;
+}

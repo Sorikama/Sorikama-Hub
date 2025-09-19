@@ -1,61 +1,137 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import Button from "../components/Button";
+import { FiEye, FiEyeOff, FiMail, FiLock } from "react-icons/fi";
+import { toast } from "react-toastify";
 
 const Login = () => {
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-  const onSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: hook to backend auth API
-    console.log("Login submit", form);
+    if (!email || !password) {
+      toast.error("Veuillez remplir tous les champs");
+      return;
+    }
+    
+    // Simulation de connexion avec chargement
+    setLoading(true);
+    
+    // Simuler un délai de chargement
+    setTimeout(() => {
+      // Simulation de connexion réussie
+      toast.success("Connexion réussie");
+      console.log("Login attempt with:", { email, password });
+      setLoading(false);
+    }, 2000);
   };
 
   return (
-    <main className="min-h-dvh bg-milk text-dark-brown">
-      <section className="max-w-7xl mx-auto md:px-9 px-5">
-        <div className="w-full min-h-[calc(100dvh-5rem)] md:min-h-[calc(100dvh-5rem)] flex flex-col justify-center items-center">
-          <h1 className="general-title text-center">Connexion</h1>
-          <div className="mt-10 max-w-xl w-full">
-            <form onSubmit={onSubmit} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 md:p-8 flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="email" className="font-bold uppercase tracking-tight">Email</label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  className="w-full rounded-xl border border-[#D1D5DB] bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  placeholder="votre@email.com"
-                  value={form.email}
-                  onChange={onChange}
-                />
+    <div className="container mx-auto px-4 py-20 min-h-screen flex flex-col justify-center">
+      <div className="max-w-md mx-auto w-full">
+        <h1 className="h2 text-center mb-8 dark:text-n-1 text-n-8">Connexion</h1>
+        <div className="p-0.5 rounded-[2rem] bg-conic-gradient">
+          <div className="relative p-8 dark:bg-n-8 bg-white rounded-[1.9375rem] overflow-hidden">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-medium dark:text-n-1 text-n-8">
+                  Adresse e-mail
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiMail className="text-n-4" />
+                  </div>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-3 border dark:border-n-6 border-n-3 rounded-xl dark:bg-n-7 bg-n-2/40 dark:text-n-1 text-n-8 focus:outline-none focus:ring-2 focus:ring-color-1"
+                    placeholder="votre@email.com"
+                  />
+                </div>
               </div>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="password" className="font-bold uppercase tracking-tight">Mot de passe</label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  className="w-full rounded-xl border border-[#D1D5DB] bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={onChange}
-                />
+
+              <div className="space-y-2">
+                <label htmlFor="password" className="block text-sm font-medium dark:text-n-1 text-n-8">
+                  Mot de passe
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiLock className="text-n-4" />
+                  </div>
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="block w-full pl-10 pr-10 py-3 border dark:border-n-6 border-n-3 rounded-xl dark:bg-n-7 bg-n-2/40 dark:text-n-1 text-n-8 focus:outline-none focus:ring-2 focus:ring-color-1"
+                    placeholder="••••••••"
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-n-4 hover:text-n-3 focus:outline-none"
+                    >
+                      {showPassword ? <FiEyeOff /> : <FiEye />}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <button type="submit" className="self-start uppercase font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-500)] rounded-full md:py-3 py-2 md:px-6 px-4 transition-colors">
-                Se connecter
-              </button>
-              <p className="mt-4 font-paragraph text-sm opacity-80">
-                Pas encore de compte ? {" "}
-                <Link to="/signup" className="font-bold text-[var(--color-primary)] underline underline-offset-4">Créez un compte</Link>
-              </p>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    className="h-4 w-4 accent-color-1"
+                  />
+                  <label htmlFor="remember-me" className="ml-2 block text-sm dark:text-n-3 text-n-5">
+                    Se souvenir de moi
+                  </label>
+                </div>
+
+                <div className="text-sm">
+                  <Link to="/forgot-password" className="font-medium text-color-1 hover:text-color-2">
+                    Mot de passe oublié ?
+                  </Link>
+                </div>
+              </div>
+
+              <div className="pt-4">
+                <Button 
+                  className="w-full justify-center" 
+                  loading={loading} 
+                  disabled={loading || !email || !password}
+                >
+                  Se connecter
+                </Button>
+              </div>
             </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm dark:text-n-3 text-n-5">
+                Pas encore de compte ?{" "}
+                <Link to="/signup" className="font-medium text-color-1 hover:text-color-2">
+                  S'inscrire
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
-      </section>
-    </main>
+      </div>
+    </div>
   );
 };
 
