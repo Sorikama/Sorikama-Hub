@@ -2,31 +2,27 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Button from "../components/Button";
 import { FiEye, FiEyeOff, FiMail, FiLock } from "react-icons/fi";
-import { toast } from "react-toastify";
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      toast.error("Veuillez remplir tous les champs");
-      return;
-    }
-    
-    // Simulation de connexion avec chargement
     setLoading(true);
-    
-    // Simuler un délai de chargement
-    setTimeout(() => {
-      // Simulation de connexion réussie
-      toast.success("Connexion réussie");
-      console.log("Login attempt with:", { email, password });
+    try {
+      await login({ email, password });
+      // La navigation est gérée par le contexte en cas de succès
+    } catch (error) {
+      console.log("this is error", error);
+      // L'erreur est gérée par le contexte (toast)
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -110,9 +106,9 @@ const Login = () => {
               </div>
 
               <div className="pt-4">
-                <Button 
-                  className="w-full justify-center" 
-                  loading={loading} 
+                <Button
+                  className="w-full justify-center"
+                  loading={loading}
                   disabled={loading || !email || !password}
                 >
                   Se connecter

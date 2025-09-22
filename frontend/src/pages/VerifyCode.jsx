@@ -1,13 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Button from "../components/Button";
 import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
 
 const VerifyCode = () => {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
   const navigate = useNavigate();
+  const { verify } = useAuth();
+  const [searchParams] = useSearchParams();
+  const verificationToken = searchParams.get('token');
 
   // Initialiser les références pour les champs de saisie
   useEffect(() => {
@@ -43,47 +47,40 @@ const VerifyCode = () => {
   const handlePaste = (e) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData("text/plain").trim();
-    
+
     // Vérifier si le texte collé contient exactement 6 chiffres
     if (/^\d{6}$/.test(pastedData)) {
       const newCode = pastedData.split("");
       setCode(newCode);
-      
+
       // Mettre le focus sur le dernier champ
       inputRefs.current[5].focus();
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Vérifier que tous les champs sont remplis
-    if (code.some(digit => digit === "")) {
-      toast.error("Veuillez entrer le code complet à 6 chiffres");
+
+    if (!verificationToken) {
+      toast.error("Token de vérification manquant. Veuillez recommencer.");
+      return navigate('/signup');
+    }
+    if (code?.join("").length !== 6) {
+      toast.error("Le code doit comporter 6 chiffres.");
       return;
     }
 
     // Simulation de vérification avec chargement
     setLoading(true);
-    
-    // Simuler un délai de chargement
-    setTimeout(() => {
-      const enteredCode = code.join("");
-      
-      // Pour la démo, considérons que 123456 est un code valide
-      if (enteredCode === "123456") {
-        toast.success("Code vérifié avec succès");
-        navigate("/reset-password");
-      } else {
-        toast.error("Code invalide. Veuillez réessayer.");
-        // Réinitialiser le code
-        setCode(["", "", "", "", "", ""]);
-        // Mettre le focus sur le premier champ
-        inputRefs.current[0].focus();
-      }
-      
+
+    try {
+      await verify(verificationToken || "", code?.join(""));
+      // La navigation est gérée par le contexte
+    } catch (error) {
+      // L'erreur est gérée par le contexte
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -95,7 +92,7 @@ const VerifyCode = () => {
             <p className="text-center dark:text-n-3 text-n-5 mb-8">
               Entrez le code à 6 chiffres que nous avons envoyé à votre adresse e-mail.
             </p>
-            
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="flex justify-center gap-2">
                 {code.map((digit, index) => (
@@ -115,9 +112,9 @@ const VerifyCode = () => {
               </div>
 
               <div className="pt-4">
-                <Button 
-                  className="w-full justify-center" 
-                  loading={loading} 
+                <Button
+                  className="w-full justify-center"
+                  loading={loading}
                   disabled={loading || code.some(digit => digit === "")}
                 >
                   Vérifier le code

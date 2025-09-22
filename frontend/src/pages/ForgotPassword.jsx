@@ -5,11 +5,12 @@ import { FiMail } from "react-icons/fi";
 import { toast } from "react-toastify";
 
 const ForgotPassword = () => {
+  const { forgotPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) {
       toast.error("Veuillez entrer votre adresse e-mail");
@@ -18,15 +19,15 @@ const ForgotPassword = () => {
 
     // Simulation d'envoi d'email avec chargement
     setLoading(true);
-    
-    // Simuler un délai de chargement
-    setTimeout(() => {
-      // Simulation d'envoi réussi
-      toast.success("Instructions de réinitialisation envoyées à votre adresse e-mail");
-      console.log("Password reset requested for:", email);
+
+    try {
+      await forgotPassword(email);
+      setIsSubmitted(true);
+    } catch (error) {
+      // Le toast est géré par le contexte
+    } finally {
       setLoading(false);
-      setEmailSent(true);
-    }, 2000);
+    }
   };
 
   return (
@@ -64,9 +65,9 @@ const ForgotPassword = () => {
                   </div>
 
                   <div className="pt-4">
-                    <Button 
-                      className="w-full justify-center" 
-                      loading={loading} 
+                    <Button
+                      className="w-full justify-center"
+                      loading={loading}
                       disabled={loading || !email}
                     >
                       Réinitialiser le mot de passe
@@ -87,7 +88,7 @@ const ForgotPassword = () => {
                 <p className="dark:text-n-3 text-n-5 mb-8">
                   Nous avons envoyé un code de vérification à {email}. Veuillez vérifier votre boîte de réception et suivre les instructions.
                 </p>
-                <Button 
+                <Button
                   className="w-full justify-center mb-4"
                   onClick={() => setEmailSent(false)}
                 >
