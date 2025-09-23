@@ -1,68 +1,69 @@
-import { Routes, Route } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import React from "react";
+import {
+  Routes,
+  Route,
+} from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
-import ButtonGradient from "./assets/svg/ButtonGradient";
-import Benefits from "./components/Benefits";
-import Collaboration from "./components/Collaboration";
-import Contribute from "./components/Contribute";
-import Roadmap from "./components/Roadmap";
-import Ecosystem from "./components/Ecosystem";
-import Hero from "./components/Hero";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
 
-// Pages
+// Importation des pages
+import Home from "./pages/Home";
+import About from "./pages/About";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import ForgotPassword from "./pages/ForgotPassword";
 import VerifyCode from "./pages/VerifyCode";
+import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-import About from "./pages/About";
-
-// Home page component
-const Home = () => (
-  <>
-    <Hero />
-    <Ecosystem />
-    <Benefits />
-    <Collaboration />
-    <Contribute />
-    <Roadmap />
-  </>
-);
 
 const App = () => {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="about" element={<About />} />
-          <Route path="login" element={<Login />} />
-          <Route path="signup" element={<Signup />} />
-          <Route path="forgot-password" element={<ForgotPassword />} />
-          <Route path="verify-code" element={<VerifyCode />} />
-          <Route path="reset-password" element={<ResetPassword />} />
-        </Route>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      
-      <ButtonGradient />
-      <ToastContainer 
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
-    </>
+    <ThemeProvider>
+      <AuthProvider>
+        <Routes>
+          {/* Routes publiques avec Header/Footer */}
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="about" element={<About />} />
+          </Route>
+
+          {/* Routes d'authentification sans Header/Footer */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/verify" element={<VerifyCode />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+
+          {/* Routes protégées */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Page 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 
 export default App;
+

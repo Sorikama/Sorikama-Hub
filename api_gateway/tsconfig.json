@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    /* --- Configuration de Base --- */
+    "target": "ES2020", // Cible la version de JavaScript moderne, compatible avec les versions récentes de Node.js
+    "module": "NodeNext", // Utilise le système de modules moderne de Node.js (supporte 'import' et 'require')
+    "moduleResolution": "NodeNext", // Stratégie de recherche des modules qui accompagne "module": "NodeNext"
+    "outDir": "./dist", // Où placer le code JavaScript compilé pour la production
+    "rootDir": "./src", // Spécifie le dossier racine de vos fichiers TypeScript
+    "esModuleInterop": true, // Permet une meilleure compatibilité entre les modules CommonJS et ES Modules
+    
+    /* --- Vérifications Strictes (Bonnes Pratiques) --- */
+    "strict": true, // Active toutes les options de vérification de type strictes
+    "forceConsistentCasingInFileNames": true, // Empêche les erreurs de casse dans les noms de fichiers (ex: User.ts vs user.ts)
+    "skipLibCheck": true, // Accélère la compilation en ne vérifiant pas les types des bibliothèques externes (node_modules)
+
+    /* --- Options pour les Fichiers de Déclaration --- */
+    "resolveJsonModule": true, // Permet d'importer des fichiers .json
+    "declaration": true // Génère les fichiers .d.ts correspondants
+  },
+  // Spécifie les fichiers à inclure dans la compilation
+  "include": ["src/**/*"],
+  // Spécifie les fichiers à exclure de la compilation
+  "exclude": ["node_modules", "dist"]
+}

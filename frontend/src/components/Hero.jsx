@@ -13,32 +13,32 @@ const Hero = () => {
   const subtitleRef = useRef(null);
   const africaRef = useRef(null);
   const discoverRef = useRef(null);
-  
+
   // Animation GSAP au chargement
   useEffect(() => {
     // Timeline pour séquencer les animations
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-    
+
     // Animation du titre principal
-    tl.fromTo(titleRef.current, 
-      { y: 50, opacity: 0 }, 
+    tl.fromTo(titleRef.current,
+      { y: 50, opacity: 0 },
       { y: 0, opacity: 1, duration: 1 }
     );
-    
+
     // Animation du mot "l'Afrique" avec un délai
     tl.fromTo(africaRef.current,
       { scale: 0.8, opacity: 0 },
       { scale: 1, opacity: 1, duration: 0.7 },
       "-=0.5" // Légèrement avant la fin de l'animation précédente
     );
-    
+
     // Animation du sous-titre
     tl.fromTo(subtitleRef.current,
       { y: 30, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.8 },
       "-=0.3"
     );
-    
+
     // Animation du bouton Découvrir
     tl.fromTo(discoverRef.current,
       { y: 20, opacity: 0 },
@@ -46,13 +46,13 @@ const Hero = () => {
       "-=0.2"
     );
   }, []);
-  
+
   // Fonction pour le défilement fluide
   const handleSmoothScroll = (e) => {
     e.preventDefault();
     const targetId = e.currentTarget.getAttribute("href");
     const targetElement = document.querySelector(targetId);
-    
+
     if (targetElement) {
       window.scrollTo({
         top: targetElement.offsetTop - 80, // Ajustement pour le header fixe
@@ -89,29 +89,29 @@ const Hero = () => {
             <br />
             Centrées sur l'humain.
           </p>
-        
-          
+
+
           <div className="flex justify-center mt-4 md:mt-6 lg:mt-8" ref={discoverRef}>
-            <a 
-              href="#ecosystem" 
+            <a
+              href="#ecosystem"
               className="flex flex-col items-center cursor-pointer transition-transform hover:translate-y-1"
               aria-label="Découvrir plus"
               onClick={handleSmoothScroll}
             >
               <span className="text-base md:text-lg dark:text-n-1 text-n-8 mb-2">Découvrir</span>
-              <svg 
-                width="24" 
-                height="24" 
-                viewBox="0 0 24 24" 
-                fill="none" 
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 className="animate-bounce"
               >
-                <path 
-                  d="M12 5V19M12 19L5 12M12 19L19 12" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
+                <path
+                  d="M12 5V19M12 19L5 12M12 19L19 12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>

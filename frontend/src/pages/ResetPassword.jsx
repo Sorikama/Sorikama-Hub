@@ -5,17 +5,30 @@ import { FiEye, FiEyeOff, FiLock } from "react-icons/fi";
 import { toast } from "react-toastify";
 
 const ResetPassword = () => {
+  const { resetPassword } = useAuth();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetComplete, setResetComplete] = useState(false);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const token = searchParams.get('token');
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    if (!token) {
+      toast.error("Token de réinitialisation manquant ou invalide.");
+      return navigate('/login');
+    }
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Les mots de passe ne correspondent pas.");
+      return;
+    }
+
     // Validation de base
     if (!password || !confirmPassword) {
       toast.error("Veuillez remplir tous les champs");
@@ -32,22 +45,15 @@ const ResetPassword = () => {
       return;
     }
 
-    // Simulation de réinitialisation avec chargement
-    setLoading(true);
-    
-    // Simuler un délai de chargement
-    setTimeout(() => {
-      // Simulation de réinitialisation réussie
-      toast.success("Mot de passe réinitialisé avec succès");
-      console.log("Password reset completed");
+    setIsLoading(true);
+    try {
+      await resetPassword(token, formData.password);
+      // La navigation est gérée par le contexte en cas de succès
+    } catch (error) {
+      // Le toast d'erreur est géré par le contexte
+    } finally {
       setLoading(false);
-      setResetComplete(true);
-      
-      // Rediriger vers la page de connexion après 3 secondes
-      setTimeout(() => {
-        navigate("/login");
-      }, 3000);
-    }, 2000);
+    }
   };
 
   return (
@@ -125,9 +131,9 @@ const ResetPassword = () => {
                   </div>
 
                   <div className="pt-4">
-                    <Button 
-                      className="w-full justify-center" 
-                      loading={loading} 
+                    <Button
+                      className="w-full justify-center"
+                      loading={loading}
                       disabled={loading || !password || !confirmPassword}
                     >
                       Réinitialiser le mot de passe
