@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import Button from "../components/Button";
 import { FiEye, FiEyeOff, FiMail, FiLock, FiUser } from "react-icons/fi";
 import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
 
 const Signup = () => {
+  const { signup } = useAuth();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -25,7 +27,7 @@ const Signup = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { firstName, lastName, email, password, confirmPassword } = formData;
 
@@ -52,14 +54,16 @@ const Signup = () => {
 
     // Simulation d'inscription avec chargement
     setLoading(true);
-    
+
     // Simuler un délai de chargement
-    setTimeout(() => {
-      // Simulation d'inscription réussie
-      toast.success("Inscription réussie");
-      console.log("Signup attempt with:", formData);
+    try {
+      await signup(formData);
+      // La navigation est gérée par le contexte
+    } catch (error) {
+      // L'erreur est gérée par le contexte
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -219,7 +223,7 @@ const Signup = () => {
               </div>
 
               <div className="pt-4">
-                <Button 
+                <Button
                   className="w-full justify-center"
                   loading={loading}
                   disabled={loading || !formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword || !termsAccepted}

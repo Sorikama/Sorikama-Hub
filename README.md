@@ -1,5 +1,5 @@
 Sorikama — le hub central
-1️⃣ Rôle principal
+1️⃣ Rôle principal 
 
 Sorikama n’est pas une application “classique” à usage direct, c’est l’écosystème / la plateforme-mère qui connecte toutes les applications Sori- :
 
