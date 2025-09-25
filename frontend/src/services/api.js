@@ -1,13 +1,14 @@
 import axios from 'axios';
+const API_BASE_URL = import.meta.env.VITE_API_GATEWAY_URL;
 
 // Création de l'instance de base d'axios
 const api = axios.create({
-    baseURL: 'http://localhost:4000/api/v1', // URL de votre backend
+    baseURL: API_BASE_URL, // URL de votre backend
     headers: {
         'Content-Type': 'application/json',
     },
 });
-
+    
 /*
   INTERCEPTEUR DE REQUÊTE (Request Interceptor)
 */

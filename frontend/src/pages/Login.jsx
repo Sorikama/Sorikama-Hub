@@ -1,27 +1,53 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate  } from "react-router-dom";
 import Button from "../components/Button";
 import { FiEye, FiEyeOff, FiMail, FiLock } from "react-icons/fi";
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  // ======================= AJOUT IMPORTANT =======================
+  // On utilise 'URLSearchParams' pour lire les paramètres dans l'URL.
+  // C'est comme ça que Sorikama saura où renvoyer l'utilisateur.
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const redirectUrl = searchParams.get('redirectUrl'); // ex: 'http://localhost:3000'
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    // setError('');
     try {
-      await login({ email, password });
-      // La navigation est gérée par le contexte en cas de succès
-    } catch (error) {
-      console.log("this is error", error);
-      // L'erreur est gérée par le contexte (toast)
-    } finally {
-      setLoading(false);
+      // ======================= INSCRIPTION ET CONNEXION AUTOMATIQUE =======================
+      // La fonction signup du contexte doit maintenant gérer l'inscription ET la connexion.
+      // Elle doit retourner les mêmes informations que la fonction login (user et tokens).
+      const { user, tokens } = await login({email, password});
+
+      if (redirectUrl) {
+        // Si une URL de redirection est fournie, on y va en ajoutant le token et l'utilisateur.
+        console.log(`Redirection vers ${redirectUrl}`);
+
+        // On prend le token d'accès
+        const token = tokens.access.token;
+        // On encode l'objet utilisateur en base64 pour le passer dans l'URL sans risque
+        const encodedUser = btoa(JSON.stringify(user));
+
+        // On redirige le navigateur de l'utilisateur
+        window.location.href = `${redirectUrl}?token=${token}&user=${encodedUser}`;
+      } else {
+        // Comportement par défaut si personne ne nous a redirigé ici.
+        // On redirige vers le dashboard de Sorikama lui-même.
+        console.log("Aucune URL de redirection, on va vers le dashboard local.");
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      // setError('Échec de l\'inscription. L\'email est peut-être déjà utilisé.');
+      console.error(err);
     }
   };
 

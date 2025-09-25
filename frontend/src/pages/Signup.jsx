@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate  } from "react-router-dom";
 import Button from "../components/Button";
 import { FiEye, FiEyeOff, FiMail, FiLock, FiUser } from "react-icons/fi";
 import { toast } from "react-toastify";
@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 
 const Signup = () => {
   const { signup } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -18,6 +19,12 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  
+  // C'est comme ça que Sorikama saura où renvoyer l'utilisateur.
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const redirectUrl = searchParams.get('redirectUrl');
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,12 +62,23 @@ const Signup = () => {
     // Simulation d'inscription avec chargement
     setLoading(true);
 
-    // Simuler un délai de chargement
     try {
-      await signup(formData);
-      // La navigation est gérée par le contexte
-    } catch (error) {
-      // L'erreur est gérée par le contexte
+      // La fonction signup retourne maintenant { verificationToken }
+      const { verificationToken } = await signup(formData);
+
+      // ======================= REDIRECTION VERS LA PAGE DE VÉRIFICATION =======================
+      // On construit l'URL de la page de vérification en y ajoutant deux informations :
+      // 1. Le token de vérification nécessaire pour l'appel API.
+      // 2. L'URL de redirection finale pour que la page de vérification sache où renvoyer l'utilisateur.
+      let verifyUrl = `/verify?token=${verificationToken}`;
+      if (redirectUrl) {
+        verifyUrl += `&redirectUrl=${encodeURIComponent(redirectUrl)}`;
+      }
+      navigate(verifyUrl);
+
+    } catch (err) {
+      console.log("erreur ici", err)
+      // setError('Échec de l\'inscription.'); // Message de secours
     } finally {
       setLoading(false);
     }

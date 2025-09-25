@@ -65,3 +65,4 @@ export const {
 export const PORT = parseInt(process.env.PORT || '3000', 10);
 export const RATE_LIMIT_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10); // 15 minutes par défaut
 export const RATE_LIMIT_MAX_REQUESTS = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10);
+export const BACKEND_SERVICE_URL = process.env.BACKEND_SERVICE_URL;

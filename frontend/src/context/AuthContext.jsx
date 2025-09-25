@@ -55,6 +55,7 @@ export const AuthProvider = ({ children }) => {
 
     // -- FONCTIONS D'AUTHENTIFICATION --
 
+    // La fonction `login` retourne maintenant les données pour que le composant puisse les utiliser.
     const login = async ({ email, password }) => {
         try {
             const response = await api.post('/auth/login', { email, password });
@@ -65,7 +66,11 @@ export const AuthProvider = ({ children }) => {
 
             setAuthData(user, tokens);
             toast.success('Connexion réussie !');
-            navigate('/dashboard');
+            // La navigation est retirée d'ici et sera gérée par la page Login elle-même
+            // navigate('/dashboard'); 
+
+            // On retourne les données pour la redirection
+            return { user, tokens };
         } catch (error) {
             console.log("this is error", error);
             const errorMessage = error.response?.data?.message || 'Email ou mot de passe incorrect.';
@@ -74,6 +79,8 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // La fonction signup ne connecte plus l'utilisateur.
+    // Elle l'enregistre et redirige vers la page de vérification avec un token temporaire.
     const signup = async (userData) => {
         try {
             const { confirmPassword, ...apiData } = userData;
@@ -81,7 +88,10 @@ export const AuthProvider = ({ children }) => {
 
             toast.success(response.data.message || 'Inscription réussie ! Veuillez vérifier votre email.');
             const verificationToken = response?.data?.data?.verificationToken;
-            navigate(`/verify?token=${verificationToken}`);
+
+            // On ne navigue plus directement depuis le contexte.
+            // On retourne le token pour que la page Signup puisse gérer la navigation.
+            return { verificationToken };
         } catch (error) {
             const errorMessage = error.response?.data?.message || "Une erreur est survenue lors de l'inscription.";
             toast.error(errorMessage);
@@ -89,20 +99,25 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // ======================= NOUVELLE FONCTION VERIFY =======================
+    // C'est cette fonction qui finalise l'inscription, connecte l'utilisateur
+    // et retourne les données pour la redirection finale.
     const verify = async (verificationToken, verificationCode) => {
         try {
             const response = await api.post('/auth/verify', { verificationToken, code: verificationCode });
-            console.log('this is list', response);
+            console.log('Réponse de la vérification:', response);
 
             const { user, tokens } = response?.data?.data;
-            console.log("this is user and tokens", user, tokens);
+            console.log("Utilisateur et tokens reçus:", user, tokens);
 
+            // On stocke les données d'authentification
             setAuthData(user, tokens);
             toast.success('Votre compte a été vérifié avec succès !');
-            navigate('/dashboard');
-        } catch (error) {
-            console.log("this is error", error);
 
+            // On retourne les données pour que la page VerifyCode puisse gérer la redirection
+            return { user, tokens };
+        } catch (error) {
+            console.log("Erreur de vérification:", error);
             const errorMessage = error.response?.data?.message || 'Code de vérification invalide ou expiré.';
             toast.error(errorMessage);
             throw error;

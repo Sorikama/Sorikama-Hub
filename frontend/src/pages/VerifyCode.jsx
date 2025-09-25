@@ -10,8 +10,6 @@ const VerifyCode = () => {
   const inputRefs = useRef([]);
   const navigate = useNavigate();
   const { verify } = useAuth();
-  const [searchParams] = useSearchParams();
-  const verificationToken = searchParams.get('token');
 
   // Initialiser les références pour les champs de saisie
   useEffect(() => {
@@ -58,30 +56,48 @@ const VerifyCode = () => {
     }
   };
 
+   // ======================= LECTURE DES PARAMÈTRES DE L'URL =======================
+  const searchParams = new URLSearchParams(location.search);
+  // 1. Le token de vérification envoyé depuis la page d'inscription
+  const verificationToken = searchParams.get('token');
+  // 2. L'URL de redirection finale vers l'application cliente (ex: WebRichesse)
+  const redirectUrl = searchParams.get('redirectUrl');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!verificationToken) {
-      toast.error("Token de vérification manquant. Veuillez recommencer.");
-      return navigate('/signup');
-    }
-    if (code?.join("").length !== 6) {
-      toast.error("Le code doit comporter 6 chiffres.");
+      setError("Token de vérification manquant. Veuillez réessayer le processus d'inscription.");
       return;
     }
-
-    // Simulation de vérification avec chargement
+    // setError('');
     setLoading(true);
 
     try {
-      await verify(verificationToken || "", code?.join(""));
-      // La navigation est gérée par le contexte
-    } catch (error) {
-      // L'erreur est gérée par le contexte
+      // On appelle la fonction verify du contexte avec le token et le code
+      const { user, tokens } = await verify(verificationToken, code?.join(""));
+      console.log("this url", redirectUrl)
+      // ======================= GESTION DE LA REDIRECTION FINALE =======================
+      // Si la vérification est réussie, on redirige vers l'application cliente
+      if (redirectUrl) {
+        console.log("this current if", redirectUrl, tokens);
+        
+        const token = tokens.accessToken;
+        const encodedUser = btoa(JSON.stringify(user));
+
+        console.log(`Vérification réussie. Redirection vers ${redirectUrl}`);
+        window.location.href = `${redirectUrl}?token=${token}&user=${encodedUser}`;
+      } else {
+        // Comportement par défaut si aucune application cliente n'était spécifiée
+        navigate('/dashboard');
+      }
+
+    } catch (err) {
+      // setError('La vérification a échoué.'); // Message de secours
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="container mx-auto px-4 py-20 min-h-screen flex flex-col justify-center">

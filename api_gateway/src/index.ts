@@ -19,6 +19,8 @@ import YAML from 'js-yaml'; // <--- Importer js-yaml
 import fs from 'fs'; // <--- Importer le module 'fs' de Node
 import { connectDB } from './database/connexion';
 import path from 'path';
+import authRoutes from './routes/auth.routes';
+import proxyRoutes from './routes/proxy.routes';
 
 import './database/models'; // Charge et enregistre tous les modèles Mongoose
 
@@ -33,7 +35,7 @@ const startServer = async () => {
 
     // 2. Middlewares essentiels
     // Helmet pour les en-têtes de sécurité de base
-     app.use(
+    app.use(
       helmet({
         contentSecurityPolicy: {
           directives: {
@@ -90,18 +92,22 @@ const startServer = async () => {
       res.sendFile(path.join(__dirname, '../public/index.html'));
     });
 
-    // 3. Routes de l'application
-    app.use('/api/v1', apiRouter);
+    // Les routes d'authentification sont gérées directement par la gateway.
+    // Elles ne sont PAS protégées par le token JWT (puisqu'on vient ici pour en obtenir un).
+    app.use('/api/v1/auth', authRoutes);
+
+    // Toutes les autres routes commençant par /api/v1/ seront dirigées vers le service backend.
+    // Notre `proxy.routes.ts` contient le middleware `protect`, donc toutes ces routes
+    // nécessiteront un token valide.
+    app.use('/api/v1', proxyRoutes); // Attention, le préfixe est important
 
     // 4. Gestion des routes non trouvées (404)
-    // Ce middleware est atteint si aucune autre route n'a correspondu
     app.all('*', (req: Request, res: Response, next: NextFunction) => {
       const err = new AppError(`La route ${req.originalUrl} n'existe pas sur ce serveur.`, StatusCodes.NOT_FOUND);
       next(err);
     });
 
     // 5. Gestionnaire d'erreurs global
-    // Ce doit être le DERNIER middleware utilisé par l'application
     app.use(errorHandler);
 
     // 6. Démarrage du serveur

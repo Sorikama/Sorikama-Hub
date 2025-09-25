@@ -1,6 +1,7 @@
 // src/middlewares/auth.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import { config } from '../config';
 import AppError from '../utils/AppError';
 import { verifyToken } from '../auth/auth.service';
 import { UserModel } from '../database/models/user.model';
@@ -14,42 +15,40 @@ declare global {
   }
 }
 
+// Cette interface doit correspondre à ce que vous mettez dans votre token
+interface UserPayload {
+  id: string;
+  roles: string[];
+}
+
+
 /**
  * Middleware pour protéger les routes. Vérifie le token JWT.
  */
-export const protect = async (req: Request, res: Response, next: NextFunction) => {
+export const protect = (req: Request, res: Response, next: NextFunction) => {
+  let token;
+  // On vérifie si le token est dans le header "Authorization"
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    return next(new AppError("Vous n'êtes pas connecté.Veuillez vous connecter pour obtenir l'accès.", 401));
+  }
+
   try {
-    const authHeader = req.headers.authorization;
+    // Vérification du token
+    const decoded = jwt.verify(token, config.jwt.secret!) as UserPayload;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return next(new AppError('Non autorisé. Token manquant.', StatusCodes.UNAUTHORIZED));
-    }
+    // Attacher l'utilisateur à la requête
+    req.user = decoded;
 
-    const token = authHeader.split(' ')[1];
-    
-    // 1. Vérifier le token
-    const decoded: any = verifyToken(token); // Le payload du token
-
-    // 2. Vérifier si l'utilisateur existe toujours
-    const currentUser = await UserModel.findById(decoded.id).populate({
-      path: 'roles',
-      populate: { path: 'permissions' }
-    });
-    
-    if (!currentUser) {
-      return next(new AppError('L\'utilisateur associé à ce token n\'existe plus.', StatusCodes.UNAUTHORIZED));
-    }
-
-    // 3. Vérifier si l'utilisateur est actif
-    if (!currentUser.isActive) {
-      return next(new AppError('Ce compte utilisateur est désactivé.', StatusCodes.FORBIDDEN));
-    }
-    
-    // 4. Attacher l'utilisateur à la requête
-    req.user = currentUser;
-    next();
-  } catch (error) {
-    return next(new AppError('Non autorisé. Token invalide ou expiré.', StatusCodes.UNAUTHORIZED));
+    next(); // Tout est bon, on passe à la suite (le proxy)
+  } catch (err) {
+    return next(new AppError('Token invalide ou expiré.', 401));
   }
 };
 

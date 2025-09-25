@@ -18,7 +18,7 @@ const roleSchema = new Schema<IRole>({
         type: String,
         default: () => uuidv4(),
     },
-    // Nom unique du rôle (ex: 'admin', 'user')
+    // Nom unique du rôle (ex: 'admin', 'user', 'creator', 'seller')
     name: {
         type: String,
         required: true,
