@@ -1,52 +1,73 @@
 // src/routes/proxy.routes.ts
 import { Router } from 'express';
-import { protect } from '../middlewares/auth.middleware'; // On garde le middleware de protection
-import { proxyToBackend } from '../services/proxy.service'; // On importe notre nouveau service de proxy
+import { protect, hasPermission } from '../middlewares/auth.middleware';
+import { createProxy } from '../services/proxy.service';
+import { MASEBUY_SERVICE_URL } from '../config';
+import { logger } from '../utils/logger';
 
 const router = Router();
 
-/*
-================================================================================================
-NOUVEAU CONTENU - Route générique pour le proxy
-================================================================================================
-On crée une route "catch-all" qui sera utilisée pour toutes les requêtes qui arrivent
-sur ce routeur.
-*/
+// ===================================================================================
+// --- 📖 Table de Routage des Microservices ---
+// ===================================================================================
+/**
+ * C'est ici que vous définissez la cartographie de votre architecture.
+ * Chaque objet représente une "règle" de redirection.
+ *
+ * - path: Le segment d'URL qui déclenche la redirection (ex: '/maisons').
+ * Toutes les requêtes commençant par ce chemin seront redirigées
+ * (ex: /maisons, /maisons/123, /maisons/123/commentaires).
+ *
+ * - target: L'URL du microservice qui doit recevoir la requête.
+ * Elle provient de votre fichier .env pour rester flexible.
+ *
+ * - permissions: Un tableau des permissions requises pour accéder à cette route.
+ * Le middleware 'hasPermission' vérifiera que l'utilisateur (via son token)
+ * possède TOUTES les permissions listées ici avant de le laisser passer.
+ */
+const serviceRoutes = [
+  {
+    path: '/masebuy',
+    target: MASEBUY_SERVICE_URL,
+    permissions: ['read:masebuy'], 
+  },
+];
 
-// 1. D'abord, on applique le middleware `protect`. Toute requête qui arrive ici doit
-//    avoir un token JWT valide. Si ce n'est pas le cas, le middleware `protect` la rejettera.
-// 2. Si le token est valide, `protect` ajoute `req.user`.
-// 3. Ensuite, on passe la main au middleware `proxyToBackend`. Il prend la requête
-//    validée et enrichie, et la transfère au service backend.
-router.use('/', protect, proxyToBackend);
+// ===================================================================================
+// --- ⚙️ Application de la Logique de Routage ---
+// ===================================================================================
 
+// 1. Appliquer le middleware 'protect' à toutes les routes de ce fichier.
+//    Aucune requête ne passera ce point sans un token JWT valide.
+router.use(protect);
+
+// 2. Parcourir la table de routage et créer dynamiquement les redirections.
+serviceRoutes.forEach(route => {
+  // Sécurité : on vérifie que l'URL du service est bien configurée dans .env
+  if (!route.target) {
+    logger.warn(`[PROXY] L'URL du service pour la route "${route.path}" n'est pas définie. Cette route sera ignorée.`);
+    return; // On passe à la règle suivante.
+  }
+
+  // On utilise notre "usine" pour créer un proxy spécifique à cette route.
+  const proxy = createProxy(route.target);
+
+  /**
+   * On attache les middlewares dans le bon ordre à la route :
+   *
+   * 1. `router.use(route.path, ...)`: Express appliquera ce qui suit uniquement
+   * pour les requêtes commençant par ce chemin.
+   *
+   * 2. `hasPermission(...route.permissions)`: Le gardien. Il vérifie les permissions
+   * de l'utilisateur. S'il n'a pas les droits, la requête est rejetée (403 Forbidden)
+   * et n'atteint jamais le proxy.
+   *
+   * 3. `proxy`: Si les permissions sont validées, le proxy prend le relais et
+   * transfère la requête au microservice cible.
+   */
+  router.use(route.path, hasPermission(...route.permissions), proxy);
+
+  logger.info(`[PROXY] Route ${route.path} configurée pour rediriger vers ${route.target}`);
+});
 
 export default router;
-
-/*
-================================================================================================
-ANCIEN CONTENU - Mis en commentaire pour référence
-================================================================================================
-
-import { hasPermission } from '../middlewares/auth.middleware';
-import { proxyRequest } from '../services/proxy.service';
-import { MAISONS_SERVICE_URL } from '../config';
-
-// L'ancienne approche était trop spécifique à une seule route.
-// La nouvelle approche est plus flexible et s'adapte à une architecture microservices.
-
-router.get(
-  '/maisons',
-  protect,
-  hasPermission('read:maison'),
-  (req, res, next) => {
-    if (req.user) {
-      req.headers['X-User-Id'] = req.user.id;
-      if (Array.isArray(req.user.roles)) {
-        req.headers['X-User-Roles'] = req.user.roles.map((r: any) => r.name).join(',');
-      }
-    }
-    proxyRequest(MAISONS_SERVICE_URL!)(req, res, next);
-  }
-);
-*/

@@ -59,10 +59,10 @@ export const {
   EMAIL_FROM,
   BASE_URL,
   BLIND_INDEX_PEPPER,
+  MASEBUY_SERVICE_URL,
 } = process.env as { [key: string]: string }; // Assert que les variables existent après validation
 
 // Exporte les variables numériques en les parsant
 export const PORT = parseInt(process.env.PORT || '3000', 10);
 export const RATE_LIMIT_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10); // 15 minutes par défaut
 export const RATE_LIMIT_MAX_REQUESTS = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10);
-export const BACKEND_SERVICE_URL = process.env.BACKEND_SERVICE_URL;
