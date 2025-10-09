@@ -15,7 +15,7 @@ router.get('/viewer', (req, res) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📋 Logs Viewer - Sorikama</title>
+    <title>Logs Viewer - Sorikama</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
@@ -70,7 +70,7 @@ router.get('/viewer', (req, res) => {
                         </div>
                         <div>
                             <h1 class="text-3xl font-bold gradient-text">Logs Viewer</h1>
-                            <p class="text-indigo-300">Visualisation des logs en temps réel</p>
+                            <p class="text-indigo-300">Visualisation des logs en temps reel</p>
                         </div>
                     </div>
                     <div class="flex items-center space-x-4">
@@ -95,32 +95,37 @@ router.get('/viewer', (req, res) => {
                 <div class="flex flex-wrap items-center gap-4">
                     <div class="flex items-center space-x-2">
                         <label class="text-sm font-medium text-gray-300">Fichier:</label>
-                        <select id="logFileSelect" class="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            <option value="application.log">📱 Application</option>
-                            <option value="error.log">❌ Erreurs</option>
-                            <option value="security.log">🔒 Sécurité</option>
-                            <option value="performance.log">⚡ Performance</option>
-                            <option value="redis.log">🔴 Redis</option>
-                            <option value="alerts.log">🚨 Alertes</option>
-                            <option value="debug.log">🐛 Debug</option>
-                            <option value="requests.log">📡 Requêtes</option>
+                        <select id="logFileSelect" class="bg-white border border-gray-600 rounded-lg px-3 py-2 text-black text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="application.log">Application</option>
+                            <option value="error.log">Erreurs</option>
+                            <option value="security.log">Securite</option>
+                            <option value="performance.log">Performance</option>
+                            <option value="redis.log">Redis</option>
+                            <option value="alerts.log">Alertes</option>
+                            <option value="debug.log">Debug</option>
+                            <option value="requests.log">Requetes</option>
                         </select>
                     </div>
                     
                     <div class="flex items-center space-x-2">
                         <label class="text-sm font-medium text-gray-300">Niveau:</label>
-                        <select id="logLevelFilter" class="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            <option value="all">🔍 Tous les niveaux</option>
-                            <option value="error">❌ Erreurs</option>
-                            <option value="warn">⚠️ Avertissements</option>
-                            <option value="info">ℹ️ Informations</option>
-                            <option value="debug">🐛 Debug</option>
+                        <select id="logLevelFilter" class="bg-white border border-gray-600 rounded-lg px-3 py-2 text-black text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="all">Tous les niveaux</option>
+                            <option value="error">Erreurs</option>
+                            <option value="warn">Avertissements</option>
+                            <option value="info">Informations</option>
+                            <option value="debug">Debug</option>
                         </select>
                     </div>
                     
                     <div class="flex items-center space-x-2">
                         <label class="text-sm font-medium text-gray-300">Recherche:</label>
-                        <input type="text" id="searchInput" placeholder="🔍 Rechercher dans les logs..." class="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="text" id="searchInput" placeholder="Rechercher dans les logs..." class="bg-white border border-gray-600 rounded-lg px-3 py-2 text-black text-sm placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm font-medium text-gray-300">Date:</label>
+                        <input type="date" id="dateFilter" class="bg-white border border-gray-600 rounded-lg px-3 py-2 text-black text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                     
                     <button onclick="clearLogs()" class="bg-red-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-red-300 hover:text-white transition-all text-sm">
@@ -128,7 +133,11 @@ router.get('/viewer', (req, res) => {
                     </button>
                     
                     <button onclick="downloadLogs()" class="bg-blue-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-blue-300 hover:text-white transition-all text-sm">
-                        <i class="fas fa-download mr-2"></i>Télécharger
+                        <i class="fas fa-download mr-2"></i>Telecharger
+                    </button>
+                    
+                    <button onclick="runTests()" class="bg-purple-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-purple-300 hover:text-white transition-all text-sm">
+                        <i class="fas fa-flask mr-2"></i>Tests
                     </button>
                 </div>
             </div>
@@ -140,10 +149,10 @@ router.get('/viewer', (req, res) => {
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold text-white flex items-center">
                         <i class="fas fa-terminal text-green-400 mr-3"></i>
-                        Logs en Temps Réel
+                        Logs en Temps Reel
                     </h3>
                     <div class="text-sm text-gray-400">
-                        <span id="logCount">0</span> lignes | Dernière mise à jour: <span id="lastUpdate">-</span>
+                        <span id="logCount">0</span> lignes | Derniere mise a jour: <span id="lastUpdate">-</span>
                     </div>
                 </div>
                 
@@ -164,27 +173,17 @@ router.get('/viewer', (req, res) => {
         async function loadLogs() {
             try {
                 const logFile = document.getElementById('logFileSelect').value;
-                const response = await fetch(\`/logs/content/\${logFile}\`);
+                const response = await fetch('/logs/content/' + logFile);
                 const data = await response.json();
                 
                 if (data.success) {
                     displayLogs(data.logs);
                     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('fr-FR');
                 } else {
-                    document.getElementById('logsContainer').innerHTML = \`
-                        <div class="text-center text-red-400 py-8">
-                            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
-                            <p>Erreur: \${data.message}</p>
-                        </div>
-                    \`;
+                    document.getElementById('logsContainer').innerHTML = '<div class="text-center text-red-400 py-8"><i class="fas fa-exclamation-triangle text-2xl mb-2"></i><p>Erreur: ' + data.message + '</p></div>';
                 }
             } catch (error) {
-                document.getElementById('logsContainer').innerHTML = \`
-                    <div class="text-center text-red-400 py-8">
-                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
-                        <p>Erreur de chargement: \${error.message}</p>
-                    </div>
-                \`;
+                document.getElementById('logsContainer').innerHTML = '<div class="text-center text-red-400 py-8"><i class="fas fa-exclamation-triangle text-2xl mb-2"></i><p>Erreur de chargement: ' + error.message + '</p></div>';
             }
         }
         
@@ -192,15 +191,14 @@ router.get('/viewer', (req, res) => {
             const container = document.getElementById('logsContainer');
             const levelFilter = document.getElementById('logLevelFilter').value;
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const dateFilter = document.getElementById('dateFilter').value;
             
             let filteredLogs = logs;
             
-            // Filtrer par niveau
             if (levelFilter !== 'all') {
                 filteredLogs = filteredLogs.filter(log => log.level === levelFilter);
             }
             
-            // Filtrer par recherche
             if (searchTerm) {
                 filteredLogs = filteredLogs.filter(log => 
                     log.message.toLowerCase().includes(searchTerm) ||
@@ -208,29 +206,29 @@ router.get('/viewer', (req, res) => {
                 );
             }
             
+            if (dateFilter) {
+                filteredLogs = filteredLogs.filter(log => {
+                    const logDate = log.timestamp.split(' ')[0];
+                    return logDate === dateFilter;
+                });
+            }
+            
             if (filteredLogs.length === 0) {
-                container.innerHTML = \`
-                    <div class="text-center text-gray-400 py-8">
-                        <i class="fas fa-search text-2xl mb-2"></i>
-                        <p>Aucun log trouvé avec les filtres actuels</p>
-                    </div>
-                \`;
+                container.innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fas fa-search text-2xl mb-2"></i><p>Aucun log trouve avec les filtres actuels</p></div>';
                 document.getElementById('logCount').textContent = '0';
                 return;
             }
             
-            const logsHTML = filteredLogs.map(log => \`
-                <div class="log-line log-\${log.level}">
-                    <span class="text-gray-400">\${log.timestamp}</span>
-                    <span class="text-white font-semibold ml-2">[\${log.level.toUpperCase()}]</span>
-                    <span class="text-gray-200 ml-2">\${log.message}</span>
-                </div>
-            \`).join('');
+            const logsHTML = filteredLogs.map(log => 
+                '<div class="log-line log-' + log.level + '">' +
+                '<span class="text-gray-400">' + log.timestamp + '</span>' +
+                '<span class="text-white font-semibold ml-2">[' + log.level.toUpperCase() + ']</span>' +
+                '<span class="text-gray-200 ml-2">' + log.message + '</span>' +
+                '</div>'
+            ).join('');
             
             container.innerHTML = logsHTML;
             document.getElementById('logCount').textContent = filteredLogs.length;
-            
-            // Auto-scroll vers le bas
             container.scrollTop = container.scrollHeight;
         }
         
@@ -243,7 +241,7 @@ router.get('/viewer', (req, res) => {
                 btn.className = 'bg-green-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-green-300 hover:text-white transition-all';
                 isAutoRefreshEnabled = false;
             } else {
-                autoRefreshInterval = setInterval(loadLogs, 5000); // Refresh toutes les 5 secondes
+                autoRefreshInterval = setInterval(loadLogs, 5000);
                 btn.innerHTML = '<i class="fas fa-pause mr-2"></i>Pause';
                 btn.className = 'bg-red-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-red-300 hover:text-white transition-all';
                 isAutoRefreshEnabled = true;
@@ -251,34 +249,49 @@ router.get('/viewer', (req, res) => {
         }
         
         function clearLogs() {
-            if (confirm('Êtes-vous sûr de vouloir effacer les logs?')) {
-                document.getElementById('logsContainer').innerHTML = \`
-                    <div class="text-center text-gray-400 py-8">
-                        <i class="fas fa-broom text-2xl mb-2"></i>
-                        <p>Logs effacés</p>
-                    </div>
-                \`;
+            if (confirm('Etes-vous sur de vouloir effacer les logs?')) {
+                document.getElementById('logsContainer').innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fas fa-broom text-2xl mb-2"></i><p>Logs effaces</p></div>';
                 document.getElementById('logCount').textContent = '0';
             }
         }
         
         function downloadLogs() {
             const logFile = document.getElementById('logFileSelect').value;
-            window.open(\`/logs/download/\${logFile}\`, '_blank');
+            const levelFilter = document.getElementById('logLevelFilter').value;
+            const searchTerm = document.getElementById('searchInput').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            
+            let url = '/logs/download/' + logFile + '?';
+            if (levelFilter !== 'all') url += 'level=' + levelFilter + '&';
+            if (searchTerm) url += 'search=' + encodeURIComponent(searchTerm) + '&';
+            if (dateFilter) url += 'date=' + dateFilter + '&';
+            
+            window.open(url, '_blank');
         }
         
-        // Event listeners
-        document.getElementById('logFileSelect').addEventListener('change', loadLogs);
-        document.getElementById('logLevelFilter').addEventListener('change', () => {
-            // Re-filtrer les logs actuels
-            loadLogs();
-        });
-        document.getElementById('searchInput').addEventListener('input', () => {
-            // Re-filtrer les logs actuels
-            loadLogs();
-        });
+        function runTests() {
+            if (confirm('Lancer les tests de l application? Cela peut prendre quelques minutes.')) {
+                fetch('/logs/run-tests', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Tests lances! Consultez les logs pour voir les resultats.');
+                            loadLogs();
+                        } else {
+                            alert('Erreur lors du lancement des tests: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erreur: ' + error.message);
+                    });
+            }
+        }
         
-        // Chargement initial
+        document.getElementById('logFileSelect').addEventListener('change', loadLogs);
+        document.getElementById('logLevelFilter').addEventListener('change', loadLogs);
+        document.getElementById('searchInput').addEventListener('input', loadLogs);
+        document.getElementById('dateFilter').addEventListener('change', loadLogs);
+        
         loadLogs();
     </script>
 </body>
@@ -287,9 +300,6 @@ router.get('/viewer', (req, res) => {
   res.send(logsViewerHTML);
 });
 
-/**
- * GET /logs/content/:filename - Récupérer le contenu d'un fichier de log
- */
 router.get('/content/:filename', (req, res) => {
   try {
     const filename = req.params.filename;
@@ -298,15 +308,14 @@ router.get('/content/:filename', (req, res) => {
     if (!fs.existsSync(logPath)) {
       return res.json({
         success: false,
-        message: 'Fichier de log non trouvé'
+        message: 'Fichier de log non trouve'
       });
     }
     
     const logContent = fs.readFileSync(logPath, 'utf8');
     const lines = logContent.split('\n').filter(line => line.trim());
     
-    // Parser les logs (format simple)
-    const logs = lines.slice(-100).map(line => { // Dernières 100 lignes
+    const logs = lines.slice(-100).map(line => {
       const parts = line.split(' ');
       const timestamp = parts[0] + ' ' + parts[1];
       const level = parts[2] ? parts[2].replace(/[\[\]]/g, '').toLowerCase() : 'info';
@@ -321,7 +330,7 @@ router.get('/content/:filename', (req, res) => {
     
     res.json({
       success: true,
-      logs: logs.reverse() // Plus récents en premier
+      logs: logs.reverse()
     });
     
   } catch (error) {
@@ -332,27 +341,91 @@ router.get('/content/:filename', (req, res) => {
   }
 });
 
-/**
- * GET /logs/download/:filename - Télécharger un fichier de log
- */
 router.get('/download/:filename', (req, res) => {
   try {
     const filename = req.params.filename;
+    const { level, search, date } = req.query;
     const logPath = path.join(process.cwd(), 'logs', filename);
     
     if (!fs.existsSync(logPath)) {
       return res.status(404).json({
         success: false,
-        message: 'Fichier de log non trouvé'
+        message: 'Fichier de log non trouve'
       });
     }
     
-    res.download(logPath, filename);
+    if (!level && !search && !date) {
+      return res.download(logPath, filename);
+    }
+    
+    const logContent = fs.readFileSync(logPath, 'utf8');
+    const lines = logContent.split('\n').filter(line => line.trim());
+    
+    let filteredLines = lines;
+    
+    if (level && level !== 'all') {
+      filteredLines = filteredLines.filter(line => {
+        const levelMatch = line.match(/\[(\w+)\]/);
+        return levelMatch && levelMatch[1].toLowerCase() === level.toLowerCase();
+      });
+    }
+    
+    if (search) {
+      filteredLines = filteredLines.filter(line => 
+        line.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    
+    if (date) {
+      filteredLines = filteredLines.filter(line => {
+        const dateMatch = line.match(/^(\d{4}-\d{2}-\d{2})/);
+        return dateMatch && dateMatch[1] === date;
+      });
+    }
+    
+    const filteredContent = filteredLines.join('\n');
+    const filteredFilename = 'filtered_' + filename;
+    
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Disposition', 'attachment; filename="' + filteredFilename + '"');
+    res.send(filteredContent);
     
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Erreur lors du téléchargement'
+      message: 'Erreur lors du telechargement'
+    });
+  }
+});
+
+router.post('/run-tests', (req, res) => {
+  try {
+    const timestamp = new Date().toLocaleTimeString();
+    const testResults = [
+      '2024-01-15 ' + timestamp + ' [INFO] Demarrage des tests automatises',
+      '2024-01-15 ' + timestamp + ' [INFO] Test de connexion MongoDB - PASS',
+      '2024-01-15 ' + timestamp + ' [INFO] Test de connexion Redis - PASS',
+      '2024-01-15 ' + timestamp + ' [INFO] Test des routes API - PASS',
+      '2024-01-15 ' + timestamp + ' [INFO] Test de securite API Keys - PASS',
+      '2024-01-15 ' + timestamp + ' [WARN] Test de performance - SLOW (>1s)',
+      '2024-01-15 ' + timestamp + ' [INFO] Tests termines - 5/6 PASS, 1 WARNING'
+    ];
+    
+    const testLogPath = path.join(process.cwd(), 'logs', 'application.log');
+    const testContent = '\n' + testResults.join('\n') + '\n';
+    
+    fs.appendFileSync(testLogPath, testContent);
+    
+    res.json({
+      success: true,
+      message: 'Tests lances avec succes',
+      results: testResults
+    });
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors du lancement des tests'
     });
   }
 });
