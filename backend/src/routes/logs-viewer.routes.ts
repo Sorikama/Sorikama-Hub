@@ -156,7 +156,13 @@ router.get('/viewer', (req, res) => {
                     </div>
                 </div>
                 
-                <div id="logsContainer" class="logs-container rounded-lg p-4">
+                <div class="mb-4">
+                    <button onclick="loadMoreLogs()" class="bg-gray-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-gray-300 hover:text-white transition-all text-sm">
+                        <i class="fas fa-arrow-up mr-2"></i>Charger plus (anciennes)
+                    </button>
+                </div>
+                
+                <div id="logsContainer" class="logs-container rounded-lg p-4" style="max-height: 500px; overflow-y: auto; background: rgba(0,0,0,0.4);">
                     <div class="text-center text-gray-400 py-8">
                         <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
                         <p>Chargement des logs...</p>
@@ -192,14 +198,25 @@ router.get('/viewer', (req, res) => {
         window.clearLogs = clearLogs;
         window.downloadLogs = downloadLogs;
         window.runTests = runTests;
+        window.loadMoreLogs = loadMoreLogs;
         
-        function displayLogs(logs) {
+        let currentOffset = 0;
+        let allLogs = [];
+        
+        function displayLogs(logs, append = false) {
             const container = document.getElementById('logsContainer');
             const levelFilter = document.getElementById('logLevelFilter').value;
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const dateFilter = document.getElementById('dateFilter').value;
             
-            let filteredLogs = logs;
+            if (!append) {
+                allLogs = logs;
+                currentOffset = 0;
+            } else {
+                allLogs = [...logs, ...allLogs];
+            }
+            
+            let filteredLogs = allLogs;
             
             if (levelFilter !== 'all') {
                 filteredLogs = filteredLogs.filter(log => log.level === levelFilter);
@@ -207,15 +224,13 @@ router.get('/viewer', (req, res) => {
             
             if (searchTerm) {
                 filteredLogs = filteredLogs.filter(log => 
-                    log.message.toLowerCase().includes(searchTerm) ||
-                    log.timestamp.toLowerCase().includes(searchTerm)
+                    log.fullLine.toLowerCase().includes(searchTerm)
                 );
             }
             
             if (dateFilter) {
                 filteredLogs = filteredLogs.filter(log => {
-                    const logDate = log.timestamp.split(' ')[0];
-                    return logDate === dateFilter;
+                    return log.date === dateFilter;
                 });
             }
             
@@ -226,14 +241,31 @@ router.get('/viewer', (req, res) => {
             }
             
             const logsHTML = filteredLogs.map(log => 
-                '<div class="log-line log-' + log.level + '">' +
-                '<span class="text-gray-300 font-mono text-xs">' + log.fullLine + '</span>' +
+                '<div class="log-line log-' + log.level + '" style="margin-bottom: 1px; padding: 2px 4px; font-family: monospace; font-size: 11px; line-height: 1.2;">' +
+                '<span class="text-gray-300">' + log.fullLine + '</span>' +
                 '</div>'
             ).join('');
             
             container.innerHTML = logsHTML;
             document.getElementById('logCount').textContent = filteredLogs.length;
-            container.scrollTop = container.scrollHeight;
+            
+            if (!append) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+        
+        function loadMoreLogs() {
+            currentOffset += 100;
+            const logFile = document.getElementById('logFileSelect').value;
+            
+            fetch('/logs/content/' + logFile + '?limit=100&offset=' + currentOffset)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.logs.length > 0) {
+                        displayLogs(data.logs, true);
+                    }
+                })
+                .catch(error => console.error('Erreur chargement logs:', error));
         }
         
         function toggleAutoRefresh() {
@@ -320,33 +352,50 @@ router.get('/content/:filename', (req, res) => {
     const lines = logContent.split('\n').filter(line => line.trim());
     
     // Prendre toutes les lignes, pas seulement les 100 dernières
+    const { limit = '100', offset = '0' } = req.query;
+    
     const logs = lines.map(line => {
       if (!line.trim()) return null;
       
-      // Extraire exactement comme dans le fichier: 2024-01-15 10:30:15 [INFO] Message
-      const match = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(\w+)\] (.+)$/);
+      let timestamp = '';
+      let level = 'info';
+      let message = line;
       
-      if (match) {
-        return {
-          timestamp: match[1],
-          level: match[2].toLowerCase(),
-          message: match[3],
-          fullLine: line
-        };
+      // Format: [2025-10-09 22:48:21] INFO: MESSAGE
+      const match1 = line.match(/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] (\w+): (.+)$/);
+      if (match1) {
+        timestamp = match1[1];
+        level = match1[2].toLowerCase();
+        message = match1[3];
       } else {
-        // Si le format ne correspond pas, traiter comme une ligne brute
-        return {
-          timestamp: '',
-          level: 'info',
-          message: line,
-          fullLine: line
-        };
+        // Format: 2024-01-15 10:30:15 [INFO] MESSAGE
+        const match2 = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(\w+)\] (.+)$/);
+        if (match2) {
+          timestamp = match2[1];
+          level = match2[2].toLowerCase();
+          message = match2[3];
+        }
       }
+      
+      return {
+        timestamp,
+        level: ['error', 'warn', 'info', 'debug'].includes(level) ? level : 'info',
+        message,
+        fullLine: line,
+        date: timestamp.split(' ')[0] || ''
+      };
     }).filter(log => log !== null);
+    
+    // Prendre les dernières lignes par défaut
+    const startIndex = Math.max(0, logs.length - parseInt(limit) - parseInt(offset));
+    const endIndex = logs.length - parseInt(offset);
+    const selectedLogs = logs.slice(startIndex, endIndex).reverse();
     
     res.json({
       success: true,
-      logs: logs.reverse() // Plus récents en premier
+      logs: selectedLogs,
+      total: logs.length,
+      hasMore: startIndex > 0
     });
     
   } catch (error) {
