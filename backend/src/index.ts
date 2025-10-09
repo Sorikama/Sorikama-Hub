@@ -8,6 +8,8 @@ import http from 'http';
 // Import de nos modules internes
 import { PORT, NODE_ENV } from './config/environments';
 import { logger } from './utils/logger';
+import { RedisManager } from './utils/redisManager';
+import { Banner } from './utils/banner';
 import apiRouter from './routes';
 import { errorHandler } from './middlewares/errorHandler.middleware';
 import rateLimiter from './middlewares/rateLimiter.middleware';
@@ -25,6 +27,9 @@ import proxyRoutes from './routes/proxy.routes';
 import swaggerRoutes from './routes/swagger.routes';
 import docsRoutes from './routes/docs.routes';
 import documentationRoutes from './routes/documentation.routes';
+import dashboardRoutes from './routes/dashboard.routes';
+import { responseTimeMiddleware, slowRequestTimeoutMiddleware } from './middlewares/responseTime.middleware';
+import { httpLoggingMiddleware } from './utils/applicationLogger';
 
 import './database/models';
 
@@ -33,7 +38,23 @@ const server = http.createServer(app);
 
 const startServer = async () => {
   try {
+    // Affichage du banner
+    await Banner.displayBanner();
+    
+    // Étape 1: Démarrage de Redis
+    Banner.displayStartupStep('Démarrage de Redis', 'loading');
+    const redisStarted = await RedisManager.startRedis();
+    
+    if (redisStarted) {
+      Banner.displayStartupStep('Redis démarré avec succès', 'success', 'Port 6379');
+    } else {
+      Banner.displayStartupStep('Redis non disponible', 'error', 'Mode dégradé activé');
+    }
+    
+    // Étape 2: Connexion à la base de données
+    Banner.displayStartupStep('Connexion à MongoDB', 'loading');
     await connectDB();
+    Banner.displayStartupStep('MongoDB connecté', 'success');
 
     app.use(
       helmet({
@@ -67,9 +88,29 @@ const startServer = async () => {
     app.use(express.json({ limit: '10kb' }));
     app.use(express.urlencoded({ extended: true, limit: '10kb' }));
     app.use('/api', rateLimiter);
+    
+    // Redis sera géré par RedisManager
+    
+    // Middlewares de logging et métriques
+    app.use(httpLoggingMiddleware);
+    app.use(responseTimeMiddleware);
+    app.use(slowRequestTimeoutMiddleware(30000)); // 30 secondes timeout
+    
+    const { metricsMiddleware, apiKeyMetricsMiddleware } = require('./middlewares/metrics.middleware');
+    app.use(metricsMiddleware);
+    app.use(apiKeyMetricsMiddleware);
 
     app.use(express.static(path.join(__dirname, '../public')));
 
+    // Étape 3: Initialisation des données
+    Banner.displayStartupStep('Initialisation des données', 'loading');
+    const { runSeeders, createSeederRoutes } = require('./database/seeders/index');
+    await runSeeders();
+    Banner.displayStartupStep('Données initialisées', 'success');
+    
+    // Route pour relancer les seeders manuellement
+    createSeederRoutes(app);
+    
     // Configuration Swagger
     if (NODE_ENV === 'development') {
 
@@ -155,13 +196,22 @@ const startServer = async () => {
           explorer: false,
           swaggerOptions: {
             defaultModelsExpandDepth: -1,
-            docExpansion: 'list'
+            docExpansion: 'list',
+            requestInterceptor: (req: any) => {
+              // Injecter automatiquement l'API key admin dans Swagger
+              if (global.ADMIN_API_KEY) {
+                req.headers['X-API-Key'] = global.ADMIN_API_KEY;
+                console.log('🔑 API Key admin injectée automatiquement dans Swagger');
+              }
+              return req;
+            }
           }
         }));
 
         logger.info(`📚 Documentation API disponible sur http://localhost:${PORT}/api-docs`);
-        logger.info(`🔑 API Key par défaut: sk_dev_default_key_12345678901234567890123456789012345678901234567890`);
+        logger.info(`🔑 API Key Admin (auto-injectée): ${global.ADMIN_API_KEY}`);
         logger.info(`📖 Documentation HTML disponible sur http://localhost:${PORT}/documentation`);
+        logger.info(`📊 Dashboard disponible sur http://localhost:${PORT}/dashboard`);
       } catch (e) {
         logger.error('❌ Erreur de chargement de la documentation Swagger:', e);
       }
@@ -173,6 +223,7 @@ const startServer = async () => {
 
     app.use('/swagger', swaggerRoutes);
     app.use('/docs', docsRoutes);
+    app.use('/dashboard', dashboardRoutes);
 
     const protectDocs = (req: Request, res: Response, next: NextFunction) => {
       const token = req.query.token as string;
@@ -197,6 +248,38 @@ const startServer = async () => {
       });
     });
 
+    // Middleware d'authentification API Key obligatoire pour toutes les routes API
+    const { authenticateApiKey } = require('./middlewares/apiKey.middleware');
+    
+    // Routes qui ne nécessitent PAS d'API key
+    const publicRoutes = [
+      '/api/v1/system/health',
+      '/api/v1/system/seed'
+    ];
+    
+    // Middleware conditionnel pour l'API key
+    app.use('/api/v1', (req: Request, res: Response, next: NextFunction) => {
+      // Vérifier si la route est publique
+      const isPublicRoute = publicRoutes.some(route => req.path === route.replace('/api/v1', ''));
+      
+      if (isPublicRoute) {
+        console.log(`🔓 Route publique autorisée: ${req.path}`);
+        return next();
+      }
+      
+      // Sinon, vérifier l'API key
+      console.log(`🔐 Vérification API key requise pour: ${req.path}`);
+      authenticateApiKey(req, res, next);
+    });
+    
+    // Routes admin
+    const adminRoutes = require('./routes/admin.routes').default;
+    app.use('/api/v1/admin', adminRoutes);
+    
+    // Routes de performance
+    const performanceRoutes = require('./routes/performance.routes').default;
+    app.use('/api/v1/performance', performanceRoutes);
+    
     app.use('/api/v1', apiRouter);
 
     app.all('*', (req: Request, res: Response, next: NextFunction) => {
@@ -207,11 +290,20 @@ const startServer = async () => {
     app.use(handleUnauthorizedAttempts);
     app.use(errorHandler);
 
+    // Étape 4: Démarrage du serveur
+    Banner.displayStartupStep('Démarrage du serveur HTTP', 'loading');
+    
     server.listen(PORT, () => {
-      logger.info(`✅ Serveur démarré avec succès sur le port ${PORT} en mode [${NODE_ENV}]`);
+      Banner.displayStartupStep('Serveur HTTP démarré', 'success', `Port ${PORT}`);
+      
+      // Attendre un peu pour les connexions Redis
+      setTimeout(async () => {
+        await Banner.displayStartupComplete(Number(PORT));
+      }, 1000);
     });
 
   } catch (error) {
+    Banner.displayStartupStep('Erreur critique', 'error', error.message);
     logger.error('❌ Erreur lors du démarrage du serveur:', error);
     process.exit(1);
   }
@@ -225,6 +317,8 @@ const gracefulShutdown = (signal: string) => {
 
     server.close(async () => {
       logger.info('🛑 Serveur HTTP fermé.');
+      await RedisManager.stopRedis();
+      logger.info('🔌 Redis arrêté.');
       await mongoose.disconnect();
       logger.info('🔌 Déconnexion de MongoDB réussie.');
       process.exit(0);

@@ -389,7 +389,7 @@ router.post('/verify', async (req: Request, res: Response) => {
         success: true, 
         token: sessionToken,
         message: 'Authentification réussie',
-        redirectUrl: `/documentation?token=${sessionToken}`
+        redirectUrl: `/dashboard?apiKey=${apiKey}&token=${sessionToken}`
       });
     }
     
@@ -407,7 +407,7 @@ router.post('/verify', async (req: Request, res: Response) => {
           success: true, 
           token: sessionToken,
           message: 'Authentification réussie (mode dégradé)',
-          redirectUrl: `/documentation?token=${sessionToken}`
+          redirectUrl: `/dashboard?apiKey=${apiKey}&token=${sessionToken}`
         });
       }
       return res.status(500).json({ 
@@ -436,7 +436,7 @@ router.post('/verify', async (req: Request, res: Response) => {
       success: true, 
       token: sessionToken,
       message: 'Authentification réussie',
-      redirectUrl: `/documentation?token=${sessionToken}`
+      redirectUrl: `/dashboard?apiKey=${apiKey}&token=${sessionToken}`
     });
     
   } catch (error) {

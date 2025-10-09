@@ -1,30 +1,47 @@
 // src/database/seeders/index.ts
-import mongoose from 'mongoose';
+import { logger } from '../../utils/logger';
 import { seedPermissions } from './permissions.seeder';
 import { seedRoles } from './roles.seeder';
-import { seedAdmin } from './admin';
+import { seedAdmin } from './admin.seeder';
 import { seedApiKeys } from './apiKeys.seeder';
-import { logger } from '../../utils/logger';
-import { connectDB } from '../connexion';
 
-const runSeeders = async () => {
-  logger.info('Démarrage du processus de seeding...');
-  
-  // 1. Connexion à la base de données
-  await connectDB();
-
-  // 2. Exécution des seeders dans l'ordre
-  await seedPermissions();
-  await seedRoles();
-  await seedAdmin();
-  await seedApiKeys();
-
-  // 3. Déconnexion
-  await mongoose.disconnect();
-  logger.info('Processus de seeding terminé. Déconnexion de MongoDB.');
+export const runSeeders = async (force = false) => {
+  try {
+    logger.info('🌱 Démarrage des seeders...');
+    
+    // 1. Permissions (base)
+    await seedPermissions();
+    
+    // 2. Rôles (dépend des permissions)
+    await seedRoles();
+    
+    // 3. Admin (dépend des rôles)
+    await seedAdmin();
+    
+    // 4. API Keys par défaut (dépend de l'admin) - optionnel
+    try {
+      await seedApiKeys();
+    } catch (error) {
+      logger.warn('⚠️ Seeder API Keys ignoré (peut ne pas exister)');
+    }
+    
+    logger.info('✅ Tous les seeders terminés avec succès');
+    
+  } catch (error) {
+    logger.error('❌ Erreur lors de l\'exécution des seeders:', error);
+    throw error;
+  }
 };
 
-runSeeders().catch(error => {
-  logger.error('Une erreur est survenue durant le seeding:', error);
-  process.exit(1);
-});
+// Route pour relancer manuellement les seeders
+export const createSeederRoutes = (app: any) => {
+  app.post('/api/v1/system/seed', async (req: any, res: any) => {
+    try {
+      const { force } = req.body;
+      await runSeeders(force);
+      res.json({ success: true, message: 'Seeders exécutés avec succès' });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Erreur lors des seeders' });
+    }
+  });
+};
