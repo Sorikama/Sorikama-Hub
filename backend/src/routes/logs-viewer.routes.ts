@@ -187,6 +187,12 @@ router.get('/viewer', (req, res) => {
             }
         }
         
+        // Fonctions globales
+        window.toggleAutoRefresh = toggleAutoRefresh;
+        window.clearLogs = clearLogs;
+        window.downloadLogs = downloadLogs;
+        window.runTests = runTests;
+        
         function displayLogs(logs) {
             const container = document.getElementById('logsContainer');
             const levelFilter = document.getElementById('logLevelFilter').value;
@@ -221,9 +227,7 @@ router.get('/viewer', (req, res) => {
             
             const logsHTML = filteredLogs.map(log => 
                 '<div class="log-line log-' + log.level + '">' +
-                '<span class="text-gray-400">' + log.timestamp + '</span>' +
-                '<span class="text-white font-semibold ml-2">[' + log.level.toUpperCase() + ']</span>' +
-                '<span class="text-gray-200 ml-2">' + log.message + '</span>' +
+                '<span class="text-gray-300 font-mono text-xs">' + log.fullLine + '</span>' +
                 '</div>'
             ).join('');
             
@@ -315,22 +319,34 @@ router.get('/content/:filename', (req, res) => {
     const logContent = fs.readFileSync(logPath, 'utf8');
     const lines = logContent.split('\n').filter(line => line.trim());
     
-    const logs = lines.slice(-100).map(line => {
-      const parts = line.split(' ');
-      const timestamp = parts[0] + ' ' + parts[1];
-      const level = parts[2] ? parts[2].replace(/[\[\]]/g, '').toLowerCase() : 'info';
-      const message = parts.slice(3).join(' ');
+    // Prendre toutes les lignes, pas seulement les 100 dernières
+    const logs = lines.map(line => {
+      if (!line.trim()) return null;
       
-      return {
-        timestamp,
-        level: ['error', 'warn', 'info', 'debug'].includes(level) ? level : 'info',
-        message
-      };
-    });
+      // Extraire exactement comme dans le fichier: 2024-01-15 10:30:15 [INFO] Message
+      const match = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(\w+)\] (.+)$/);
+      
+      if (match) {
+        return {
+          timestamp: match[1],
+          level: match[2].toLowerCase(),
+          message: match[3],
+          fullLine: line
+        };
+      } else {
+        // Si le format ne correspond pas, traiter comme une ligne brute
+        return {
+          timestamp: '',
+          level: 'info',
+          message: line,
+          fullLine: line
+        };
+      }
+    }).filter(log => log !== null);
     
     res.json({
       success: true,
-      logs: logs.reverse()
+      logs: logs.reverse() // Plus récents en premier
     });
     
   } catch (error) {

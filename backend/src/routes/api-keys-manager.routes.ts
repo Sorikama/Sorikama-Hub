@@ -262,8 +262,13 @@ router.get('/manager', async (req, res) => {
             document.getElementById('createKeyModal').classList.remove('hidden');
         }
         
-        // Fonction globale accessible
+        // Fonctions globales
         window.createNewKey = createNewKey;
+        window.closeCreateModal = closeCreateModal;
+        window.copyToClipboard = copyToClipboard;
+        window.revokeKey = revokeKey;
+        window.reactivateKey = reactivateKey;
+        window.deleteKey = deleteKey;
         
         function closeCreateModal() {
             document.getElementById('createKeyModal').classList.add('hidden');
