@@ -7,12 +7,9 @@ const router = Router();
 /**
  * GET /dashboard - Page de tableau de bord après connexion
  */
-router.get('/', (req, res) => {
-  const apiKey = req.query.apiKey as string;
-  
-  if (!apiKey) {
-    return res.redirect('/swagger/login');
-  }
+router.get('/', (req: any, res) => {
+  const user = req.portalUser;
+  const apiKey = user?.apiKey || 'N/A';
 
   const dashboardHTML = `
 <!DOCTYPE html>

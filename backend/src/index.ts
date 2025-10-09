@@ -214,10 +214,7 @@ const startServer = async () => {
           }
         }));
 
-        logger.info(`📚 Documentation API disponible sur http://localhost:${PORT}/api-docs`);
-        logger.info(`🔑 API Key Admin (auto-injectée): ${global.ADMIN_API_KEY}`);
-        logger.info(`📖 Documentation HTML disponible sur http://localhost:${PORT}/documentation`);
-        logger.info(`📊 Dashboard disponible sur http://localhost:${PORT}/dashboard`);
+        logger.info(`🔑 API Key Admin générée automatiquement`);
       } catch (e) {
         logger.error('❌ Erreur de chargement de la documentation Swagger:', e);
       }
@@ -242,6 +239,9 @@ const startServer = async () => {
     // Route API - dashboard connecté
     app.get('/api', verifyPortalSession, (req: any, res) => {
       const user = req.portalUser;
+      const { portalSessions } = require('./routes/auth-portal.routes');
+      const session = portalSessions.get(user.sessionToken);
+      
       const connectedHTML = `
 <!DOCTYPE html>
 <html lang="fr">
@@ -264,7 +264,8 @@ const startServer = async () => {
                 </div>
                 <div class="text-right">
                     <div class="bg-green-500 bg-opacity-20 px-4 py-2 rounded-lg border border-green-400 border-opacity-50 mb-2">
-                        <span class="text-green-300 font-semibold"><i class="fas fa-shield-alt mr-2"></i>Session Active (24h)</span>
+                        <span class="text-green-300 font-semibold"><i class="fas fa-shield-alt mr-2"></i>Session Active</span>
+                        <div class="text-green-200 text-sm mt-1" id="sessionCountdown">Calcul en cours...</div>
                     </div>
                     <button onclick="logout()" class="bg-red-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg border border-red-400 border-opacity-50 text-red-300 hover:text-red-200 transition-all">
                         <i class="fas fa-sign-out-alt mr-1"></i>Se déconnecter
@@ -352,6 +353,9 @@ const startServer = async () => {
                 <div class="text-blue-200">
                     <strong>Session:</strong> ${user.sessionToken.substring(0, 8)}...
                 </div>
+                <div class="text-blue-200">
+                    <strong>Créée le:</strong> ${session?.createdAt ? new Date(session.createdAt).toLocaleString('fr-FR') : 'N/A'}
+                </div>
             </div>
         </div>
     </div>
@@ -379,6 +383,35 @@ const startServer = async () => {
                 window.location.href = '/portal/login';
             }
         }
+        
+        // Décompte de session
+        function updateSessionCountdown() {
+            // Calculer le temps restant (24h depuis la connexion)
+            const sessionStart = ${session?.createdAt || Date.now()};
+            const sessionDuration = 24 * 60 * 60 * 1000; // 24h en ms
+            const now = Date.now();
+            const elapsed = now - sessionStart;
+            const remaining = sessionDuration - elapsed;
+            
+            if (remaining <= 0) {
+                document.getElementById('sessionCountdown').innerHTML = '<span class="text-red-300">Session expirée</span>';
+                setTimeout(() => {
+                    window.location.href = '/portal/login';
+                }, 2000);
+                return;
+            }
+            
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+            
+            document.getElementById('sessionCountdown').innerHTML = 
+                \`<i class="fas fa-clock mr-1"></i>Expire dans: \${hours}h \${minutes}m \${seconds}s\`;
+        }
+        
+        // Mettre à jour le décompte chaque seconde
+        updateSessionCountdown();
+        setInterval(updateSessionCountdown, 1000);
     </script>
 </body>
 </html>`;
@@ -388,17 +421,10 @@ const startServer = async () => {
 
     app.use('/swagger', swaggerRoutes);
     app.use('/docs', docsRoutes);
-    app.use('/dashboard', dashboardRoutes);
+    app.use('/dashboard', verifyPortalSession, dashboardRoutes);
     app.use('/portal', authPortalRoutes);
-
-    const protectDocs = (req: Request, res: Response, next: NextFunction) => {
-      const token = req.query.token as string;
-      if (!token || token.length < 10) {
-        return res.redirect('/swagger/login');
-      }
-      next();
-    };
-    app.use('/documentation', protectDocs, documentationRoutes);
+    app.use('/documentation', verifyPortalSession, documentationRoutes);
+    app.use('/api-docs', verifyPortalSession);
 
     app.get('/api/v1/system/health', (req, res) => {
       res.json({
@@ -421,16 +447,9 @@ const startServer = async () => {
     const publicRoutes = [
       '/api/v1/system/health',
       '/api/v1/system/seed',
-      '/performance/metrics',
-      '/performance/health',
-      '/performance/cache-stats',
-      '/admin/stats',
-      '/admin/control',
-      '/admin/gc',
-      '/admin/optimize',
-      '/metrics/dashboard',
       '/portal/login',
-      '/portal/authenticate'
+      '/portal/authenticate',
+      '/portal/logout'
     ];
     
     // Middleware conditionnel pour l'API key
@@ -456,17 +475,19 @@ const startServer = async () => {
     const adminRoutes = require('./routes/admin.routes').default;
     app.use('/api/v1/admin', adminRoutes);
     
-    // Routes de performance (publiques)
+    // Routes de performance (protégées)
     const performanceRoutes = require('./routes/performance.routes').default;
+    const performanceDashboardRoutes = require('./routes/performance-dashboard.routes').default;
     app.use('/performance', performanceRoutes);
+    app.use('/performance', performanceDashboardRoutes);
     
-    // Dashboard métriques
+    // Dashboard métriques (protégé)
     const metricsDashboardRoutes = require('./routes/metrics-dashboard.routes').default;
     app.use('/metrics', metricsDashboardRoutes);
     
-    // Routes admin
+    // Routes admin (protégées)
     const adminPublicRoutes = require('./routes/admin-public.routes').default;
-    app.use('/admin', adminPublicRoutes);
+    app.use('/admin', verifyPortalSession, adminPublicRoutes);
     app.use('/admin', adminControlRoutes);
     
     app.use('/api/v1', apiRouter);
@@ -488,6 +509,7 @@ const startServer = async () => {
       // Attendre un peu pour les connexions Redis
       setTimeout(async () => {
         await Banner.displayStartupComplete(Number(PORT));
+        logger.info(`🌐 Accès au portail: http://localhost:${PORT}/portal/login`);
         
         // Lancement automatique du navigateur
         setTimeout(() => {
