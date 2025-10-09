@@ -11,8 +11,6 @@ tags:
     description: Endpoints pour l'inscription, la connexion et la récupération de compte.
   - name: Gestion de Compte
     description: Endpoints pour la gestion du profil utilisateur une fois connecté.
-  - name: Maisons
-    description: Redirection vers le microservice de gestion des maisons.
 
 # --- Définition de la Sécurité ---
 components:
@@ -233,16 +231,3 @@ paths:
         '200': { description: Mot de passe mis à jour. }
 
   # --- Routes Proxy ---
-  /maisons:
-    get:
-      tags: [Maisons]
-      summary: Récupérer la liste des maisons
-      security: [{ bearerAuth: [] }]
-      description: Route protégée qui redirige vers le microservice des maisons.
-      responses:
-        '200':
-          description: Succès - La réponse provient du microservice.
-        '401':
-          description: Non autorisé.
-        '403':
-          description: Interdit.
