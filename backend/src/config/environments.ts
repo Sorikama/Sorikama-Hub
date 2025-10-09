@@ -50,8 +50,12 @@ export const {
   DEFAULT_ADMIN_EMAIL,
   DEFAULT_ADMIN_PASSWORD,
   ENCRYPTION_KEY,
-  MAISONS_SERVICE_URL,
-  UTILISATEURS_SERVICE_URL,
+  SORISTORE_SERVICE_URL,
+  SORIPAY_SERVICE_URL,
+  SORIWALLET_SERVICE_URL,
+  SORILEARN_SERVICE_URL,
+  SORIHEALTH_SERVICE_URL,
+  SORIACCESS_SERVICE_URL,
   SMTP_HOST,
   SMTP_PORT,
   SMTP_USER,
@@ -59,7 +63,6 @@ export const {
   EMAIL_FROM,
   BASE_URL,
   BLIND_INDEX_PEPPER,
-  MASEBUY_SERVICE_URL,
 } = process.env as { [key: string]: string }; // Assert que les variables existent après validation
 
 // Exporte les variables numériques en les parsant

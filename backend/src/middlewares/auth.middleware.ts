@@ -1,54 +1,100 @@
 // src/middlewares/auth.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import jwt from 'jsonwebtoken';
 import { config } from '../config';
 import AppError from '../utils/AppError';
-import { verifyToken } from '../auth/auth.service';
 import { UserModel } from '../database/models/user.model';
+import { logger } from '../utils/logger';
 
 // Étend l'interface Request d'Express pour y ajouter la propriété 'user'
 declare global {
   namespace Express {
     interface Request {
-      user?: any; // Utiliser un type plus spécifique si possible, ex: IUser
+      user?: any;
+      sessionId?: string;
     }
   }
 }
 
-// Cette interface doit correspondre à ce que vous mettez dans votre token
 interface UserPayload {
   id: string;
   roles: string[];
+  sessionId?: string;
+  iat?: number;
+  exp?: number;
 }
 
+// Cache des sessions actives
+const activeSessions = new Map<string, { userId: string; expires: number }>();
 
 /**
- * Middleware pour protéger les routes. Vérifie le token JWT.
+ * Middleware d'authentification renforcé
  */
-export const protect = (req: Request, res: Response, next: NextFunction) => {
-  let token;
-  // On vérifie si le token est dans le header "Authorization"
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
-    token = req.headers.authorization.split(' ')[1];
-  }
-
-  if (!token) {
-    return next(new AppError("Vous n'êtes pas connecté.Veuillez vous connecter pour obtenir l'accès.", 401));
-  }
-
+export const protect = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    let token;
+    
+    // Extraction du token depuis différentes sources
+    if (req.headers.authorization?.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies?.token) {
+      token = req.cookies.token;
+    } else if (req.headers['x-access-token']) {
+      token = req.headers['x-access-token'] as string;
+    }
+
+    if (!token) {
+      logger.warn(`[AUTH] Tentative d'accès sans token - IP: ${req.ip} - URL: ${req.originalUrl}`);
+      return next(new AppError('Token d\'authentification requis', StatusCodes.UNAUTHORIZED));
+    }
+
     // Vérification du token
     const decoded = jwt.verify(token, config.jwt.secret!) as UserPayload;
+    
+    // Vérification de la session si présente
+    if (decoded.sessionId) {
+      const session = activeSessions.get(decoded.sessionId);
+      if (!session || session.expires < Date.now()) {
+        logger.warn(`[AUTH] Session expirée ou invalide - User: ${decoded.id} - Session: ${decoded.sessionId}`);
+        return next(new AppError('Session expirée', StatusCodes.UNAUTHORIZED));
+      }
+    }
 
-    // Attacher l'utilisateur à la requête
-    req.user = decoded;
+    // Récupération des données utilisateur complètes
+    const user = await UserModel.findById(decoded.id)
+      .populate({
+        path: 'roles',
+        populate: { path: 'permissions' }
+      })
+      .select('-password');
 
-    next(); // Tout est bon, on passe à la suite (le proxy)
-  } catch (err) {
-    return next(new AppError('Token invalide ou expiré.', 401));
+    if (!user) {
+      logger.warn(`[AUTH] Utilisateur non trouvé - ID: ${decoded.id}`);
+      return next(new AppError('Utilisateur non trouvé', StatusCodes.UNAUTHORIZED));
+    }
+
+    if (!user.isActive) {
+      logger.warn(`[AUTH] Compte désactivé - User: ${user._id}`);
+      return next(new AppError('Compte désactivé', StatusCodes.FORBIDDEN));
+    }
+
+    // Attacher les données à la requête
+    req.user = user;
+    req.sessionId = decoded.sessionId;
+    
+    // Log de l'activité
+    logger.info(`[AUTH] Accès autorisé - User: ${user._id} - IP: ${req.ip} - URL: ${req.originalUrl}`);
+    
+    next();
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      logger.warn(`[AUTH] Token invalide - IP: ${req.ip} - Error: ${error.message}`);
+      return next(new AppError('Token invalide', StatusCodes.UNAUTHORIZED));
+    }
+    
+    logger.error('[AUTH] Erreur d\'authentification:', error);
+    return next(new AppError('Erreur d\'authentification', StatusCodes.INTERNAL_SERVER_ERROR));
   }
 };
 

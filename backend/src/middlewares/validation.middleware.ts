@@ -1,6 +1,6 @@
 // src/middlewares/validation.middleware.ts
 import { Request, Response, NextFunction } from 'express';
-import { Schema } from 'joi';
+import Joi, { Schema } from 'joi';
 import { StatusCodes } from 'http-status-codes';
 import AppError from '../utils/AppError';
 
@@ -25,3 +25,32 @@ export const validateBody = (schema: Schema) => {
     next();
   };
 };
+
+// Schémas de validation pour les API Keys
+export const apiKeyCreationSchema = Joi.object({
+  name: Joi.string().min(3).max(100).required(),
+  permissions: Joi.array().items(Joi.string()).optional(),
+  expiresAt: Joi.date().greater('now').optional(),
+  rateLimit: Joi.object({
+    requests: Joi.number().integer().min(1).max(10000).required(),
+    windowMs: Joi.number().integer().min(60000).max(86400000).required()
+  }).optional(),
+  allowedIPs: Joi.array().items(Joi.string().ip()).optional(),
+  allowedDomains: Joi.array().items(Joi.string().domain()).optional()
+});
+
+export const apiKeyUpdateSchema = Joi.object({
+  name: Joi.string().min(3).max(100).optional(),
+  permissions: Joi.array().items(Joi.string()).optional(),
+  isActive: Joi.boolean().optional(),
+  rateLimit: Joi.object({
+    requests: Joi.number().integer().min(1).max(10000).required(),
+    windowMs: Joi.number().integer().min(60000).max(86400000).required()
+  }).optional(),
+  allowedIPs: Joi.array().items(Joi.string().ip()).optional(),
+  allowedDomains: Joi.array().items(Joi.string().domain()).optional()
+});
+
+// Middlewares de validation spécifiques
+export const validateApiKeyCreation = validateBody(apiKeyCreationSchema);
+export const validateApiKeyUpdate = validateBody(apiKeyUpdateSchema);

@@ -1,47 +1,148 @@
 // src/services/proxy.service.ts
 import { createProxyMiddleware, Options } from 'http-proxy-middleware';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { logger } from '../utils/logger';
+import { ServiceRoute } from './routingEngine.service';
+
+// Métriques de performance
+interface ProxyMetrics {
+  requestCount: number;
+  errorCount: number;
+  totalResponseTime: number;
+  lastRequestTime: number;
+}
+
+const metrics = new Map<string, ProxyMetrics>();
 
 /**
- * Crée une instance de middleware de proxy configurée pour une cible spécifique.
- * Cette fonction agit comme une usine : vous lui donnez l'URL d'un microservice
- * et elle vous retourne un proxy prêt à l'emploi pour cette destination.
- *
- * @param {string} target - L'URL de base du microservice cible (ex: 'http://localhost:3001').
- * @returns Le middleware de proxy configuré.
+ * Crée un proxy avancé avec retry, timeout et métriques
  */
+export const createAdvancedProxy = (route: ServiceRoute, targetUrl: string) => {
+  const options: Options = {
+    target: targetUrl,
+    changeOrigin: true,
+    timeout: route.timeout || 30000,
+    proxyTimeout: route.timeout || 30000,
+    
+    onProxyReq: (proxyReq, req: Request, res: Response) => {
+      const startTime = Date.now();
+      req.startTime = startTime;
+      
+      logger.info(`[PROXY] ${req.method} ${req.originalUrl} -> ${targetUrl}${req.url}`);
+      
+      // En-têtes de sécurité
+      if (req.user) {
+        proxyReq.setHeader('X-User-Id', req.user._id || req.user.id);
+        proxyReq.setHeader('X-User-Email', req.user.email);
+        
+        if (req.user.roles) {
+          const roleNames = req.user.roles.map((r: any) => r.name || r).join(',');
+          proxyReq.setHeader('X-User-Roles', roleNames);
+          
+          const permissions = new Set<string>();
+          req.user.roles.forEach((role: any) => {
+            if (role.permissions) {
+              role.permissions.forEach((perm: any) => {
+                permissions.add(`${perm.action}:${perm.subject}`);
+              });
+            }
+          });
+          proxyReq.setHeader('X-User-Permissions', Array.from(permissions).join(','));
+        }
+      }
+      
+      // En-têtes de traçabilité
+      proxyReq.setHeader('X-Request-ID', req.headers['x-request-id'] || generateRequestId());
+      proxyReq.setHeader('X-Forwarded-For', req.ip);
+      proxyReq.setHeader('X-Gateway-Version', '1.0.0');
+      proxyReq.setHeader('X-Service-Name', route.name);
+      
+      // Mise à jour des métriques
+      updateMetrics(route.name, 'request');
+    },
+    
+    onProxyRes: (proxyRes, req: Request, res: Response) => {
+      const responseTime = Date.now() - (req.startTime || Date.now());
+      
+      // En-têtes de réponse
+      proxyRes.headers['X-Response-Time'] = `${responseTime}ms`;
+      proxyRes.headers['X-Gateway'] = 'Sorikama-Hub';
+      
+      // Log de performance
+      logger.info(`[PROXY] Response: ${proxyRes.statusCode} in ${responseTime}ms`);
+      
+      // Mise à jour des métriques
+      updateMetrics(route.name, 'response', responseTime);
+      
+      if (proxyRes.statusCode >= 400) {
+        updateMetrics(route.name, 'error');
+      }
+    },
+    
+    onError: async (err: any, req: Request, res: Response) => {
+      const responseTime = Date.now() - (req.startTime || Date.now());
+      
+      logger.error(`[PROXY] Error for ${route.name} after ${responseTime}ms:`, {
+        error: err.message,
+        code: err.code,
+        target: targetUrl,
+        method: req.method,
+        url: req.originalUrl
+      });
+      
+      updateMetrics(route.name, 'error');
+      
+      // Retry logic
+      if (route.retries && req.retryCount < route.retries) {
+        req.retryCount = (req.retryCount || 0) + 1;
+        logger.info(`[PROXY] Retry ${req.retryCount}/${route.retries} for ${route.name}`);
+        
+        // Attendre avant retry
+        await new Promise(resolve => setTimeout(resolve, 1000 * req.retryCount));
+        return; // Le proxy va automatiquement retry
+      }
+      
+      if (!res.headersSent) {
+        const errorResponse = {
+          error: 'Service Unavailable',
+          message: `Le service ${route.name} est temporairement indisponible`,
+          code: err.code || 'PROXY_ERROR',
+          timestamp: new Date().toISOString(),
+          requestId: req.headers['x-request-id']
+        };
+        
+        // Déterminer le code de statut approprié
+        let statusCode = 502; // Bad Gateway par défaut
+        
+        if (err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND') {
+          statusCode = 503; // Service Unavailable
+        } else if (err.code === 'ETIMEDOUT') {
+          statusCode = 504; // Gateway Timeout
+        }
+        
+        res.status(statusCode).json(errorResponse);
+      }
+    }
+  };
+  
+  return createProxyMiddleware(options);
+};
+
+// Fonction de compatibilité (deprecated)
 export const createProxy = (target: string) => {
   const options: Options = {
     target,
-    changeOrigin: true, // Essentiel pour que le microservice cible pense que la requête vient de la gateway
-
-    /**
-     * Cette fonction est le cœur de l'enrichissement de la requête.
-     * Elle s'exécute juste avant que la requête ne soit envoyée au microservice.
-     */
+    changeOrigin: true,
     onProxyReq: (proxyReq, req: Request, res) => {
       logger.info(`[PROXY] Redirection : ${req.method} ${req.originalUrl} -> ${target}${req.url}`);
-
-      // Le middleware 'protect' a déjà validé le token et ajouté 'req.user'.
       if (req.user) {
-        // On ajoute des en-têtes sécurisés pour que le microservice en aval
-        // sache qui est l'utilisateur, sans avoir à re-valider le token JWT.
-        // C'est un principe clé de l'API Gateway : elle est la seule porte d'entrée et garante de l'identité.
         proxyReq.setHeader('X-User-Id', req.user.id);
-
         if (Array.isArray(req.user.roles)) {
           const roleNames = req.user.roles.map((r: any) => r.name).join(',');
           proxyReq.setHeader('X-User-Roles', roleNames);
         }
       }
     },
-
-    /**
-     * Gère les erreurs de connectivité avec le microservice.
-     * Si le service 'maisons' est éteint, par exemple, cette fonction répondra
-     * avec une erreur 502 Bad Gateway claire.
-     */
     onError: (err, req, res) => {
       logger.error(`[PROXY] Erreur de proxy vers ${target}:`, err);
       if (!res.headersSent) {
@@ -52,6 +153,57 @@ export const createProxy = (target: string) => {
       }
     },
   };
-
   return createProxyMiddleware(options);
 };
+
+// Génération d'ID de requête unique
+const generateRequestId = (): string => {
+  return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
+// Mise à jour des métriques
+const updateMetrics = (serviceName: string, type: 'request' | 'response' | 'error', responseTime?: number): void => {
+  const current = metrics.get(serviceName) || {
+    requestCount: 0,
+    errorCount: 0,
+    totalResponseTime: 0,
+    lastRequestTime: 0
+  };
+  
+  switch (type) {
+    case 'request':
+      current.requestCount++;
+      current.lastRequestTime = Date.now();
+      break;
+    case 'response':
+      if (responseTime) {
+        current.totalResponseTime += responseTime;
+      }
+      break;
+    case 'error':
+      current.errorCount++;
+      break;
+  }
+  
+  metrics.set(serviceName, current);
+};
+
+// Récupération des métriques
+export const getProxyMetrics = (): Map<string, ProxyMetrics> => {
+  return new Map(metrics);
+};
+
+// Reset des métriques
+export const resetMetrics = (): void => {
+  metrics.clear();
+};
+
+// Extension de l'interface Request
+declare global {
+  namespace Express {
+    interface Request {
+      startTime?: number;
+      retryCount?: number;
+    }
+  }
+}

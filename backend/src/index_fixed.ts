@@ -72,45 +72,30 @@ const startServer = async () => {
 
     // Configuration Swagger
     if (NODE_ENV === 'development') {
-
       try {
-        // Supprimez ou commentez la ligne suivante car on utilise l'import d'en haut
-        // const yaml = require('yaml');
-
+        const yaml = require('yaml');
         const swaggerPath = path.join(__dirname, '../openapi.yaml');
-
-        console.log('🔍 Chemin du fichier YAML:', swaggerPath);
-        console.log('🔍 Fichier existe?', fs.existsSync(swaggerPath));
-
+        
         let swaggerSpec;
         if (fs.existsSync(swaggerPath)) {
-          console.log('📝 Lecture du fichier YAML...');
           const yamlContent = fs.readFileSync(swaggerPath, 'utf8');
-          console.log('📝 Taille du contenu YAML:', yamlContent.length, 'caractères');
-          console.log('📝 Début du contenu:', yamlContent.substring(0, 100));
-
-          swaggerSpec = YAML.load(yamlContent) as any;
-          console.log('📝 Parsing YAML terminé');
-
-          console.log('📝 Contenu YAML chargé:', Object.keys(swaggerSpec));
-          console.log('📝 Paths trouvés:', Object.keys(swaggerSpec.paths || {}));
-
+          swaggerSpec = yaml.parse(yamlContent);
+          
           if (!swaggerSpec.components) swaggerSpec.components = {};
           if (!swaggerSpec.components.securitySchemes) swaggerSpec.components.securitySchemes = {};
-
+          
           swaggerSpec.components.securitySchemes.ApiKeyAuth = {
             type: 'apiKey',
             in: 'header',
             name: 'X-API-Key',
             description: 'API Key pour l\'authentification Gateway'
           };
-
+          
           swaggerSpec.servers = [{ url: `http://localhost:${PORT}/api/v1` }];
           swaggerSpec.security = [{ ApiKeyAuth: [] }, { bearerAuth: [] }];
-
+          
           console.log('✅ Fichier OpenAPI YAML chargé avec succès');
         } else {
-          console.log('⚠️ Fichier OpenAPI YAML non trouvé, utilisation du schéma par défaut');
           swaggerSpec = {
             openapi: '3.0.0',
             info: {
@@ -139,27 +124,96 @@ const startServer = async () => {
           };
           console.log('⚠️ Fichier OpenAPI YAML non trouvé, utilisation du schéma par défaut');
         }
-
-        console.log('📝 Spec finale - Titre:', swaggerSpec.info?.title);
-        console.log('📝 Spec finale - Paths:', Object.keys(swaggerSpec.paths || {}));
-        console.log('📝 Spec finale - Components:', Object.keys(swaggerSpec.components || {}));
-
+        
+        const protectSwagger = (req: Request, res: Response, next: NextFunction) => {
+          if (req.url.includes('.js') || req.url.includes('.css') || req.url.includes('.map')) {
+            return next();
+          }
+          
+          const token = req.query.token as string;
+          const apiKey = req.query.x_api_key as string;
+          
+          if (!token || token.length < 10) {
+            return res.redirect('/swagger/login');
+          }
+          
+          if (!apiKey) {
+            return res.redirect('/swagger/login');
+          }
+          
+          req.headers['x-api-key'] = apiKey;
+          next();
+        };
+        
         app.use('/api-docs', (req, res, next) => {
           res.removeHeader('Content-Security-Policy');
           next();
         });
-
-        app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+        
+        app.use('/api-docs', express.static(require('swagger-ui-dist').absolutePath()));
+        
+        app.use('/api-docs', protectSwagger, swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
           customCss: '.swagger-ui .topbar { display: none }',
           customSiteTitle: 'Sorikama API Gateway Documentation',
-          explorer: false,
           swaggerOptions: {
-            defaultModelsExpandDepth: -1,
-            docExpansion: 'list'
+            requestInterceptor: (req: any) => {
+              const urlParams = new URLSearchParams(window.location.search);
+              const apiKey = urlParams.get('x_api_key');
+              
+              if (apiKey) {
+                req.headers['X-API-Key'] = apiKey;
+              }
+              
+              const bearerToken = localStorage.getItem('sorikama_access_token');
+              if (bearerToken) {
+                req.headers['Authorization'] = `Bearer ${bearerToken}`;
+              }
+              
+              return req;
+            },
+            onComplete: () => {
+              const infoDiv = document.createElement('div');
+              const apiKey = new URLSearchParams(window.location.search).get('x_api_key');
+              const bearerToken = localStorage.getItem('sorikama_access_token');
+              
+              infoDiv.innerHTML = `
+                <div style="background: #e3f2fd; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #2196f3;">
+                  <div style="margin-bottom: 10px;">
+                    <strong>🔑 API Key active:</strong> ${apiKey?.substring(0, 20)}...
+                  </div>
+                  <div style="margin-bottom: 10px;">
+                    <strong>🎩 Bearer Token:</strong> ${bearerToken ? bearerToken.substring(0, 20) + '...' : 'Non défini'}
+                  </div>
+                  <div>
+                    <input type="text" id="bearerTokenInput" placeholder="Collez votre Bearer Token ici" style="width: 300px; padding: 5px; margin-right: 10px;" />
+                    <button onclick="setBearerToken()" style="padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Définir Token</button>
+                    <button onclick="clearBearerToken()" style="padding: 5px 10px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px;">Effacer</button>
+                  </div>
+                </div>
+              `;
+              
+              const container = document.querySelector('.swagger-ui .information-container');
+              if (container) {
+                container.appendChild(infoDiv);
+              }
+              
+              window.setBearerToken = function() {
+                const token = document.getElementById('bearerTokenInput').value.trim();
+                if (token) {
+                  localStorage.setItem('sorikama_access_token', token);
+                  location.reload();
+                }
+              };
+              
+              window.clearBearerToken = function() {
+                localStorage.removeItem('sorikama_access_token');
+                location.reload();
+              };
+            }
           }
         }));
-
-        logger.info(`📚 Documentation API disponible sur http://localhost:${PORT}/api-docs`);
+        
+        logger.info(`📚 Documentation API disponible sur http://localhost:${PORT}/swagger/login`);
         logger.info(`🔑 API Key par défaut: sk_dev_default_key_12345678901234567890123456789012345678901234567890`);
         logger.info(`📖 Documentation HTML disponible sur http://localhost:${PORT}/documentation`);
       } catch (e) {
@@ -173,7 +227,7 @@ const startServer = async () => {
 
     app.use('/swagger', swaggerRoutes);
     app.use('/docs', docsRoutes);
-
+    
     const protectDocs = (req: Request, res: Response, next: NextFunction) => {
       const token = req.query.token as string;
       if (!token || token.length < 10) {
@@ -182,7 +236,7 @@ const startServer = async () => {
       next();
     };
     app.use('/documentation', protectDocs, documentationRoutes);
-
+    
     app.get('/api/v1/system/health', (req, res) => {
       res.json({
         success: true,
@@ -196,7 +250,7 @@ const startServer = async () => {
         }
       });
     });
-
+    
     app.use('/api/v1', apiRouter);
 
     app.all('*', (req: Request, res: Response, next: NextFunction) => {

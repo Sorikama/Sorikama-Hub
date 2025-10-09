@@ -2,6 +2,8 @@
 import { Router } from 'express';
 import authRouter from './auth.routes';
 import proxyRouter from './proxy.routes';
+import apiKeyRouter from './apiKey.routes';
+import systemRouter from './system.routes';
 import path from 'path';
 
 const router = Router();
@@ -11,10 +13,16 @@ router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../../public/index.html'));
 });
 
-// Toutes les routes commençant par /auth sont gérées par authRouter
+// Routes d'authentification
 router.use('/auth', authRouter);
 
-// Les autres routes (proxy) sont gérées par proxyRouter
+// Routes de gestion des API Keys
+router.use('/api/keys', apiKeyRouter);
+
+// Routes système (rôles, permissions, services)
+router.use('/system', systemRouter);
+
+// Routes de proxy vers les microservices
 router.use('/', proxyRouter);
 
 export default router;

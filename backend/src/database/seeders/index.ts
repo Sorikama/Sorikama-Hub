@@ -1,8 +1,9 @@
 // src/database/seeders/index.ts
 import mongoose from 'mongoose';
-import { seedPermissions } from './permissions';
-import { seedRoles } from './roles';
+import { seedPermissions } from './permissions.seeder';
+import { seedRoles } from './roles.seeder';
 import { seedAdmin } from './admin';
+import { seedApiKeys } from './apiKeys.seeder';
 import { logger } from '../../utils/logger';
 import { connectDB } from '../connexion';
 
@@ -16,6 +17,7 @@ const runSeeders = async () => {
   await seedPermissions();
   await seedRoles();
   await seedAdmin();
+  await seedApiKeys();
 
   // 3. Déconnexion
   await mongoose.disconnect();
