@@ -1,0 +1,8 @@
+2024-01-15 10:00:15 [DEBUG] Initialisation du module de routage
+2024-01-15 10:00:16 [DEBUG] Chargement des middlewares de sécurité
+2024-01-15 10:00:17 [DEBUG] Configuration Redis: host=localhost, port=6379
+2024-01-15 10:00:18 [DEBUG] Connexion MongoDB: sorikama_gateway_db
+2024-01-15 10:01:22 [DEBUG] Validation des permissions pour clé: sk_prod_***
+2024-01-15 10:02:33 [DEBUG] Cache miss pour clé: user_profile_456
+2024-01-15 10:03:45 [DEBUG] Exécution du middleware de rate limiting
+2024-01-15 10:04:12 [DEBUG] Parsing des headers de requête HTTP

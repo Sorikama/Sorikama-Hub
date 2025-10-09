@@ -1,0 +1,7 @@
+2024-01-15 10:15:22 [INFO] Temps de réponse API: 45ms - GET /api/users
+2024-01-15 10:16:33 [WARN] Temps de réponse lent: 1250ms - POST /api/data/process
+2024-01-15 10:17:45 [INFO] Cache hit ratio: 85% - Performances optimales
+2024-01-15 10:18:12 [INFO] Mémoire utilisée: 256MB / 1GB disponible
+2024-01-15 10:19:28 [WARN] CPU usage élevé: 78% - Pic de charge détecté
+2024-01-15 10:20:15 [INFO] Base de données: 23ms latence moyenne
+2024-01-15 10:21:42 [INFO] Redis: 2ms latence moyenne - Excellent

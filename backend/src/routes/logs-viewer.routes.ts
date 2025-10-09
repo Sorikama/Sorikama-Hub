@@ -95,29 +95,32 @@ router.get('/viewer', (req, res) => {
                 <div class="flex flex-wrap items-center gap-4">
                     <div class="flex items-center space-x-2">
                         <label class="text-sm font-medium text-gray-300">Fichier:</label>
-                        <select id="logFileSelect" class="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-white text-sm">
-                            <option value="application.log">Application</option>
-                            <option value="error.log">Erreurs</option>
-                            <option value="security.log">Sécurité</option>
-                            <option value="performance.log">Performance</option>
-                            <option value="redis.log">Redis</option>
+                        <select id="logFileSelect" class="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="application.log">📱 Application</option>
+                            <option value="error.log">❌ Erreurs</option>
+                            <option value="security.log">🔒 Sécurité</option>
+                            <option value="performance.log">⚡ Performance</option>
+                            <option value="redis.log">🔴 Redis</option>
+                            <option value="alerts.log">🚨 Alertes</option>
+                            <option value="debug.log">🐛 Debug</option>
+                            <option value="requests.log">📡 Requêtes</option>
                         </select>
                     </div>
                     
                     <div class="flex items-center space-x-2">
                         <label class="text-sm font-medium text-gray-300">Niveau:</label>
-                        <select id="logLevelFilter" class="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-white text-sm">
-                            <option value="all">Tous</option>
-                            <option value="error">Erreurs</option>
-                            <option value="warn">Avertissements</option>
-                            <option value="info">Informations</option>
-                            <option value="debug">Debug</option>
+                        <select id="logLevelFilter" class="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="all">🔍 Tous les niveaux</option>
+                            <option value="error">❌ Erreurs</option>
+                            <option value="warn">⚠️ Avertissements</option>
+                            <option value="info">ℹ️ Informations</option>
+                            <option value="debug">🐛 Debug</option>
                         </select>
                     </div>
                     
                     <div class="flex items-center space-x-2">
                         <label class="text-sm font-medium text-gray-300">Recherche:</label>
-                        <input type="text" id="searchInput" placeholder="Filtrer les logs..." class="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-400">
+                        <input type="text" id="searchInput" placeholder="🔍 Rechercher dans les logs..." class="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                     
                     <button onclick="clearLogs()" class="bg-red-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-red-300 hover:text-white transition-all text-sm">

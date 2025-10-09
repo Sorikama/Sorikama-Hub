@@ -1,0 +1,8 @@
+2024-01-15 10:30:15 [INFO] Application démarrée avec succès
+2024-01-15 10:30:16 [INFO] Connexion à MongoDB établie
+2024-01-15 10:30:17 [INFO] Redis connecté avec succès
+2024-01-15 10:31:22 [INFO] Nouvelle requête API reçue - GET /api/health
+2024-01-15 10:32:45 [INFO] Authentification réussie pour l'utilisateur admin
+2024-01-15 10:33:12 [INFO] Clé API utilisée: sk_prod_***
+2024-01-15 10:34:28 [INFO] Cache Redis mis à jour
+2024-01-15 10:35:15 [INFO] Métriques collectées avec succès

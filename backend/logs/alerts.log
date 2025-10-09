@@ -1,0 +1,7 @@
+2024-01-15 09:45:12 [WARN] Alerte système: Espace disque faible - 85% utilisé
+2024-01-15 09:46:33 [ERROR] Alerte critique: Service SoriPay indisponible
+2024-01-15 09:47:15 [WARN] Alerte performance: Temps de réponse > 2s détecté
+2024-01-15 09:48:22 [ERROR] Alerte sécurité: Tentatives de connexion suspectes
+2024-01-15 09:49:45 [WARN] Alerte mémoire: Utilisation RAM > 80%
+2024-01-15 09:50:18 [ERROR] Alerte base de données: Connexions max atteintes
+2024-01-15 09:51:33 [WARN] Alerte réseau: Latence élevée détectée

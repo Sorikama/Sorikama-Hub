@@ -1,6 +1,6 @@
 // src/routes/api-keys-manager.routes.ts
 import { Router } from 'express';
-import { ApiKeyModel } from '../database/models/apiKey.model';
+import { SimpleApiKeyModel } from '../database/models/simpleApiKey.model';
 import crypto from 'crypto';
 
 const router = Router();
@@ -10,7 +10,7 @@ const router = Router();
  */
 router.get('/manager', async (req, res) => {
   try {
-    const apiKeys = await ApiKeyModel.find({}).sort({ createdAt: -1 });
+    const apiKeys = await SimpleApiKeyModel.find({}).sort({ createdAt: -1 });
     
     const managerHTML = `
 <!DOCTYPE html>
@@ -49,6 +49,35 @@ router.get('/manager', async (req, res) => {
         .key-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        .form-checkbox {
+            appearance: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .form-checkbox:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .form-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .form-checkbox:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
         }
     </style>
 </head>
@@ -196,12 +225,24 @@ router.get('/manager', async (req, res) => {
                         <textarea id="keyDescription" class="w-full px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Description de l'usage de cette clé"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Permissions</label>
-                        <select id="keyPermissions" multiple class="w-full px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="read">Lecture</option>
-                            <option value="write">Écriture</option>
-                            <option value="admin">Administration</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-300 mb-3">Permissions</label>
+                        <div class="space-y-3">
+                            <label class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-white hover:bg-opacity-5 transition-all">
+                                <input type="checkbox" value="read" class="form-checkbox">
+                                <span class="text-white font-medium">Lecture</span>
+                                <span class="text-gray-400 text-xs ml-auto">Acces en lecture seule</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-white hover:bg-opacity-5 transition-all">
+                                <input type="checkbox" value="write" class="form-checkbox">
+                                <span class="text-white font-medium">Ecriture</span>
+                                <span class="text-gray-400 text-xs ml-auto">Modification des donnees</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-white hover:bg-opacity-5 transition-all">
+                                <input type="checkbox" value="admin" class="form-checkbox">
+                                <span class="text-white font-medium">Administration</span>
+                                <span class="text-gray-400 text-xs ml-auto">Acces complet</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="flex space-x-4 mt-6">
@@ -223,22 +264,25 @@ router.get('/manager', async (req, res) => {
         
         function closeCreateModal() {
             document.getElementById('createKeyModal').classList.add('hidden');
+            // Reset form
+            document.getElementById('createKeyForm').reset();
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
         
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
-                alert('Clé copiée dans le presse-papiers!');
+                alert('Cle copiee dans le presse-papiers!');
             });
         }
         
         async function revokeKey(keyId) {
-            if (confirm('Êtes-vous sûr de vouloir révoquer cette clé?')) {
+            if (confirm('Etes-vous sur de vouloir revoquer cette cle?')) {
                 try {
                     const response = await fetch(\`/api-keys/revoke/\${keyId}\`, { method: 'POST' });
                     if (response.ok) {
                         location.reload();
                     } else {
-                        alert('Erreur lors de la révocation');
+                        alert('Erreur lors de la revocation');
                     }
                 } catch (error) {
                     alert('Erreur: ' + error.message);
@@ -252,7 +296,7 @@ router.get('/manager', async (req, res) => {
                 if (response.ok) {
                     location.reload();
                 } else {
-                    alert('Erreur lors de la réactivation');
+                    alert('Erreur lors de la reactivation');
                 }
             } catch (error) {
                 alert('Erreur: ' + error.message);
@@ -260,7 +304,7 @@ router.get('/manager', async (req, res) => {
         }
         
         async function deleteKey(keyId) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer définitivement cette clé?')) {
+            if (confirm('Etes-vous sur de vouloir supprimer definitivement cette cle?')) {
                 try {
                     const response = await fetch(\`/api-keys/delete/\${keyId}\`, { method: 'DELETE' });
                     if (response.ok) {
@@ -277,11 +321,21 @@ router.get('/manager', async (req, res) => {
         document.getElementById('createKeyForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const formData = {
-                name: document.getElementById('keyName').value,
-                description: document.getElementById('keyDescription').value,
-                permissions: Array.from(document.getElementById('keyPermissions').selectedOptions).map(option => option.value)
-            };
+            const name = document.getElementById('keyName').value.trim();
+            const description = document.getElementById('keyDescription').value.trim();
+            const permissions = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            
+            if (!name) {
+                alert('Le nom de la cle est requis');
+                return;
+            }
+            
+            if (permissions.length === 0) {
+                alert('Veuillez selectionner au moins une permission');
+                return;
+            }
+            
+            const formData = { name, description, permissions };
             
             try {
                 const response = await fetch('/api-keys/create', {
@@ -290,15 +344,17 @@ router.get('/manager', async (req, res) => {
                     body: JSON.stringify(formData)
                 });
                 
-                if (response.ok) {
-                    const result = await response.json();
-                    alert(\`Clé créée avec succès! Clé: \${result.apiKey}\`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Cle creee avec succes!\n\nCle API: ' + result.apiKey + '\n\nCopiez cette cle maintenant, elle ne sera plus affichee!');
+                    closeCreateModal();
                     location.reload();
                 } else {
-                    alert('Erreur lors de la création');
+                    alert('Erreur: ' + result.message);
                 }
             } catch (error) {
-                alert('Erreur: ' + error.message);
+                alert('Erreur reseau: ' + error.message);
             }
         });
     </script>
@@ -322,14 +378,41 @@ router.post('/create', async (req, res) => {
   try {
     const { name, description, permissions } = req.body;
     
-    const newKey = new ApiKeyModel({
-      name: name || 'Clé sans nom',
-      description,
-      permissions: permissions || ['read'],
-      keyId: `sk_${crypto.randomBytes(32).toString('hex')}`,
-      hashedKey: crypto.randomBytes(32).toString('hex'),
+    // Validation des données
+    if (!name || name.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Le nom de la clé est requis'
+      });
+    }
+    
+    if (!permissions || !Array.isArray(permissions) || permissions.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Au moins une permission est requise'
+      });
+    }
+    
+    const validPermissions = ['read', 'write', 'admin'];
+    const invalidPerms = permissions.filter(p => !validPermissions.includes(p));
+    if (invalidPerms.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Permissions invalides: ${invalidPerms.join(', ')}`
+      });
+    }
+    
+    const keyId = `sk_${crypto.randomBytes(24).toString('hex')}`;
+    
+    const newKey = new SimpleApiKeyModel({
+      name: name.trim(),
+      description: description?.trim() || '',
+      permissions,
+      keyId,
+      hashedKey: crypto.createHash('sha256').update(keyId).digest('hex'),
       isActive: true,
-      createdAt: new Date()
+      createdAt: new Date(),
+      usageCount: 0
     });
     
     await newKey.save();
@@ -337,13 +420,20 @@ router.post('/create', async (req, res) => {
     res.json({
       success: true,
       message: 'Clé API créée avec succès',
-      apiKey: newKey.keyId
+      apiKey: keyId,
+      keyData: {
+        id: newKey._id,
+        name: newKey.name,
+        permissions: newKey.permissions,
+        createdAt: newKey.createdAt
+      }
     });
     
   } catch (error) {
+    console.error('Erreur création clé API:', error);
     res.status(500).json({
       success: false,
-      message: 'Erreur lors de la création de la clé API'
+      message: 'Erreur lors de la création de la clé API: ' + error.message
     });
   }
 });
@@ -353,7 +443,7 @@ router.post('/create', async (req, res) => {
  */
 router.post('/revoke/:id', async (req, res) => {
   try {
-    await ApiKeyModel.findByIdAndUpdate(req.params.id, { isActive: false });
+    await SimpleApiKeyModel.findByIdAndUpdate(req.params.id, { isActive: false });
     res.json({ success: true, message: 'Clé révoquée avec succès' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Erreur lors de la révocation' });
@@ -365,7 +455,7 @@ router.post('/revoke/:id', async (req, res) => {
  */
 router.post('/reactivate/:id', async (req, res) => {
   try {
-    await ApiKeyModel.findByIdAndUpdate(req.params.id, { isActive: true });
+    await SimpleApiKeyModel.findByIdAndUpdate(req.params.id, { isActive: true });
     res.json({ success: true, message: 'Clé réactivée avec succès' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Erreur lors de la réactivation' });
@@ -377,7 +467,7 @@ router.post('/reactivate/:id', async (req, res) => {
  */
 router.delete('/delete/:id', async (req, res) => {
   try {
-    await ApiKeyModel.findByIdAndDelete(req.params.id);
+    await SimpleApiKeyModel.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Clé supprimée avec succès' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Erreur lors de la suppression' });
