@@ -4,7 +4,7 @@ info:
   version: '1.0.0'
   description: Documentation de l'API Gateway pour le projet Sorikama.
 servers:
-  - url: http://localhost:3000/api/v1
+  - url: http://localhost:7000/api/v1
     description: Serveur de développement
 tags:
   - name: Authentification
@@ -230,4 +230,47 @@ paths:
       responses:
         '200': { description: Mot de passe mis à jour. }
 
-  # --- Routes Proxy ---
+  # --- Routes Système ---
+  /system/health:
+    get:
+      tags: [Système]
+      summary: Vérification de santé du système
+      responses:
+        '200':
+          description: Système opérationnel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        example: "healthy"
+                      timestamp:
+                        type: string
+                        format: date-time
+                      gateway:
+                        type: object
+                        properties:
+                          version:
+                            type: string
+                            example: "1.0.0"
+                          uptime:
+                            type: number
+                            example: 3600
+        '503':
+          description: Service indisponible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+# Sécurité globale
+security:
+  - bearerAuth: []

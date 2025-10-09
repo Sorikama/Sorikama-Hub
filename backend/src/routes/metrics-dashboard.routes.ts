@@ -1,12 +1,13 @@
 // src/routes/metrics-dashboard.routes.ts
 import { Router } from 'express';
+import { verifyPortalSession } from './auth-portal.routes';
 
 const router = Router();
 
 /**
- * GET /metrics/dashboard - Dashboard visuel des métriques temps réel
+ * GET /metrics/dashboard - Dashboard visuel des métriques temps réel (protégé)
  */
-router.get('/dashboard', (req, res) => {
+router.get('/dashboard', verifyPortalSession, (req, res) => {
   const dashboardHTML = `
 <!DOCTYPE html>
 <html lang="fr">

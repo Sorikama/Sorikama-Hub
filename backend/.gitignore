@@ -11,6 +11,9 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Keep example file
+!.env.example
+
 # Build outputs
 dist/
 build/
