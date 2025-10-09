@@ -30,7 +30,8 @@ import docsRoutes from './routes/docs.routes';
 import documentationRoutes from './routes/documentation.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import adminControlRoutes from './routes/admin-control.routes';
-import authPortalRoutes from './routes/auth-portal.routes';
+import authPortalRoutes, { verifyPortalSession } from './routes/auth-portal.routes';
+import cookieParser from 'cookie-parser';
 import { responseTimeMiddleware, slowRequestTimeoutMiddleware } from './middlewares/responseTime.middleware';
 import { httpLoggingMiddleware } from './utils/applicationLogger';
 import { BrowserLauncher } from './utils/browserLauncher';
@@ -89,6 +90,7 @@ const startServer = async () => {
       credentials: true
     };
     app.use(cors(corsOptions));
+    app.use(cookieParser());
     app.use(express.json({ limit: '10kb' }));
     app.use(express.urlencoded({ extended: true, limit: '10kb' }));
     app.use('/api', rateLimiter);
@@ -221,24 +223,25 @@ const startServer = async () => {
       }
     }
 
-    // Route principale - redirige vers login si pas connecté
+    // Route principale - redirige selon l'état de connexion
     app.get('/', (req, res) => {
-      const sessionToken = req.query.session || req.headers['x-session-token'];
+      const sessionToken = req.cookies.sorikama_session;
       
-      // Si pas de session, rediriger vers login
-      if (!sessionToken) {
-        return res.redirect('/portal/login');
+      if (sessionToken) {
+        const { portalSessions } = require('./routes/auth-portal.routes');
+        const session = portalSessions?.get(sessionToken);
+        
+        if (session && session.expires > Date.now()) {
+          return res.redirect('/api');
+        }
       }
       
-      // Vérifier la session (import des sessions depuis auth-portal)
-      const { portalSessions } = require('./routes/auth-portal.routes');
-      const session = portalSessions?.get(sessionToken as string);
-      
-      if (!session || session.expires < Date.now()) {
-        return res.redirect('/portal/login');
-      }
-      
-      // Session valide - afficher la page avec statut connecté
+      res.redirect('/portal/login');
+    });
+    
+    // Route API - dashboard connecté
+    app.get('/api', verifyPortalSession, (req: any, res) => {
+      const user = req.portalUser;
       const connectedHTML = `
 <!DOCTYPE html>
 <html lang="fr">
@@ -256,21 +259,34 @@ const startServer = async () => {
             <div class="flex justify-between items-center">
                 <div>
                     <h1 class="text-3xl font-bold text-white mb-2">🚀 Sorikama API Gateway</h1>
-                    <p class="text-green-300"><i class="fas fa-check-circle mr-2"></i>Connecté en tant que: <strong>${session.username}</strong></p>
+                    <p class="text-green-300"><i class="fas fa-check-circle mr-2"></i>Connecté en tant que: <strong>${user.username}</strong></p>
+                    <p class="text-blue-300 text-sm mt-1"><i class="fas fa-key mr-2"></i>API Key temporaire générée</p>
                 </div>
                 <div class="text-right">
-                    <div class="bg-green-500 bg-opacity-20 px-4 py-2 rounded-lg border border-green-400 border-opacity-50">
-                        <span class="text-green-300 font-semibold"><i class="fas fa-shield-alt mr-2"></i>Session Active</span>
+                    <div class="bg-green-500 bg-opacity-20 px-4 py-2 rounded-lg border border-green-400 border-opacity-50 mb-2">
+                        <span class="text-green-300 font-semibold"><i class="fas fa-shield-alt mr-2"></i>Session Active (24h)</span>
                     </div>
-                    <a href="/portal/login" class="text-red-300 hover:text-red-200 text-sm mt-2 inline-block">
+                    <button onclick="logout()" class="bg-red-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg border border-red-400 border-opacity-50 text-red-300 hover:text-red-200 transition-all">
                         <i class="fas fa-sign-out-alt mr-1"></i>Se déconnecter
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
         
+        <!-- API Key temporaire -->
+        <div class="bg-yellow-500 bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 mb-8 border border-yellow-400 border-opacity-20">
+            <h2 class="text-xl font-bold text-yellow-300 mb-4"><i class="fas fa-key mr-2"></i>API Key Temporaire</h2>
+            <div class="bg-black bg-opacity-30 p-4 rounded-lg mb-4">
+                <code class="text-yellow-200 text-sm break-all" id="apiKey">${user.apiKey}</code>
+                <button onclick="copyApiKey()" class="ml-4 bg-yellow-500 bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded text-yellow-300 text-sm transition-all">
+                    <i class="fas fa-copy mr-1"></i>Copier
+                </button>
+            </div>
+            <p class="text-yellow-200 text-sm"><i class="fas fa-exclamation-triangle mr-2"></i>Cette clé est valide uniquement pendant votre session et sera supprimée à la déconnexion.</p>
+        </div>
+        
         <!-- Navigation rapide -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             <a href="/api-docs" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
                 <div class="text-center">
                     <i class="fas fa-book text-blue-300 text-3xl mb-3"></i>
@@ -294,6 +310,30 @@ const startServer = async () => {
                     <p class="text-purple-200 text-sm">Performance en temps réel</p>
                 </div>
             </a>
+            
+            <a href="/admin/stats?apiKey=${user.apiKey}" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
+                <div class="text-center">
+                    <i class="fas fa-cogs text-orange-300 text-3xl mb-3"></i>
+                    <h3 class="text-white font-semibold mb-2">Admin Stats</h3>
+                    <p class="text-orange-200 text-sm">Statistiques administrateur</p>
+                </div>
+            </a>
+            
+            <a href="/performance/metrics" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
+                <div class="text-center">
+                    <i class="fas fa-server text-cyan-300 text-3xl mb-3"></i>
+                    <h3 class="text-white font-semibold mb-2">Performance</h3>
+                    <p class="text-cyan-200 text-sm">Métriques serveur</p>
+                </div>
+            </a>
+            
+            <a href="/documentation" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
+                <div class="text-center">
+                    <i class="fas fa-file-alt text-indigo-300 text-3xl mb-3"></i>
+                    <h3 class="text-white font-semibold mb-2">Documentation</h3>
+                    <p class="text-indigo-200 text-sm">Guide complet</p>
+                </div>
+            </a>
         </div>
         
         <!-- Informations système -->
@@ -310,11 +350,36 @@ const startServer = async () => {
                     <strong>Base URL:</strong> http://localhost:${PORT}/api/v1
                 </div>
                 <div class="text-blue-200">
-                    <strong>Session:</strong> ${sessionToken.substring(0, 8)}...
+                    <strong>Session:</strong> ${user.sessionToken.substring(0, 8)}...
                 </div>
             </div>
         </div>
     </div>
+    
+    <script>
+        function copyApiKey() {
+            const apiKey = document.getElementById('apiKey').textContent;
+            navigator.clipboard.writeText(apiKey).then(() => {
+                alert('API Key copiée dans le presse-papiers!');
+            });
+        }
+        
+        async function logout() {
+            try {
+                const response = await fetch('/portal/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    window.location.href = result.redirectUrl;
+                }
+            } catch (error) {
+                console.error('Erreur déconnexion:', error);
+                window.location.href = '/portal/login';
+            }
+        }
+    </script>
 </body>
 </html>`;
       

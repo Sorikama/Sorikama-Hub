@@ -5,8 +5,13 @@ import crypto from 'crypto';
 
 const router = Router();
 
-// Sessions en mémoire pour le portail
-export const portalSessions = new Map<string, { expires: number; username: string }>();
+// Sessions en mémoire pour le portail avec API keys temporaires
+export const portalSessions = new Map<string, { 
+  expires: number; 
+  username: string; 
+  apiKey: string;
+  createdAt: number;
+}>();
 
 /**
  * GET /portal/login - Page de connexion du portail
@@ -252,25 +257,41 @@ router.post('/authenticate', async (req, res) => {
       });
     }
     
-    // Générer un token de session
+    // Générer un token de session et une API key temporaire
     const sessionToken = crypto.randomBytes(32).toString('hex');
-    const expires = Date.now() + 3600000; // 1 heure
+    const tempApiKey = `temp_${crypto.randomBytes(16).toString('hex')}`;
+    const expires = Date.now() + 86400000; // 24 heures
+    const createdAt = Date.now();
     
-    // Stocker la session
-    portalSessions.set(sessionToken, { expires, username });
+    // Stocker la session avec API key
+    portalSessions.set(sessionToken, { 
+      expires, 
+      username, 
+      apiKey: tempApiKey,
+      createdAt
+    });
     
     // Log de succès
     logger.info('✅ Connexion portail réussie', {
       username,
       ip: req.ip,
       sessionToken: sessionToken.substring(0, 8) + '...',
+      apiKey: tempApiKey.substring(0, 12) + '...',
       timestamp: new Date().toISOString()
+    });
+    
+    // Définir le cookie sécurisé
+    res.cookie('sorikama_session', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 86400000 // 24 heures
     });
     
     res.json({
       success: true,
       message: 'Connexion réussie',
-      redirectUrl: `/?session=${sessionToken}`
+      redirectUrl: '/api'
     });
     
   } catch (error) {
@@ -283,10 +304,37 @@ router.post('/authenticate', async (req, res) => {
 });
 
 /**
+ * POST /portal/logout - Déconnexion du portail
+ */
+router.post('/logout', (req, res) => {
+  const sessionToken = req.cookies.sorikama_session;
+  
+  if (sessionToken && portalSessions.has(sessionToken)) {
+    const session = portalSessions.get(sessionToken);
+    portalSessions.delete(sessionToken);
+    
+    logger.info('🚪 Déconnexion portail', {
+      username: session?.username,
+      ip: req.ip,
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  // Supprimer le cookie
+  res.clearCookie('sorikama_session');
+  
+  res.json({
+    success: true,
+    message: 'Déconnexion réussie',
+    redirectUrl: '/portal/login'
+  });
+});
+
+/**
  * Middleware de vérification de session portail
  */
 export const verifyPortalSession = (req: any, res: any, next: any) => {
-  const sessionToken = req.query.session || req.headers['x-session-token'];
+  const sessionToken = req.cookies.sorikama_session;
   
   if (!sessionToken) {
     return res.redirect('/portal/login');
@@ -298,12 +346,16 @@ export const verifyPortalSession = (req: any, res: any, next: any) => {
     if (session) {
       portalSessions.delete(sessionToken);
     }
+    res.clearCookie('sorikama_session');
     return res.redirect('/portal/login');
   }
   
-  // Prolonger la session
-  session.expires = Date.now() + 3600000;
-  req.portalUser = { username: session.username };
+  // Session valide
+  req.portalUser = { 
+    username: session.username, 
+    apiKey: session.apiKey,
+    sessionToken
+  };
   
   next();
 };
