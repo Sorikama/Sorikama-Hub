@@ -27,7 +27,7 @@ import authRoutes from './routes/auth.routes';
 import proxyRoutes from './routes/proxy.routes';
 import swaggerRoutes from './routes/swagger.routes';
 import docsRoutes from './routes/docs.routes';
-import documentationRoutes from './routes/documentation.routes';
+
 import dashboardRoutes from './routes/dashboard.routes';
 import adminControlRoutes from './routes/admin-control.routes';
 import authPortalRoutes, { verifyPortalSession } from './routes/auth-portal.routes';
@@ -320,19 +320,11 @@ const startServer = async () => {
                 </div>
             </a>
             
-            <a href="/performance/metrics" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
+            <a href="/dependencies" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
                 <div class="text-center">
-                    <i class="fas fa-server text-cyan-300 text-3xl mb-3"></i>
-                    <h3 class="text-white font-semibold mb-2">Performance</h3>
-                    <p class="text-cyan-200 text-sm">Métriques serveur</p>
-                </div>
-            </a>
-            
-            <a href="/documentation" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
-                <div class="text-center">
-                    <i class="fas fa-file-alt text-indigo-300 text-3xl mb-3"></i>
-                    <h3 class="text-white font-semibold mb-2">Documentation</h3>
-                    <p class="text-indigo-200 text-sm">Guide complet</p>
+                    <i class="fas fa-cube text-purple-300 text-3xl mb-3"></i>
+                    <h3 class="text-white font-semibold mb-2">Dépendances</h3>
+                    <p class="text-purple-200 text-sm">Packages installés</p>
                 </div>
             </a>
         </div>
@@ -423,7 +415,10 @@ const startServer = async () => {
     app.use('/docs', docsRoutes);
     app.use('/dashboard', verifyPortalSession, dashboardRoutes);
     app.use('/portal', authPortalRoutes);
-    app.use('/documentation', verifyPortalSession, documentationRoutes);
+    
+    // Route des dépendances
+    const dependenciesRoutes = require('./routes/dependencies.routes').default;
+    app.use('/dependencies', verifyPortalSession, dependenciesRoutes);
     app.use('/api-docs', verifyPortalSession);
 
     app.get('/api/v1/system/health', (req, res) => {
