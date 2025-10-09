@@ -17,6 +17,14 @@ export const portalSessions = new Map<string, {
  * GET /portal/login - Page de connexion du portail
  */
 router.get('/login', (req, res) => {
+  // Si déjà connecté, rediriger vers /api
+  const sessionToken = req.cookies.sorikama_session;
+  if (sessionToken) {
+    const session = portalSessions.get(sessionToken);
+    if (session && session.expires > Date.now()) {
+      return res.redirect('/api');
+    }
+  }
   const loginHTML = `
 <!DOCTYPE html>
 <html lang="fr">
