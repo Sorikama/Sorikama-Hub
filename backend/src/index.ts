@@ -327,6 +327,30 @@ const startServer = async () => {
                     <p class="text-purple-200 text-sm">Packages installés</p>
                 </div>
             </a>
+            
+            <a href="/system/health" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
+                <div class="text-center">
+                    <i class="fas fa-heartbeat text-green-300 text-3xl mb-3"></i>
+                    <h3 class="text-white font-semibold mb-2">System Health</h3>
+                    <p class="text-green-200 text-sm">Santé du système</p>
+                </div>
+            </a>
+            
+            <a href="/api-keys/manager" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
+                <div class="text-center">
+                    <i class="fas fa-key text-yellow-300 text-3xl mb-3"></i>
+                    <h3 class="text-white font-semibold mb-2">API Keys</h3>
+                    <p class="text-yellow-200 text-sm">Gestion des clés</p>
+                </div>
+            </a>
+            
+            <a href="/logs/viewer" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
+                <div class="text-center">
+                    <i class="fas fa-file-alt text-indigo-300 text-3xl mb-3"></i>
+                    <h3 class="text-white font-semibold mb-2">Logs Viewer</h3>
+                    <p class="text-indigo-200 text-sm">Visualiseur de logs</p>
+                </div>
+            </a>
         </div>
         
         <!-- Informations système -->
@@ -416,9 +440,16 @@ const startServer = async () => {
     app.use('/dashboard', verifyPortalSession, dashboardRoutes);
     app.use('/portal', authPortalRoutes);
     
-    // Route des dépendances
+    // Nouvelles routes
     const dependenciesRoutes = require('./routes/dependencies.routes').default;
+    const systemHealthRoutes = require('./routes/system-health.routes').default;
+    const apiKeysManagerRoutes = require('./routes/api-keys-manager.routes').default;
+    const logsViewerRoutes = require('./routes/logs-viewer.routes').default;
+    
     app.use('/dependencies', verifyPortalSession, dependenciesRoutes);
+    app.use('/system', verifyPortalSession, systemHealthRoutes);
+    app.use('/api-keys', verifyPortalSession, apiKeysManagerRoutes);
+    app.use('/logs', verifyPortalSession, logsViewerRoutes);
     app.use('/api-docs', verifyPortalSession);
 
     app.get('/api/v1/system/health', (req, res) => {
