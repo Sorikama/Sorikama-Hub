@@ -304,7 +304,7 @@ const startServer = async () => {
                 </div>
             </a>
             
-            <a href="/metrics/dashboard" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
+            <a href="/performance/metrics" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
                 <div class="text-center">
                     <i class="fas fa-tachometer-alt text-purple-300 text-3xl mb-3"></i>
                     <h3 class="text-white font-semibold mb-2">Métriques</h3>
@@ -481,9 +481,7 @@ const startServer = async () => {
     app.use('/performance', performanceRoutes);
     app.use('/performance', performanceDashboardRoutes);
     
-    // Dashboard métriques (protégé)
-    const metricsDashboardRoutes = require('./routes/metrics-dashboard.routes').default;
-    app.use('/metrics', metricsDashboardRoutes);
+
     
     // Routes admin (protégées)
     const adminPublicRoutes = require('./routes/admin-public.routes').default;
