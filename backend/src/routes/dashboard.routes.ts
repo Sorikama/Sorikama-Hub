@@ -93,8 +93,8 @@ router.get('/', (req, res) => {
                 </div>
                 <h3 class="font-semibold text-gray-900 mb-2">Métriques</h3>
                 <p class="text-sm text-gray-600 mb-4">Performance et statistiques temps réel</p>
-                <a href="/performance/metrics" target="_blank" class="inline-flex items-center text-green-600 hover:text-green-800 text-sm font-medium">
-                    Voir Métriques <i class="fas fa-external-link-alt ml-1 text-xs"></i>
+                <a href="/metrics/dashboard" target="_blank" class="inline-flex items-center text-green-600 hover:text-green-800 text-sm font-medium">
+                    Dashboard Métriques <i class="fas fa-external-link-alt ml-1 text-xs"></i>
                 </a>
             </div>
 
@@ -121,7 +121,7 @@ router.get('/', (req, res) => {
                 </div>
                 <h3 class="font-semibold text-gray-900 mb-2">Administration</h3>
                 <p class="text-sm text-gray-600 mb-4">Gestion système et sécurité</p>
-                <a href="/api/v1/admin/stats" target="_blank" class="inline-flex items-center text-red-600 hover:text-red-800 text-sm font-medium">
+                <a href="/admin/stats?apiKey=${apiKey}" target="_blank" class="inline-flex items-center text-red-600 hover:text-red-800 text-sm font-medium">
                     Admin Panel <i class="fas fa-external-link-alt ml-1 text-xs"></i>
                 </a>
             </div>
