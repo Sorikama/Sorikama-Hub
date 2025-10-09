@@ -351,6 +351,14 @@ const startServer = async () => {
                     <p class="text-indigo-200 text-sm">Visualiseur de logs</p>
                 </div>
             </a>
+            
+            <a href="/services/manager" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
+                <div class="text-center">
+                    <i class="fas fa-network-wired text-cyan-300 text-3xl mb-3"></i>
+                    <h3 class="text-white font-semibold mb-2">Services Manager</h3>
+                    <p class="text-cyan-200 text-sm">Gestion des services</p>
+                </div>
+            </a>
         </div>
         
         <!-- Informations système -->
@@ -450,6 +458,9 @@ const startServer = async () => {
     app.use('/system', verifyPortalSession, systemHealthRoutes);
     app.use('/api-keys', verifyPortalSession, apiKeysManagerRoutes);
     app.use('/logs', verifyPortalSession, logsViewerRoutes);
+    
+    const servicesManagerRoutes = require('./routes/services-manager.routes').default;
+    app.use('/services', verifyPortalSession, servicesManagerRoutes);
     app.use('/api-docs', verifyPortalSession);
 
     app.get('/api/v1/system/health', (req, res) => {
