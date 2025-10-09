@@ -1,0 +1,7 @@
+2024-01-15 10:20:12 [WARN] Tentative de connexion avec mot de passe incorrect - IP: 192.168.1.50
+2024-01-15 10:21:35 [ERROR] Tentative d'accès non autorisé à /admin - IP: 10.0.0.25
+2024-01-15 10:22:48 [INFO] Nouvelle session créée pour admin - Session: sess_abc123
+2024-01-15 10:23:15 [WARN] Clé API utilisée depuis une nouvelle IP: 203.0.113.45
+2024-01-15 10:24:22 [ERROR] Détection d'activité suspecte - Trop de requêtes
+2024-01-15 10:25:33 [INFO] Authentification 2FA réussie pour admin
+2024-01-15 10:26:45 [WARN] Session expirée pour utilisateur: user_456
