@@ -37,3 +37,6 @@
 [2025-10-09 21:39:40] REQUEST: Request issue {"method":"GET","url":"/.well-known/appspecific/com.chrome.devtools.json","statusCode":404,"responseTime":"2ms","ip":"::1"}
 [2025-10-09 21:39:54] REQUEST: Request issue {"method":"GET","url":"/.well-known/appspecific/com.chrome.devtools.json","statusCode":404,"responseTime":"2ms","ip":"::1"}
 [2025-10-09 21:44:32] REQUEST: Request issue {"method":"GET","url":"/.well-known/appspecific/com.chrome.devtools.json","statusCode":404,"responseTime":"27ms","ip":"::1"}
+[2025-10-09 22:37:40] REQUEST: Request issue {"method":"GET","url":"/logs/download/error.log","statusCode":404,"responseTime":"8ms","ip":"::1"}
+[2025-10-09 22:41:13] REQUEST: Request issue {"method":"POST","url":"/api-keys/create","statusCode":500,"responseTime":"13ms","ip":"::1"}
+[2025-10-09 22:41:18] REQUEST: Request issue {"method":"GET","url":"/.well-known/appspecific/com.chrome.devtools.json","statusCode":404,"responseTime":"20ms","ip":"::1"}
