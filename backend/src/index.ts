@@ -10,6 +10,7 @@ import { PORT, NODE_ENV } from './config/environments';
 import { logger } from './utils/logger';
 import { RedisManager } from './utils/redisManager';
 import { Banner } from './utils/banner';
+import './utils/performanceOptimizer'; // Démarrage automatique
 import apiRouter from './routes';
 import { errorHandler } from './middlewares/errorHandler.middleware';
 import rateLimiter from './middlewares/rateLimiter.middleware';
@@ -28,8 +29,10 @@ import swaggerRoutes from './routes/swagger.routes';
 import docsRoutes from './routes/docs.routes';
 import documentationRoutes from './routes/documentation.routes';
 import dashboardRoutes from './routes/dashboard.routes';
+import adminControlRoutes from './routes/admin-control.routes';
 import { responseTimeMiddleware, slowRequestTimeoutMiddleware } from './middlewares/responseTime.middleware';
 import { httpLoggingMiddleware } from './utils/applicationLogger';
+import { BrowserLauncher } from './utils/browserLauncher';
 
 import './database/models';
 
@@ -61,7 +64,7 @@ const startServer = async () => {
         contentSecurityPolicy: {
           directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "https://cdn.tailwindcss.com", "'unsafe-inline'"],
+            scriptSrc: ["'self'", "https://cdn.tailwindcss.com", "https://cdn.jsdelivr.net", "'unsafe-inline'"],
             styleSrc: ["'self'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "'unsafe-inline'"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
             imgSrc: ["'self'", "data:"],
@@ -254,31 +257,52 @@ const startServer = async () => {
     // Routes qui ne nécessitent PAS d'API key
     const publicRoutes = [
       '/api/v1/system/health',
-      '/api/v1/system/seed'
+      '/api/v1/system/seed',
+      '/performance/metrics',
+      '/performance/health',
+      '/performance/cache-stats',
+      '/admin/stats',
+      '/admin/control',
+      '/admin/gc',
+      '/admin/optimize',
+      '/metrics/dashboard'
     ];
     
     // Middleware conditionnel pour l'API key
-    app.use('/api/v1', (req: Request, res: Response, next: NextFunction) => {
+    app.use((req: Request, res: Response, next: NextFunction) => {
       // Vérifier si la route est publique
-      const isPublicRoute = publicRoutes.some(route => req.path === route.replace('/api/v1', ''));
+      const isPublicRoute = publicRoutes.some(route => req.path === route || req.path.startsWith(route));
       
       if (isPublicRoute) {
         console.log(`🔓 Route publique autorisée: ${req.path}`);
         return next();
       }
       
-      // Sinon, vérifier l'API key
-      console.log(`🔐 Vérification API key requise pour: ${req.path}`);
-      authenticateApiKey(req, res, next);
+      // Routes API nécessitent une clé
+      if (req.path.startsWith('/api/v1')) {
+        console.log(`🔐 Vérification API key requise pour: ${req.path}`);
+        authenticateApiKey(req, res, next);
+      } else {
+        next();
+      }
     });
     
-    // Routes admin
+    // Routes admin (avec API key)
     const adminRoutes = require('./routes/admin.routes').default;
     app.use('/api/v1/admin', adminRoutes);
     
-    // Routes de performance
+    // Routes de performance (publiques)
     const performanceRoutes = require('./routes/performance.routes').default;
-    app.use('/api/v1/performance', performanceRoutes);
+    app.use('/performance', performanceRoutes);
+    
+    // Dashboard métriques
+    const metricsDashboardRoutes = require('./routes/metrics-dashboard.routes').default;
+    app.use('/metrics', metricsDashboardRoutes);
+    
+    // Routes admin
+    const adminPublicRoutes = require('./routes/admin-public.routes').default;
+    app.use('/admin', adminPublicRoutes);
+    app.use('/admin', adminControlRoutes);
     
     app.use('/api/v1', apiRouter);
 
@@ -299,6 +323,11 @@ const startServer = async () => {
       // Attendre un peu pour les connexions Redis
       setTimeout(async () => {
         await Banner.displayStartupComplete(Number(PORT));
+        
+        // Lancement automatique du navigateur
+        setTimeout(() => {
+          BrowserLauncher.autoLaunch(Number(PORT));
+        }, 2000);
       }, 1000);
     });
 
@@ -317,6 +346,11 @@ const gracefulShutdown = (signal: string) => {
 
     server.close(async () => {
       logger.info('🛑 Serveur HTTP fermé.');
+      
+      // Nettoyage des ressources
+      const { PerformanceOptimizer } = require('./utils/performanceOptimizer');
+      PerformanceOptimizer.cleanup();
+      
       await RedisManager.stopRedis();
       logger.info('🔌 Redis arrêté.');
       await mongoose.disconnect();

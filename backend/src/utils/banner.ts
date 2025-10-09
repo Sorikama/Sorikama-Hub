@@ -234,6 +234,8 @@ export class Banner {
     console.log('');
     
     console.log(`❤️ Health Check ${chalk.cyan.bold(`http://localhost:${port}/performance/health`)}`);
+    console.log('');
+    console.log(`🛡️ Contrôle Admin ${chalk.cyan.bold(`http://localhost:${port}/admin/control?apiKey=sk_dev_default_key_12345678901234567890123456789012345678901234567890`)}`);
     console.log(`   ${chalk.gray('Vérification de santé du système')}`);
     console.log('');
     
@@ -257,7 +259,10 @@ export class Banner {
     
     console.log(colors.env(`   ${envMessages[env] || envMessages.development}   `));
     console.log('');
-    console.log(chalk.cyan.bold('✨ ASTUCE: Visitez la page d\'accueil pour une expérience guidée!'));
+    console.log(chalk.cyan.bold('✨ ASTUCE: Le navigateur s\'ouvrira automatiquement (max 3 fois)!'));
+    
+    const launchStatus = require('./browserLauncher').BrowserLauncher.getStatus();
+    console.log(chalk.gray(`🔢 Lancements auto: ${launchStatus.count}/${launchStatus.maxCount}`));
     console.log('');
   }
 

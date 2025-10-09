@@ -19,17 +19,17 @@ const customFormat = winston.format.combine(
   })
 );
 
-// Logger principal de l'application
+// Logger principal de l'application - Optimisé pour les performances
 export const appLogger = winston.createLogger({
-  level: 'debug',
+  level: process.env.NODE_ENV === 'production' ? 'warn' : 'info',
   format: customFormat,
   transports: [
     // Logs généraux de l'application
     new winston.transports.File({
       filename: path.join(logsDir, 'application.log'),
       level: 'info',
-      maxsize: 10 * 1024 * 1024, // 10MB
-      maxFiles: 5,
+      maxsize: 5 * 1024 * 1024, // 5MB
+      maxFiles: 3,
       tailable: true
     }),
     
@@ -37,15 +37,6 @@ export const appLogger = winston.createLogger({
     new winston.transports.File({
       filename: path.join(logsDir, 'errors.log'),
       level: 'error',
-      maxsize: 10 * 1024 * 1024, // 10MB
-      maxFiles: 5,
-      tailable: true
-    }),
-    
-    // Logs de debug (développement)
-    new winston.transports.File({
-      filename: path.join(logsDir, 'debug.log'),
-      level: 'debug',
       maxsize: 5 * 1024 * 1024, // 5MB
       maxFiles: 3,
       tailable: true
@@ -53,7 +44,7 @@ export const appLogger = winston.createLogger({
     
     // Console pour développement
     new winston.transports.Console({
-      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+      level: process.env.NODE_ENV === 'production' ? 'error' : 'info',
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.simple()
@@ -62,9 +53,9 @@ export const appLogger = winston.createLogger({
   ]
 });
 
-// Logger spécialisé pour les requêtes HTTP
+// Logger spécialisé pour les requêtes HTTP - Réduit en production
 export const requestLogger = winston.createLogger({
-  level: 'info',
+  level: process.env.NODE_ENV === 'production' ? 'warn' : 'info',
   format: winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     winston.format.printf(({ timestamp, level, message, ...meta }) => {
@@ -74,8 +65,8 @@ export const requestLogger = winston.createLogger({
   transports: [
     new winston.transports.File({
       filename: path.join(logsDir, 'requests.log'),
-      maxsize: 20 * 1024 * 1024, // 20MB
-      maxFiles: 10,
+      maxsize: 5 * 1024 * 1024, // 5MB
+      maxFiles: 2,
       tailable: true
     })
   ]
@@ -109,9 +100,9 @@ export const alertLogger = winston.createLogger({
   ]
 });
 
-// Logger pour les métriques de performance
+// Logger pour les métriques de performance - Optimisé
 export const performanceLogger = winston.createLogger({
-  level: 'info',
+  level: 'warn', // Seulement les requêtes lentes
   format: winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     winston.format.printf(({ timestamp, message, ...meta }) => {
@@ -121,8 +112,8 @@ export const performanceLogger = winston.createLogger({
   transports: [
     new winston.transports.File({
       filename: path.join(logsDir, 'performance.log'),
-      maxsize: 15 * 1024 * 1024, // 15MB
-      maxFiles: 7,
+      maxsize: 3 * 1024 * 1024, // 3MB
+      maxFiles: 2,
       tailable: true
     })
   ]
@@ -156,42 +147,33 @@ export const securityLogger = winston.createLogger({
   ]
 });
 
-// Middleware de logging des requêtes HTTP
+// Middleware de logging des requêtes HTTP - Optimisé
 export const httpLoggingMiddleware = (req: any, res: any, next: any) => {
   const startTime = Date.now();
-  
-  // Log de la requête entrante
-  requestLogger.info('Incoming request', {
-    method: req.method,
-    url: req.originalUrl,
-    ip: req.ip,
-    userAgent: req.get('User-Agent'),
-    timestamp: new Date().toISOString()
-  });
   
   // Intercepter la fin de la réponse
   const originalEnd = res.end;
   res.end = function(chunk?: any, encoding?: any) {
     const responseTime = Date.now() - startTime;
     
-    // Log de la réponse
-    requestLogger.info('Request completed', {
-      method: req.method,
-      url: req.originalUrl,
-      statusCode: res.statusCode,
-      responseTime: `${responseTime}ms`,
-      ip: req.ip,
-      timestamp: new Date().toISOString()
-    });
+    // Log seulement les erreurs et requêtes lentes
+    if (res.statusCode >= 400 || responseTime > 1000) {
+      requestLogger.warn('Request issue', {
+        method: req.method,
+        url: req.originalUrl,
+        statusCode: res.statusCode,
+        responseTime: `${responseTime}ms`,
+        ip: req.ip
+      });
+    }
     
-    // Log des performances si la requête est lente
-    if (responseTime > 1000) {
-      performanceLogger.warn('Slow request detected', {
+    // Log des performances si la requête est très lente
+    if (responseTime > 2000) {
+      performanceLogger.warn('Very slow request', {
         method: req.method,
         url: req.originalUrl,
         responseTime: `${responseTime}ms`,
-        statusCode: res.statusCode,
-        timestamp: new Date().toISOString()
+        statusCode: res.statusCode
       });
     }
     
