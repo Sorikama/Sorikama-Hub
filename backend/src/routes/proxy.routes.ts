@@ -11,7 +11,6 @@ import {
   sanitizeQuery, 
   logSuspiciousActivity 
 } from '../middlewares/requestFilter.middleware';
-import { dataInspection } from '../middlewares/security.middleware';
 import { handleUnauthorizedAttempts } from '../middlewares/unauthorizedHandler.middleware';
 import { createAdvancedProxy, getProxyMetrics } from '../services/proxy.service';
 import { routingEngine } from '../services/routingEngine.service';
@@ -29,7 +28,6 @@ const router = Router();
 router.use(securityHeaders);
 router.use(validateHeaders);
 router.use(logSuspiciousActivity);
-router.use(dataInspection); // Inspection des données contre les injections
 router.use(sanitizeQuery);
 router.use(validatePayloadSize());
 

@@ -15,6 +15,7 @@ import apiRouter from './routes';
 import { errorHandler } from './middlewares/errorHandler.middleware';
 import rateLimiter from './middlewares/rateLimiter.middleware';
 import { handleUnauthorizedAttempts } from './middlewares/unauthorizedHandler.middleware';
+import { securityHeaders, detectInjection, requestSizeLimit, validateUserAgent, timingAttackProtection } from './middlewares/security.middleware';
 import AppError from './utils/AppError';
 import { StatusCodes } from 'http-status-codes';
 
@@ -91,8 +92,16 @@ const startServer = async () => {
     };
     app.use(cors(corsOptions));
     app.use(cookieParser());
-    app.use(express.json({ limit: '10kb' }));
-    app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+    
+    // Middlewares de sécurité
+    app.use(securityHeaders);
+    app.use(requestSizeLimit);
+    app.use(validateUserAgent);
+    app.use(detectInjection);
+    app.use(timingAttackProtection);
+    
+    app.use(express.json({ limit: '1mb' }));
+    app.use(express.urlencoded({ extended: true, limit: '1mb' }));
     app.use('/api', rateLimiter);
     
     // Redis sera géré par RedisManager
