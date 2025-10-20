@@ -1,6 +1,7 @@
 // src/routes/api-keys-manager.routes.ts
 import { Router } from 'express';
 import { SimpleApiKeyModel } from '../database/models/simpleApiKey.model';
+import { logger } from '../utils/logger';
 import crypto from 'crypto';
 
 const router = Router();
@@ -79,6 +80,13 @@ router.get('/manager', async (req, res) => {
             border-color: #3b82f6;
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
         }
+        .animate-pulse-border {
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-opacity: 0.3; }
+            50% { border-opacity: 0.8; }
+        }
     </style>
 </head>
 <body class="text-white">
@@ -148,6 +156,7 @@ router.get('/manager', async (req, res) => {
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold ${key.isActive ? 'bg-green-500 bg-opacity-20 text-green-300' : 'bg-red-500 bg-opacity-20 text-red-300'}">
                                         ${key.isActive ? 'Active' : 'Révoquée'}
                                     </span>
+                                    ${key.expiresAt && new Date(key.expiresAt) < new Date() ? '<span class="px-3 py-1 rounded-full text-xs font-semibold bg-orange-500 bg-opacity-20 text-orange-300">Expirée</span>' : ''}
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500 bg-opacity-20 text-blue-300">
                                         ${key.permissions.join(', ')}
                                     </span>
@@ -173,6 +182,7 @@ router.get('/manager', async (req, res) => {
                                         <span class="text-gray-400">Utilisation:</span>
                                         <span class="text-white ml-2">${key.usageCount || 0} fois</span>
                                     </div>
+                                    ${key.expiresAt ? `<div class="col-span-2"><span class="text-gray-400">Expire le:</span><span class="text-${new Date(key.expiresAt) < new Date() ? 'red' : 'yellow'}-300 ml-2 font-semibold">${new Date(key.expiresAt).toLocaleDateString('fr-FR')}</span></div>` : ''}
                                 </div>
                                 
                                 ${key.description ? `<p class="text-gray-300 text-sm mt-3">${key.description}</p>` : ''}
@@ -210,6 +220,168 @@ router.get('/manager', async (req, res) => {
         </div>
     </div>
     
+    <!-- Modal Success API Key -->
+    <div id="apiKeySuccessModal" class="fixed inset-0 bg-black bg-opacity-80 hidden flex items-center justify-center z-50">
+        <div class="glass-morphism rounded-3xl p-8 max-w-2xl w-full mx-4 border-2 border-green-400 border-opacity-30 animate-pulse-border">
+            <div class="text-center mb-6">
+                <div class="w-24 h-24 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg animate-bounce">
+                    <i class="fas fa-key text-white text-4xl"></i>
+                </div>
+                <h3 class="text-3xl font-bold text-white mb-2">🎉 Clé API Créée avec Succès !</h3>
+                <p class="text-green-300 font-medium text-lg" id="keySuccessName">Nom de la clé</p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-2xl p-6 mb-6 border-2 border-green-400 border-opacity-40 shadow-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <label class="text-lg font-bold text-green-300 flex items-center">
+                        <i class="fas fa-key mr-2"></i>Votre Clé API Secrète
+                    </label>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs bg-red-500 bg-opacity-40 text-red-200 px-3 py-2 rounded-full font-bold animate-pulse border border-red-400">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>AFFICHAGE UNIQUE
+                        </span>
+                        <span class="text-xs bg-yellow-500 bg-opacity-40 text-yellow-200 px-3 py-2 rounded-full font-bold border border-yellow-400">
+                            <i class="fas fa-clock mr-1"></i>SAUVEGARDEZ MAINTENANT
+                        </span>
+                    </div>
+                </div>
+                <div class="relative mb-4">
+                    <input type="text" id="generatedApiKey" readonly class="w-full bg-black bg-opacity-70 border-2 border-green-400 border-opacity-60 rounded-xl px-4 py-4 text-green-300 font-mono text-base focus:outline-none focus:ring-4 focus:ring-green-400 focus:border-green-400 shadow-inner">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-10 animate-pulse pointer-events-none rounded-xl"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="copyToAdvancedClipboard()" id="copyApiKeyBtn" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 px-6 py-4 rounded-xl text-white font-bold transition-all flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105">
+                        <i class="fas fa-copy text-lg"></i>
+                        <span>Copier la Clé</span>
+                    </button>
+                    <button onclick="downloadAsFile()" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-6 py-4 rounded-xl text-white font-bold transition-all flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105">
+                        <i class="fas fa-download text-lg"></i>
+                        <span>Télécharger</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-red-500 to-orange-500 bg-opacity-15 border-2 border-red-400 border-opacity-40 rounded-2xl p-6 mb-6 shadow-lg">
+                <div class="flex items-start space-x-4">
+                    <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-shield-alt text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-red-300 font-bold text-lg mb-3 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2 animate-pulse"></i>
+                            Consignes de Sécurité Critiques
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-eye-slash text-red-400"></i>
+                                <span class="text-red-200">Affichage unique - Ne sera plus visible</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-key text-red-400"></i>
+                                <span class="text-red-200">Stockez dans un coffre-fort numérique</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-user-secret text-red-400"></i>
+                                <span class="text-red-200">Ne jamais partager publiquement</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-ban text-red-400"></i>
+                                <span class="text-red-200">Révoquer si compromise</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-4">
+                <button onclick="copyToAdvancedClipboard()" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 px-6 py-4 rounded-xl text-white font-bold transition-all border-2 border-green-400 border-opacity-50 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    <i class="fas fa-clipboard-check mr-2"></i>Copier & Sauvegarder
+                </button>
+                <button onclick="closeApiKeyModal()" class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-6 py-4 rounded-xl text-white font-bold transition-all border-2 border-blue-400 border-opacity-50 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    <i class="fas fa-check-circle mr-2"></i>J'ai Sauvegardé
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast de copie personnalisé amélioré -->
+    <div id="copyToast" class="fixed top-6 right-6 bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-2xl shadow-2xl transform translate-x-full transition-all duration-500 z-50 border-2 border-green-400">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                <i class="fas fa-check text-green-200 animate-bounce"></i>
+            </div>
+            <div>
+                <div class="font-bold text-lg">Clé Copiée !</div>
+                <div class="text-green-200 text-sm">Sauvegardez-la maintenant</div>
+            </div>
+            <i class="fas fa-clipboard-check text-2xl text-green-200 animate-pulse"></i>
+        </div>
+    </div>
+    
+    <!-- Toast de téléchargement -->
+    <div id="downloadToast" class="fixed top-6 right-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-2xl shadow-2xl transform translate-x-full transition-all duration-500 z-50 border-2 border-blue-400">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                <i class="fas fa-download text-blue-200 animate-bounce"></i>
+            </div>
+            <div>
+                <div class="font-bold text-lg">Fichier Téléchargé !</div>
+                <div class="text-blue-200 text-sm">Clé sauvegardée localement</div>
+            </div>
+            <i class="fas fa-file-download text-2xl text-blue-200 animate-pulse"></i>
+        </div>
+    </div>
+    
+    <!-- Toast simple pour copie -->
+    <div id="simpleCopyToast" class="fixed top-6 right-6 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl shadow-2xl transform translate-x-full transition-all duration-500 z-50 border border-green-400">
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-check text-green-200"></i>
+            <span class="font-semibold">Clé copiée dans le presse-papiers !</span>
+        </div>
+    </div>
+    
+    <!-- Modal de confirmation de suppression -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-80 hidden flex items-center justify-center z-50">
+        <div class="glass-morphism rounded-3xl p-8 max-w-md w-full mx-4 border-2 border-red-400 border-opacity-50 shadow-2xl">
+            <input type="hidden" id="deleteKeyId">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse">
+                    <i class="fas fa-trash-alt text-white text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-3">⚠️ Supprimer la Clé API</h3>
+                <div class="bg-red-500 bg-opacity-20 border border-red-400 border-opacity-40 rounded-xl p-4 mb-4">
+                    <p class="text-red-200 font-medium text-lg mb-2">Cette action est irréversible !</p>
+                    <p class="text-red-300 text-sm">La clé API sera définitivement supprimée et ne pourra plus être utilisée.</p>
+                </div>
+                <p class="text-gray-300">Êtes-vous absolument certain de vouloir continuer ?</p>
+            </div>
+            <div class="flex space-x-4">
+                <button onclick="closeDeleteModal()" class="flex-1 bg-gray-500 bg-opacity-20 hover:bg-opacity-30 px-6 py-4 rounded-xl text-gray-300 hover:text-white transition-all font-semibold border border-gray-400 border-opacity-30">
+                    <i class="fas fa-times mr-2"></i>Annuler
+                </button>
+                <button onclick="confirmDeleteKey(document.getElementById('deleteKeyId').value)" class="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 px-6 py-4 rounded-xl text-white font-bold transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border border-red-400 border-opacity-50">
+                    <i class="fas fa-trash-alt mr-2"></i>Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal d'erreur -->
+    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="glass-morphism rounded-2xl p-8 max-w-md w-full mx-4 border-2 border-red-400 border-opacity-30">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Erreur</h3>
+                <p class="text-red-300" id="errorMessage">Une erreur est survenue</p>
+            </div>
+            <button onclick="closeErrorModal()" class="w-full bg-red-500 bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-xl text-red-300 hover:text-white transition-all font-semibold">
+                <i class="fas fa-times mr-2"></i>Fermer
+            </button>
+        </div>
+    </div>
+    
     <!-- Modal Create Key -->
     <div id="createKeyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
         <div class="glass-morphism rounded-2xl p-8 max-w-md w-full mx-4">
@@ -223,6 +395,11 @@ router.get('/manager', async (req, res) => {
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Description (optionnel)</label>
                         <textarea id="keyDescription" class="w-full px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Description de l'usage de cette clé"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Date d'expiration (optionnel)</label>
+                        <input type="date" id="keyExpiration" class="w-full px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-400 mt-1">Laissez vide pour une clé sans expiration</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-3">Permissions</label>
@@ -258,17 +435,10 @@ router.get('/manager', async (req, res) => {
     </div>
     
     <script>
+        // Déclaration de toutes les fonctions d'abord
         function createNewKey() {
             document.getElementById('createKeyModal').classList.remove('hidden');
         }
-        
-        // Fonctions globales
-        window.createNewKey = createNewKey;
-        window.closeCreateModal = closeCreateModal;
-        window.copyToClipboard = copyToClipboard;
-        window.revokeKey = revokeKey;
-        window.reactivateKey = reactivateKey;
-        window.deleteKey = deleteKey;
         
         function closeCreateModal() {
             document.getElementById('createKeyModal').classList.add('hidden');
@@ -279,14 +449,25 @@ router.get('/manager', async (req, res) => {
         
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
-                alert('Cle copiee dans le presse-papiers!');
+                showCopyToast();
             });
+        }
+        
+        function showCopyToast() {
+            const toast = document.getElementById('simpleCopyToast');
+            toast.classList.remove('translate-x-full');
+            toast.classList.add('translate-x-0');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0');
+                toast.classList.add('translate-x-full');
+            }, 3000);
         }
         
         async function revokeKey(keyId) {
             if (confirm('Etes-vous sur de vouloir revoquer cette cle?')) {
                 try {
-                    const response = await fetch(\`/api-keys/revoke/\${keyId}\`, { method: 'POST' });
+                    const response = await fetch('/api-keys/revoke/' + keyId, { method: 'POST' });
                     if (response.ok) {
                         location.reload();
                     } else {
@@ -300,7 +481,7 @@ router.get('/manager', async (req, res) => {
         
         async function reactivateKey(keyId) {
             try {
-                const response = await fetch(\`/api-keys/reactivate/\${keyId}\`, { method: 'POST' });
+                const response = await fetch('/api-keys/reactivate/' + keyId, { method: 'POST' });
                 if (response.ok) {
                     location.reload();
                 } else {
@@ -312,25 +493,190 @@ router.get('/manager', async (req, res) => {
         }
         
         async function deleteKey(keyId) {
-            if (confirm('Etes-vous sur de vouloir supprimer definitivement cette cle?')) {
-                try {
-                    const response = await fetch(\`/api-keys/delete/\${keyId}\`, { method: 'DELETE' });
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        alert('Erreur lors de la suppression');
-                    }
-                } catch (error) {
-                    alert('Erreur: ' + error.message);
+            showDeleteConfirmModal(keyId);
+        }
+        
+        async function confirmDeleteKey(keyId) {
+            try {
+                const response = await fetch('/api-keys/delete/' + keyId, { method: 'DELETE' });
+                if (response.ok) {
+                    closeDeleteModal();
+                    location.reload();
+                } else {
+                    alert('Erreur lors de la suppression');
                 }
+            } catch (error) {
+                alert('Erreur: ' + error.message);
             }
         }
+        
+        function showDeleteConfirmModal(keyId) {
+            document.getElementById('deleteKeyId').value = keyId;
+            document.getElementById('deleteConfirmModal').classList.remove('hidden');
+        }
+        
+        function closeDeleteModal() {
+            document.getElementById('deleteConfirmModal').classList.add('hidden');
+        }
+        
+        function showApiKeyModal(apiKey, keyName) {
+            document.getElementById('generatedApiKey').value = apiKey;
+            document.getElementById('keySuccessName').textContent = keyName;
+            document.getElementById('apiKeySuccessModal').classList.remove('hidden');
+        }
+        
+        function closeApiKeyModal() {
+            document.getElementById('apiKeySuccessModal').classList.add('hidden');
+            location.reload();
+        }
+        
+        function copyToAdvancedClipboard() {
+            const apiKey = document.getElementById('generatedApiKey').value;
+            const keyName = document.getElementById('keySuccessName').textContent;
+            const copyBtn = document.getElementById('copyApiKeyBtn');
+            const toast = document.getElementById('copyToast');
+            
+            // Méthode moderne de copie avec fallback
+            const copyToClipboard = async () => {
+                try {
+                    // Essayer l'API moderne
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(apiKey);
+                        return true;
+                    } else {
+                        // Fallback pour navigateurs plus anciens
+                        const textArea = document.createElement('textarea');
+                        textArea.value = apiKey;
+                        textArea.style.position = 'fixed';
+                        textArea.style.left = '-999999px';
+                        textArea.style.top = '-999999px';
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        
+                        const successful = document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        return successful;
+                    }
+                } catch (err) {
+                    return false;
+                }
+            };
+            
+            copyToClipboard().then(success => {
+                if (success) {
+                    // Animation du bouton
+                    const originalHTML = copyBtn.innerHTML;
+                    const originalClass = copyBtn.className;
+                    
+                    copyBtn.innerHTML = '<i class="fas fa-check animate-bounce text-xl"></i><span>Copié !</span>';
+                    copyBtn.className = 'bg-gradient-to-r from-green-600 to-green-700 px-6 py-4 rounded-xl text-white font-bold transition-all flex items-center justify-center space-x-2 shadow-xl transform scale-105';
+                    
+                    // Afficher le toast avancé
+                    showAdvancedToast('copy');
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHTML;
+                        copyBtn.className = originalClass;
+                    }, 2000);
+                } else {
+                    // Fallback - sélectionner le texte
+                    selectAllKey();
+                    showErrorToast('Veuillez copier manuellement (Ctrl+C)');
+                }
+            });
+        }
+        
+        function downloadAsFile() {
+            const apiKey = document.getElementById('generatedApiKey').value;
+            const keyName = document.getElementById('keySuccessName').textContent;
+            const timestamp = new Date().toISOString().split('T')[0];
+            
+            const content = \`# Clé API Sorikama\n# Nom: \${keyName}\n# Créée le: \${new Date().toLocaleString('fr-FR')}\n# ATTENTION: Gardez cette clé secrète et sécurisée\n\nAPI_KEY=\${apiKey}\n\n# Utilisation:\n# X-API-Key: \${apiKey}\n# ou\n# Authorization: Bearer \${apiKey}\`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = \`sorikama-api-key-\${keyName.replace(/\\s+/g, '-').toLowerCase()}-\${timestamp}.txt\`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showAdvancedToast('download');
+        }
+        
+        function showAdvancedToast(type) {
+            const toastId = type === 'copy' ? 'copyToast' : 'downloadToast';
+            const toast = document.getElementById(toastId);
+            
+            toast.classList.remove('translate-x-full');
+            toast.classList.add('translate-x-0');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0');
+                toast.classList.add('translate-x-full');
+            }, 4000);
+        }
+        
+        function showErrorToast(message) {
+            // Créer un toast d'erreur temporaire
+            const errorToast = document.createElement('div');
+            errorToast.className = 'fixed top-6 right-6 bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-2xl shadow-2xl z-50 border-2 border-red-400';
+            errorToast.innerHTML = \`
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-exclamation-triangle text-red-200 animate-pulse"></i>
+                    <span class="font-semibold">\${message}</span>
+                </div>
+            \`;
+            
+            document.body.appendChild(errorToast);
+            
+            setTimeout(() => {
+                document.body.removeChild(errorToast);
+            }, 5000);
+        }
+        
+        function selectAllKey() {
+            const input = document.getElementById('generatedApiKey');
+            input.focus();
+            input.select();
+            input.setSelectionRange(0, 99999); // Pour mobile
+        }
+        
+        function showErrorModal(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorModal').classList.remove('hidden');
+        }
+        
+        function closeErrorModal() {
+            document.getElementById('errorModal').classList.add('hidden');
+        }
+        
+        // Assignation aux objets globaux après déclaration
+        window.createNewKey = createNewKey;
+        window.closeCreateModal = closeCreateModal;
+        window.copyToClipboard = copyToClipboard;
+        window.revokeKey = revokeKey;
+        window.reactivateKey = reactivateKey;
+        window.deleteKey = deleteKey;
+        window.confirmDeleteKey = confirmDeleteKey;
+        window.showDeleteConfirmModal = showDeleteConfirmModal;
+        window.closeDeleteModal = closeDeleteModal;
+        window.showCopyToast = showCopyToast;
+        window.showApiKeyModal = showApiKeyModal;
+        window.closeApiKeyModal = closeApiKeyModal;
+        window.copyToAdvancedClipboard = copyToAdvancedClipboard;
+        window.downloadAsFile = downloadAsFile;
+        window.selectAllKey = selectAllKey;
         
         document.getElementById('createKeyForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const name = document.getElementById('keyName').value.trim();
             const description = document.getElementById('keyDescription').value.trim();
+            const expirationDate = document.getElementById('keyExpiration').value;
             const permissions = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
             
             if (!name) {
@@ -344,6 +690,9 @@ router.get('/manager', async (req, res) => {
             }
             
             const formData = { name, description, permissions };
+            if (expirationDate) {
+                formData.expiresAt = expirationDate;
+            }
             
             try {
                 const response = await fetch('/api-keys/create', {
@@ -355,14 +704,13 @@ router.get('/manager', async (req, res) => {
                 const result = await response.json();
                 
                 if (result.success) {
-                    alert('Cle creee avec succes!\n\nCle API: ' + result.apiKey + '\n\nCopiez cette cle maintenant, elle ne sera plus affichee!');
+                    showApiKeyModal(result.apiKey, result.keyData.name);
                     closeCreateModal();
-                    location.reload();
                 } else {
-                    alert('Erreur: ' + result.message);
+                    showErrorModal(result.message || 'Erreur lors de la création de la clé API');
                 }
             } catch (error) {
-                alert('Erreur reseau: ' + error.message);
+                showErrorModal('Erreur réseau: ' + error.message);
             }
         });
     </script>
@@ -384,7 +732,7 @@ router.get('/manager', async (req, res) => {
  */
 router.post('/create', async (req, res) => {
   try {
-    const { name, description, permissions } = req.body;
+    const { name, description, permissions, expiresAt } = req.body;
     
     // Validation des données
     if (!name || name.trim() === '') {
@@ -412,7 +760,7 @@ router.post('/create', async (req, res) => {
     
     const keyId = `sk_${crypto.randomBytes(24).toString('hex')}`;
     
-    const newKey = new SimpleApiKeyModel({
+    const keyData = {
       name: name.trim(),
       description: description?.trim() || '',
       permissions,
@@ -421,9 +769,22 @@ router.post('/create', async (req, res) => {
       isActive: true,
       createdAt: new Date(),
       usageCount: 0
-    });
+    };
+    
+    if (expiresAt) {
+      keyData.expiresAt = new Date(expiresAt);
+    }
+    
+    const newKey = new SimpleApiKeyModel(keyData);
     
     await newKey.save();
+    
+    logger.info(`🔑 Nouvelle clé API créée: ${newKey.name}`, {
+      keyId: newKey._id,
+      keyName: newKey.name,
+      permissions: newKey.permissions,
+      timestamp: new Date().toISOString()
+    });
     
     res.json({
       success: true,
