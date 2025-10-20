@@ -6,7 +6,7 @@ import { logger } from './logger';
 export class Banner {
   private static startTime = Date.now();
   private static stepCount = 0;
-  private static totalSteps = 4;
+  private static totalSteps = 6; // Ajouté préparation port + monitoring
 
   /**
    * Obtient les couleurs selon l'environnement

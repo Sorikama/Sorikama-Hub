@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Keys Manager - Sorikama Hub</title>
+    <meta name="description" content="Sorikama Hub API Keys Management">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .theme-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glass {
+            backdrop-filter: blur(16px) saturate(180%);
+            background-color: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(209, 213, 219, 0.3);
+        }
+        .dark .glass {
+            background-color: rgba(17, 25, 40, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.125);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .dark .card-hover:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        .status-online { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="theme-transition bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen">
+
+    <!-- Header -->
+    <header class="glass sticky top-0 z-50 theme-transition border-b border-gray-200 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-cube text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Sorikama Hub</h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">API Keys Manager</p>
+                    </div>
+                </div>
+                
+                <!-- User Info & Controls -->
+                <div class="flex items-center space-x-4">
+                    
+                    <!-- Theme Switcher -->
+                    <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                        <button id="theme-light" class="p-2 rounded-md transition-colors" title="Light mode">
+                            <i class="fas fa-sun text-sm"></i>
+                        </button>
+                        <button id="theme-dark" class="p-2 rounded-md transition-colors" title="Dark mode">
+                            <i class="fas fa-moon text-sm"></i>
+                        </button>
+                        <button id="theme-system" class="p-2 rounded-md transition-colors" title="System mode">
+                            <i class="fas fa-desktop text-sm"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full status-online"></div>
+                        <span class="text-sm text-green-600 dark:text-green-400 font-medium hidden sm:block">Online</span>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <button onclick="createNewKey()" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-plus mr-1"></i>
+                        <span class="hidden sm:inline">New Key</span>
+                    </button>
+                    
+                    <a href="/api" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        <span class="hidden sm:inline">Back</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">API Keys Manager</h2>
+            <p class="text-gray-600 dark:text-gray-400">Manage your API authentication keys and permissions.</p>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            
+            <!-- Total Keys -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Keys</p>
+                        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="totalKeys">0</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">All keys</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-key text-blue-600 dark:text-blue-400 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Active Keys -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Active Keys</p>
+                        <p class="text-2xl font-bold text-green-600 dark:text-green-400" id="activeKeys">0</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Currently active</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Revoked Keys -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Revoked Keys</p>
+                        <p class="text-2xl font-bold text-red-600 dark:text-red-400" id="revokedKeys">0</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Deactivated</p>
+                    </div>
+                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-ban text-red-600 dark:text-red-400 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Expired Keys -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Expired Keys</p>
+                        <p class="text-2xl font-bold text-orange-600 dark:text-orange-400" id="expiredKeys">0</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Past expiration</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-clock text-orange-600 dark:text-orange-400 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- API Keys List -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-list text-blue-600 dark:text-blue-400 mr-3"></i>
+                API Keys
+            </h3>
+            
+            <div id="apiKeysList" class="space-y-4">
+                <!-- Keys will be loaded here -->
+            </div>
+            
+            <div id="noKeysMessage" class="text-center py-12 hidden">
+                <i class="fas fa-key text-gray-400 text-6xl mb-4"></i>
+                <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">No API keys found</p>
+                <button onclick="createNewKey()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Create your first key
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create Key Modal -->
+    <div id="createKeyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Create New API Key</h3>
+            <form id="createKeyForm">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Key Name</label>
+                        <input type="text" id="keyName" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Production API Key">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description (optional)</label>
+                        <textarea id="keyDescription" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="Description of this key's purpose"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Expiration Date (optional)</label>
+                        <input type="date" id="keyExpiration" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Leave empty for no expiration</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Permissions</label>
+                        <div class="space-y-3">
+                            <label class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <input type="checkbox" value="read" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                <span class="text-gray-900 dark:text-white font-medium">Read</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-xs ml-auto">Read-only access</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <input type="checkbox" value="write" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                <span class="text-gray-900 dark:text-white font-medium">Write</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-xs ml-auto">Modify data</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <input type="checkbox" value="admin" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                <span class="text-gray-900 dark:text-white font-medium">Admin</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-xs ml-auto">Full access</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex space-x-4 mt-6">
+                    <button type="submit" class="flex-1 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Create
+                    </button>
+                    <button type="button" onclick="closeCreateModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-2xl w-full mx-4 shadow-2xl border-2 border-green-500">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-key text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">API Key Created Successfully!</h3>
+                <p class="text-green-600 dark:text-green-400 font-medium" id="keySuccessName">Key name</p>
+            </div>
+            
+            <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <label class="text-lg font-bold text-gray-900 dark:text-white">Your Secret API Key</label>
+                    <span class="text-xs bg-red-500 text-white px-3 py-1 rounded-full font-bold">ONE-TIME DISPLAY</span>
+                </div>
+                <div class="relative mb-4">
+                    <input type="text" id="generatedApiKey" readonly class="w-full bg-white dark:bg-gray-800 border-2 border-green-500 rounded-lg px-4 py-3 text-gray-900 dark:text-white font-mono text-sm focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="copyApiKey()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-copy mr-2"></i>Copy Key
+                    </button>
+                    <button onclick="downloadKey()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-download mr-2"></i>Download
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-exclamation-triangle text-red-500 mt-1"></i>
+                    <div>
+                        <h4 class="text-red-800 dark:text-red-200 font-bold mb-2">Security Warning</h4>
+                        <ul class="text-red-700 dark:text-red-300 text-sm space-y-1">
+                            <li>• This key will only be shown once</li>
+                            <li>• Store it securely in a password manager</li>
+                            <li>• Never share it publicly or commit to version control</li>
+                            <li>• Revoke immediately if compromised</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-4">
+                <button onclick="copyApiKey()" class="flex-1 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-clipboard-check mr-2"></i>Copy & Save
+                </button>
+                <button onclick="closeSuccessModal()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-check-circle mr-2"></i>I've Saved It
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Management
+        class ThemeManager {
+            constructor() {
+                this.theme = localStorage.getItem('theme') || 'system';
+                this.init();
+            }
+            
+            init() {
+                this.applyTheme();
+                this.setupEventListeners();
+                this.updateButtons();
+            }
+            
+            applyTheme() {
+                const root = document.documentElement;
+                
+                if (this.theme === 'system') {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    root.classList.toggle('dark', prefersDark);
+                } else {
+                    root.classList.toggle('dark', this.theme === 'dark');
+                }
+            }
+            
+            setTheme(newTheme) {
+                this.theme = newTheme;
+                localStorage.setItem('theme', newTheme);
+                this.applyTheme();
+                this.updateButtons();
+            }
+            
+            updateButtons() {
+                const buttons = {
+                    light: document.getElementById('theme-light'),
+                    dark: document.getElementById('theme-dark'),
+                    system: document.getElementById('theme-system')
+                };
+                
+                Object.keys(buttons).forEach(key => {
+                    const button = buttons[key];
+                    if (button) {
+                        button.classList.toggle('bg-primary-100', key === this.theme);
+                        button.classList.toggle('text-primary-600', key === this.theme);
+                        button.classList.toggle('dark:bg-primary-900', key === this.theme);
+                        button.classList.toggle('dark:text-primary-400', key === this.theme);
+                    }
+                });
+            }
+            
+            setupEventListeners() {
+                document.getElementById('theme-light')?.addEventListener('click', () => this.setTheme('light'));
+                document.getElementById('theme-dark')?.addEventListener('click', () => this.setTheme('dark'));
+                document.getElementById('theme-system')?.addEventListener('click', () => this.setTheme('system'));
+                
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    if (this.theme === 'system') {
+                        this.applyTheme();
+                    }
+                });
+            }
+        }
+
+        let apiKeys = [];
+
+        async function loadApiKeys() {
+            try {
+                const response = await fetch('/api-keys/list');
+                const result = await response.json();
+                
+                if (result.success) {
+                    apiKeys = result.data;
+                    updateStats();
+                    renderApiKeys();
+                }
+            } catch (error) {
+                console.error('Error loading API keys:', error);
+            }
+        }
+
+        function updateStats() {
+            const total = apiKeys.length;
+            const active = apiKeys.filter(key => key.isActive).length;
+            const revoked = apiKeys.filter(key => !key.isActive).length;
+            const expired = apiKeys.filter(key => key.expiresAt && new Date(key.expiresAt) < new Date()).length;
+
+            document.getElementById('totalKeys').textContent = total;
+            document.getElementById('activeKeys').textContent = active;
+            document.getElementById('revokedKeys').textContent = revoked;
+            document.getElementById('expiredKeys').textContent = expired;
+        }
+
+        function renderApiKeys() {
+            const container = document.getElementById('apiKeysList');
+            const noKeysMessage = document.getElementById('noKeysMessage');
+
+            if (apiKeys.length === 0) {
+                container.innerHTML = '';
+                noKeysMessage.classList.remove('hidden');
+                return;
+            }
+
+            noKeysMessage.classList.add('hidden');
+            
+            container.innerHTML = apiKeys.map(key => `
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-200 dark:border-gray-600 card-hover">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <h4 class="font-bold text-gray-900 dark:text-white text-lg">${key.name || 'Unnamed Key'}</h4>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold ${key.isActive ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'}">
+                                    ${key.isActive ? 'Active' : 'Revoked'}
+                                </span>
+                                ${key.expiresAt && new Date(key.expiresAt) < new Date() ? '<span class="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">Expired</span>' : ''}
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                                    ${key.permissions.join(', ')}
+                                </span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-600 dark:text-gray-400">Key:</span>
+                                    <code class="text-yellow-600 dark:text-yellow-400 font-mono ml-2">${key.keyId.substring(0, 20)}...</code>
+                                    <button onclick="copyToClipboard('${key.keyId}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600 dark:text-gray-400">Created:</span>
+                                    <span class="text-gray-900 dark:text-white ml-2">${new Date(key.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600 dark:text-gray-400">Last used:</span>
+                                    <span class="text-gray-900 dark:text-white ml-2">${key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : 'Never'}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600 dark:text-gray-400">Usage:</span>
+                                    <span class="text-gray-900 dark:text-white ml-2">${key.usageCount || 0} times</span>
+                                </div>
+                                ${key.expiresAt ? `<div class="col-span-2"><span class="text-gray-600 dark:text-gray-400">Expires:</span><span class="text-${new Date(key.expiresAt) < new Date() ? 'red' : 'yellow'}-600 dark:text-${new Date(key.expiresAt) < new Date() ? 'red' : 'yellow'}-400 ml-2 font-semibold">${new Date(key.expiresAt).toLocaleDateString()}</span></div>` : ''}
+                            </div>
+                            
+                            ${key.description ? `<p class="text-gray-600 dark:text-gray-400 text-sm mt-3">${key.description}</p>` : ''}
+                        </div>
+                        
+                        <div class="flex space-x-2 ml-4">
+                            ${key.isActive ? `
+                            <button onclick="revokeKey('${key._id}')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                <i class="fas fa-ban mr-1"></i>Revoke
+                            </button>
+                            ` : `
+                            <button onclick="reactivateKey('${key._id}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                <i class="fas fa-check mr-1"></i>Reactivate
+                            </button>
+                            `}
+                            <button onclick="deleteKey('${key._id}')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                <i class="fas fa-trash mr-1"></i>Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function createNewKey() {
+            document.getElementById('createKeyModal').classList.remove('hidden');
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createKeyModal').classList.add('hidden');
+            document.getElementById('createKeyForm').reset();
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            loadApiKeys();
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Key copied to clipboard!');
+            });
+        }
+
+        function copyApiKey() {
+            const apiKey = document.getElementById('generatedApiKey').value;
+            navigator.clipboard.writeText(apiKey).then(() => {
+                showToast('API Key copied to clipboard!');
+            });
+        }
+
+        function downloadKey() {
+            const apiKey = document.getElementById('generatedApiKey').value;
+            const keyName = document.getElementById('keySuccessName').textContent;
+            const content = `# Sorikama API Key\n# Name: ${keyName}\n# Created: ${new Date().toLocaleString()}\n\nAPI_KEY=${apiKey}\n`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sorikama-api-key-${keyName.replace(/\s+/g, '-').toLowerCase()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        async function revokeKey(keyId) {
+            if (confirm('Are you sure you want to revoke this key?')) {
+                try {
+                    const response = await fetch(`/api-keys/revoke/${keyId}`, { method: 'POST' });
+                    if (response.ok) {
+                        loadApiKeys();
+                        showToast('Key revoked successfully');
+                    }
+                } catch (error) {
+                    showToast('Error revoking key', 'error');
+                }
+            }
+        }
+
+        async function reactivateKey(keyId) {
+            try {
+                const response = await fetch(`/api-keys/reactivate/${keyId}`, { method: 'POST' });
+                if (response.ok) {
+                    loadApiKeys();
+                    showToast('Key reactivated successfully');
+                }
+            } catch (error) {
+                showToast('Error reactivating key', 'error');
+            }
+        }
+
+        async function deleteKey(keyId) {
+            if (confirm('Are you sure you want to delete this key? This action cannot be undone.')) {
+                try {
+                    const response = await fetch(`/api-keys/delete/${keyId}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        loadApiKeys();
+                        showToast('Key deleted successfully');
+                    }
+                } catch (error) {
+                    showToast('Error deleting key', 'error');
+                }
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white font-medium z-50 transform translate-x-full transition-transform duration-300 ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Form submission
+        document.getElementById('createKeyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('keyName').value.trim();
+            const description = document.getElementById('keyDescription').value.trim();
+            const expirationDate = document.getElementById('keyExpiration').value;
+            const permissions = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            
+            if (!name) {
+                showToast('Key name is required', 'error');
+                return;
+            }
+            
+            if (permissions.length === 0) {
+                showToast('Please select at least one permission', 'error');
+                return;
+            }
+            
+            const formData = { name, description, permissions };
+            if (expirationDate) {
+                formData.expiresAt = expirationDate;
+            }
+            
+            try {
+                const response = await fetch('/api-keys/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('generatedApiKey').value = result.apiKey;
+                    document.getElementById('keySuccessName').textContent = result.keyData.name;
+                    document.getElementById('successModal').classList.remove('hidden');
+                    closeCreateModal();
+                } else {
+                    showToast(result.message || 'Error creating API key', 'error');
+                }
+            } catch (error) {
+                showToast('Network error: ' + error.message, 'error');
+            }
+        });
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            new ThemeManager();
+            loadApiKeys();
+        });
+    </script>
+
+</body>
+</html>
