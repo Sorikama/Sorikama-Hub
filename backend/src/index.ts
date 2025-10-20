@@ -137,7 +137,7 @@ const startServer = async () => {
     createSeederRoutes(app);
     
     // Configuration Swagger
-    if (NODE_ENV === 'development') {
+    // if (NODE_ENV === 'development') {
 
       try {
         // Supprimez ou commentez la ligne suivante car on utilise l'import d'en haut
@@ -161,18 +161,35 @@ const startServer = async () => {
           console.log('📝 Contenu YAML chargé:', Object.keys(swaggerSpec));
           console.log('📝 Paths trouvés:', Object.keys(swaggerSpec.paths || {}));
 
+          // Améliorer la spec existante
           if (!swaggerSpec.components) swaggerSpec.components = {};
           if (!swaggerSpec.components.securitySchemes) swaggerSpec.components.securitySchemes = {};
+
+
 
           swaggerSpec.components.securitySchemes.ApiKeyAuth = {
             type: 'apiKey',
             in: 'header',
             name: 'X-API-Key',
-            description: 'API Key pour l\'authentification Gateway'
+            description: 'API Key d\'authentification'
           };
 
-          swaggerSpec.servers = [{ url: `http://localhost:${PORT}/api/v1` }];
+          swaggerSpec.servers = [
+            { 
+              url: `http://localhost:${PORT}/api/v1`,
+              description: 'Serveur de développement local'
+            }
+          ];
           swaggerSpec.security = [{ ApiKeyAuth: [] }, { bearerAuth: [] }];
+          
+          // Ajouter des tags si pas présents
+          if (!swaggerSpec.tags) {
+            swaggerSpec.tags = [
+              { name: 'Authentication', description: '🔐 Authentification' },
+              { name: 'System', description: '⚙️ Système' },
+              { name: 'Services', description: '🔗 Services' }
+            ];
+          }
 
           console.log('✅ Fichier OpenAPI YAML chargé avec succès');
         } else {
@@ -210,32 +227,27 @@ const startServer = async () => {
         console.log('📝 Spec finale - Paths:', Object.keys(swaggerSpec.paths || {}));
         console.log('📝 Spec finale - Components:', Object.keys(swaggerSpec.components || {}));
 
-        app.use('/api-docs', (req, res, next) => {
+        app.use('/api-docs', verifyPortalSession, (req, res, next) => {
           res.removeHeader('Content-Security-Policy');
           next();
         });
 
         app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-          customSiteTitle: 'Sorikama API Gateway - Documentation',
           explorer: false,
           swaggerOptions: {
-            defaultModelsExpandDepth: -1,
-            docExpansion: 'list',
-            requestInterceptor: (req: any) => {
-              if (global.ADMIN_API_KEY) {
-                req.headers['X-API-Key'] = global.ADMIN_API_KEY;
-                console.log('🔑 API Key admin injectée automatiquement dans Swagger');
-              }
-              return req;
-            }
+            defaultModelsExpandDepth: 1,
+            defaultModelExpandDepth: 1,
+            docExpansion: 'none'
           }
         }));
+
+        // Route protégée pour la documentation déjà définie ci-dessus
 
         logger.info('API Key Admin générée automatiquement');
       } catch (e) {
         logger.error('❌ Erreur de chargement de la documentation Swagger:', e);
       }
-    }
+    // }
 
     // Route principale - redirige selon l'état de connexion
     app.get('/', (req, res) => {
@@ -322,7 +334,6 @@ const startServer = async () => {
     const monitoringRoutes = require('./routes/monitoring.routes').default;
     app.use('/services', verifyPortalSession, servicesManagerRoutes);
     app.use('/monitoring', verifyPortalSession, monitoringRoutes);
-    app.use('/api-docs', verifyPortalSession);
 
     app.get('/api/v1/system/health', (req, res) => {
       res.json({
@@ -350,45 +361,52 @@ const startServer = async () => {
       '/portal/logout'
     ];
     
-    // Middleware conditionnel pour l'API key
+    // API Key OBLIGATOIRE pour toutes les routes /api/v1
+    app.use('/api/v1', (req: Request, res: Response, next: NextFunction) => {
+      // Routes publiques (exceptions)
+      const publicApiRoutes = [
+        '/api/v1/system/health',
+        '/api/v1/auth/login',
+        '/api/v1/auth/register',
+        '/api/v1/auth/refresh-token'
+      ];
+      
+      const isPublicApiRoute = publicApiRoutes.some(route => req.path === route);
+      
+      if (isPublicApiRoute) {
+        console.log(`🔓 Route API publique: ${req.path}`);
+        return next();
+      }
+      
+      // Toutes les autres routes API nécessitent une API Key
+      console.log(`🔑 API Key requise pour: ${req.path}`);
+      authenticateApiKey(req, res, next);
+    });
+    
+    // Routes portail (pas d'API key)
     app.use((req: Request, res: Response, next: NextFunction) => {
-      // Routes protégées par session portail (pas d'API key nécessaire)
-      const portalProtectedRoutes = [
+      const portalRoutes = [
         '/dependencies',
         '/system',
-        '/api-keys',
+        '/api-keys', 
         '/logs',
         '/services',
         '/admin',
         '/performance',
         '/api-docs',
         '/dashboard',
-        '/api'
+        '/api',
+        '/portal'
       ];
       
-      // Routes publiques (pas d'authentification)
-      const isPublicRoute = publicRoutes.some(route => req.path === route || req.path.startsWith(route));
-      
-      // Routes protégées par session portail
-      const isPortalRoute = portalProtectedRoutes.some(route => req.path.startsWith(route));
-      
-      if (isPublicRoute) {
-        console.log(`🔓 Route publique autorisée: ${req.path}`);
-        return next();
-      }
+      const isPortalRoute = portalRoutes.some(route => req.path.startsWith(route));
       
       if (isPortalRoute) {
-        console.log(`🔐 Route protégée par session portail: ${req.path}`);
+        console.log(`🏠 Route portail: ${req.path}`);
         return next();
       }
       
-      // Routes API nécessitent une clé
-      if (req.path.startsWith('/api/v1')) {
-        console.log(`🔐 Vérification API key requise pour: ${req.path}`);
-        authenticateApiKey(req, res, next);
-      } else {
-        next();
-      }
+      next();
     });
     
     // Routes admin (avec API key)

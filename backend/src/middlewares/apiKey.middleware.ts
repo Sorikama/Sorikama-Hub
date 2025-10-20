@@ -1,7 +1,7 @@
 // src/middlewares/apiKey.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { ApiKeyModel } from '../database/models/apiKey.model';
+import { SimpleApiKeyModel } from '../database/models/simpleApiKey.model';
 import AppError from '../utils/AppError';
 import { logger } from '../utils/logger';
 
@@ -33,7 +33,7 @@ export const authenticateApiKey = async (req: Request, res: Response, next: Next
     }
     
     // Vérification du format de l'API key
-    if (!apiKey.startsWith('sk_') || apiKey.length !== 67) {
+    if (!apiKey.startsWith('sk_')) {
       logger.warn(`[API_KEY] Format d'API key invalide - IP: ${req.ip}`);
       return next(new AppError('Format d\'API key invalide', StatusCodes.UNAUTHORIZED));
     }
@@ -45,8 +45,8 @@ export const authenticateApiKey = async (req: Request, res: Response, next: Next
     if (cached && cached.expires > Date.now()) {
       keyDoc = cached.apiKey;
     } else {
-      // Vérification en base de données
-      keyDoc = await ApiKeyModel.verifyApiKey(apiKey);
+      // Vérification dans simple_api_keys
+      keyDoc = await SimpleApiKeyModel.verifyApiKey(apiKey);
       
       if (keyDoc) {
         // Mise en cache
@@ -62,11 +62,7 @@ export const authenticateApiKey = async (req: Request, res: Response, next: Next
       return next(new AppError('API key invalide ou expirée', StatusCodes.UNAUTHORIZED));
     }
     
-    // Vérification que l'utilisateur est actif
-    if (!keyDoc.userId.isActive) {
-      logger.warn(`[API_KEY] Compte utilisateur désactivé - User: ${keyDoc.userId._id} - IP: ${req.ip}`);
-      return next(new AppError('Compte utilisateur désactivé', StatusCodes.FORBIDDEN));
-    }
+
     
     // Vérification des IPs autorisées
     if (keyDoc.allowedIPs && keyDoc.allowedIPs.length > 0) {
@@ -77,38 +73,13 @@ export const authenticateApiKey = async (req: Request, res: Response, next: Next
       }
     }
     
-    // Rate limiting par API key
-    const rateLimitKey = keyDoc._id;
-    const now = Date.now();
-    const rateLimit = rateLimitStore.get(rateLimitKey);
-    
-    if (rateLimit) {
-      if (now < rateLimit.resetTime) {
-        if (rateLimit.count >= keyDoc.rateLimit.requests) {
-          logger.warn(`[API_KEY] Rate limit dépassé - API Key: ${keyDoc._id} - User: ${keyDoc.userId._id}`);
-          return next(new AppError('Rate limit dépassé pour cette API key', StatusCodes.TOO_MANY_REQUESTS));
-        }
-        rateLimit.count++;
-      } else {
-        // Reset du compteur
-        rateLimitStore.set(rateLimitKey, {
-          count: 1,
-          resetTime: now + keyDoc.rateLimit.windowMs
-        });
-      }
-    } else {
-      rateLimitStore.set(rateLimitKey, {
-        count: 1,
-        resetTime: now + keyDoc.rateLimit.windowMs
-      });
-    }
+
     
     // Attacher les informations à la requête
-    req.user = keyDoc.userId;
     req.apiKey = keyDoc;
     
     // Log de l'activité
-    logger.info(`[API_KEY] Accès autorisé - API Key: ${keyDoc.name} - User: ${keyDoc.userId._id} - IP: ${req.ip} - URL: ${req.originalUrl}`);
+    logger.info(`[API_KEY] Accès autorisé - API Key: ${keyDoc.name} - IP: ${req.ip} - URL: ${req.originalUrl}`);
     
     next();
   } catch (error) {
