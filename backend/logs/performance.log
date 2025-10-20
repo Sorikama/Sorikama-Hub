@@ -147,3 +147,169 @@
 [2025-10-20 19:23:19] INFO: 📊 Service sorilearn response time: 4ms
 [2025-10-20 19:23:19] INFO: 📊 Service sorihealth response time: 2ms
 [2025-10-20 19:23:19] INFO: 📊 Service soriaccess response time: 4ms
+[2025-10-20 15:05:13] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:05:13] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:05:13] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:05:13] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:05:13] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:05:13] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 22:05:13] INFO: 📊 Service soristore response time: 66ms
+[2025-10-20 22:05:13] INFO: 📊 Service soripay response time: 3ms
+[2025-10-20 22:05:13] INFO: 📊 Service soriwallet response time: 3ms
+[2025-10-20 22:05:13] INFO: 📊 Service sorilearn response time: 2ms
+[2025-10-20 22:05:13] INFO: 📊 Service sorihealth response time: 3ms
+[2025-10-20 22:05:13] INFO: 📊 Service soriaccess response time: 2ms
+[2025-10-20 22:05:53] WARN: 🐌 Requête lente: 📤 POST /api/v1/auth/register - 200 - 2153ms - ::1
+[2025-10-20 22:05:53] PERF: Very slow request {"method":"POST","url":"/api/v1/auth/register","responseTime":"2153ms","statusCode":200,"level":"warn"}
+[2025-10-20 22:10:13] INFO: 📊 Service soristore response time: 3ms
+[2025-10-20 22:10:13] INFO: 📊 Service soripay response time: 3ms
+[2025-10-20 22:10:13] INFO: 📊 Service soriwallet response time: 3ms
+[2025-10-20 22:10:13] INFO: 📊 Service sorilearn response time: 9ms
+[2025-10-20 22:10:13] INFO: 📊 Service sorihealth response time: 3ms
+[2025-10-20 22:10:13] INFO: 📊 Service soriaccess response time: 7ms
+[2025-10-20 22:11:01] WARN: 🐌 Requête lente: 📤 POST /api/v1/auth/register - 200 - 1907ms - ::1
+[2025-10-20 22:11:17] WARN: 🐌 Requête lente: 📤 POST /api/v1/auth/register - 200 - 1912ms - ::1
+[2025-10-20 15:15:14] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:15:14] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:15:14] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:15:14] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:15:14] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:15:14] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:15:14] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:15:14] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:15:14] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:15:14] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:15:14] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:15:14] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 22:15:14] INFO: 📊 Service soristore response time: 93ms
+[2025-10-20 22:15:14] INFO: 📊 Service soripay response time: 5ms
+[2025-10-20 22:15:14] INFO: 📊 Service soriwallet response time: 4ms
+[2025-10-20 22:15:14] INFO: 📊 Service sorilearn response time: 3ms
+[2025-10-20 22:15:14] INFO: 📊 Service sorihealth response time: 4ms
+[2025-10-20 22:15:14] INFO: 📊 Service soriaccess response time: 19ms
+[2025-10-20 15:15:14] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:15:14] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:15:14] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:15:14] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:15:14] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:15:14] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:15:20] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:15:20] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:15:20] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:15:20] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:15:20] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:15:20] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 22:15:21] INFO: 📊 Service soristore response time: 122ms
+[2025-10-20 22:15:21] INFO: 📊 Service soripay response time: 5ms
+[2025-10-20 22:15:21] INFO: 📊 Service soriwallet response time: 4ms
+[2025-10-20 22:15:21] INFO: 📊 Service sorilearn response time: 4ms
+[2025-10-20 22:15:21] INFO: 📊 Service sorihealth response time: 5ms
+[2025-10-20 22:15:21] INFO: 📊 Service soriaccess response time: 4ms
+[2025-10-20 15:15:21] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:15:21] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:15:21] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:15:21] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:15:21] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:15:21] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:15:36] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:15:36] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:15:36] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:15:36] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:15:36] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:15:36] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 22:15:36] INFO: 📊 Service soristore response time: 118ms
+[2025-10-20 22:15:36] INFO: 📊 Service soripay response time: 10ms
+[2025-10-20 22:15:36] INFO: 📊 Service soriwallet response time: 3ms
+[2025-10-20 22:15:36] INFO: 📊 Service sorilearn response time: 5ms
+[2025-10-20 22:15:36] INFO: 📊 Service sorihealth response time: 5ms
+[2025-10-20 22:15:36] INFO: 📊 Service soriaccess response time: 3ms
+[2025-10-20 15:15:37] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:15:37] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:15:37] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:15:37] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:15:37] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:15:37] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:15:36] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:15:36] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:15:36] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:15:36] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:15:36] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:15:36] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:15:50] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:15:50] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:15:50] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:15:50] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:15:50] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:15:50] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:15:50] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:15:50] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:15:50] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:15:50] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:15:50] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:15:50] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 22:15:50] INFO: 📊 Service soristore response time: 154ms
+[2025-10-20 22:15:50] INFO: 📊 Service soripay response time: 4ms
+[2025-10-20 22:15:50] INFO: 📊 Service soriwallet response time: 4ms
+[2025-10-20 22:15:50] INFO: 📊 Service sorilearn response time: 4ms
+[2025-10-20 22:15:50] INFO: 📊 Service sorihealth response time: 4ms
+[2025-10-20 22:15:50] INFO: 📊 Service soriaccess response time: 3ms
+[2025-10-20 15:15:51] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:15:51] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:15:51] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:15:51] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:15:51] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:15:51] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:16:20] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:16:20] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:16:20] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:16:20] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:16:20] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:16:20] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 22:16:21] INFO: 📊 Service soristore response time: 184ms
+[2025-10-20 22:16:21] INFO: 📊 Service soripay response time: 7ms
+[2025-10-20 22:16:21] INFO: 📊 Service soriwallet response time: 6ms
+[2025-10-20 22:16:21] INFO: 📊 Service sorilearn response time: 3ms
+[2025-10-20 22:16:22] INFO: 📊 Service sorihealth response time: 12ms
+[2025-10-20 22:16:22] INFO: 📊 Service soriaccess response time: 9ms
+[2025-10-20 15:16:22] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:16:22] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:16:22] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:16:22] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:16:22] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:16:22] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:16:21] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:16:21] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:16:21] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:16:21] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:16:21] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:16:21] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:18:08] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:18:08] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:18:08] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:18:08] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:18:08] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:18:08] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:19:52] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:19:52] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:19:52] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:19:52] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:19:52] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:19:52] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:19:54] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:19:54] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:19:54] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:19:54] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:19:54] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:19:54] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:19:56] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:19:56] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:19:56] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:19:56] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:19:56] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:19:56] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-20 15:20:16] INFO: ⚡ Monitoring des performances activé
+[2025-10-20 16:20:16] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-20 17:20:16] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-20 18:20:16] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-20 19:20:16] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-20 20:20:16] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%

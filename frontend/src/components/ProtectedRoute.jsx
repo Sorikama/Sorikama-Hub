@@ -1,21 +1,38 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import FadeInAnimation from './animations/FadeInAnimation';
 
-const ProtectedRoute = ({ children }) => {
-    // Récupère l'état d'authentification depuis le contexte
-    const { isAuthenticated, user } = useAuth();
-    const location = useLocation();
+const ProtectedRoute = ({ children, requireApiKey = true }) => {
+  const { user, loading } = useAuth();
 
-    // Si l'utilisateur n'est pas authentifié, le rediriger vers la page de connexion.
-    // On sauvegarde l'URL actuelle (`location`) pour pouvoir y retourner après la connexion.
-    if (!isAuthenticated) {
-        return <Navigate to="/login" state={{ from: location }} replace />;
-    }
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Vérification des autorisations...</div>
+      </div>
+    );
+  }
 
-    // Si l'utilisateur est authentifié, on affiche le composant enfant demandé (ex: Dashboard).
-    return <FadeInAnimation>{children}</FadeInAnimation>;
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (requireApiKey && !user.apiKey) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center">
+          <div className="text-4xl mb-4">🔑</div>
+          <h1 className="text-2xl font-bold mb-4">Clé API manquante</h1>
+          <p className="text-muted-foreground mb-6">
+            Votre compte ne possède pas de clé API. Veuillez contacter le support.
+          </p>
+          <Navigate to="/profile" replace />
+        </div>
+      </div>
+    );
+  }
+
+  return children;
 };
 
 export default ProtectedRoute;

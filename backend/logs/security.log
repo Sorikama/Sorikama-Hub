@@ -105,3 +105,127 @@
 [2025-10-20 15:18:19] INFO: 🛡️ Validation API Key réussie
 [2025-10-20 16:18:19] WARN: 🚨 Accès refusé - Token manquant
 [2025-10-20 17:18:19] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:05:13] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:05:13] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:05:13] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:05:13] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:05:13] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:05:13] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 22:08:41] WARN: 🔐 Accès refusé: 📤 GET /api/v1/auth/me - 401 - 20ms - ::1
+[2025-10-20 22:08:50] WARN: 🔐 Accès refusé: 📤 POST /api/v1/auth/login - 401 - 16ms - ::1
+[2025-10-20 15:15:14] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:15:14] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:15:14] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:15:14] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:15:14] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:15:14] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:15:14] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:15:14] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:15:14] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:15:14] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:15:14] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:15:14] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:15:14] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:15:14] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:15:14] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:15:14] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:15:14] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:15:14] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:15:20] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:15:20] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:15:20] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:15:20] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:15:20] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:15:20] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:15:21] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:15:21] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:15:21] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:15:21] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:15:21] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:15:21] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:15:36] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:15:36] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:15:36] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:15:36] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:15:36] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:15:36] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:15:37] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:15:37] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:15:37] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:15:37] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:15:37] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:15:37] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:15:36] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:15:36] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:15:36] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:15:36] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:15:36] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:15:36] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:15:50] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:15:50] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:15:50] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:15:50] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:15:50] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:15:50] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:15:50] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:15:50] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:15:50] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:15:50] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:15:50] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:15:50] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:15:51] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:15:51] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:15:51] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:15:51] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:15:51] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:15:51] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:16:20] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:16:20] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:16:20] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:16:20] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:16:20] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:16:20] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:16:22] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:16:22] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:16:22] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:16:22] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:16:22] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:16:22] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:16:21] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:16:21] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:16:21] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:16:21] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:16:21] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:16:21] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:18:08] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:18:08] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:18:08] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:18:08] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:18:08] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:18:08] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 22:18:28] WARN: 🔐 Accès refusé: 📤 POST /api/v1/auth/register - 401 - 10ms - ::1
+[2025-10-20 22:18:41] WARN: 🔐 Accès refusé: 📤 POST /api/v1/auth/register - 401 - 4ms - ::1
+[2025-10-20 15:19:52] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:19:52] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:19:52] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:19:52] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:19:52] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:19:52] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:19:54] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:19:54] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:19:54] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:19:54] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:19:54] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:19:54] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:19:56] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:19:56] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:19:56] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:19:56] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:19:56] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:19:56] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-20 15:20:16] INFO: 🔐 Système de sécurité initialisé
+[2025-10-20 16:20:16] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-20 17:20:16] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-20 18:20:16] INFO: 🛡️ Validation API Key réussie
+[2025-10-20 19:20:16] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-20 20:20:16] INFO: 🔐 Session utilisateur renouvelée

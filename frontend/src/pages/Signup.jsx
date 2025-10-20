@@ -1,264 +1,321 @@
-import React, { useState } from "react";
-import { Link, useLocation, useNavigate  } from "react-router-dom";
-import Button from "../components/Button";
-import { FiEye, FiEyeOff, FiMail, FiLock, FiUser } from "react-icons/fi";
-import { toast } from "react-toastify";
-import { useAuth } from "../context/AuthContext";
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useToastContext } from '../context/ToastContext';
+import api from '../services/api';
 
 const Signup = () => {
-  const { signup } = useAuth();
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: ""
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  
-  // C'est comme ça que Sorikama saura où renvoyer l'utilisateur.
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const redirectUrl = searchParams.get('redirectUrl');
+  const [localError, setLocalError] = useState('');
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationToken, setVerificationToken] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const { signup, verify, loading, error, clearError, user } = useAuth();
+  const { success, error: showError } = useToastContext();
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    if (user) {
+      navigate('/services');
+    }
+  }, [user, navigate]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  useEffect(() => {
+    return () => clearError();
+  }, [clearError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { firstName, lastName, email, password, confirmPassword } = formData;
+    setLocalError('');
 
-    // Validation de base
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      toast.error("Veuillez remplir tous les champs");
+    if (formData.password !== formData.confirmPassword) {
+      setLocalError('Les mots de passe ne correspondent pas');
       return;
     }
 
-    if (password !== confirmPassword) {
-      toast.error("Les mots de passe ne correspondent pas");
+    if (formData.password.length < 6) {
+      setLocalError('Le mot de passe doit contenir au moins 6 caractères');
       return;
     }
-
-    if (password.length < 8) {
-      toast.error("Le mot de passe doit contenir au moins 8 caractères");
-      return;
-    }
-
-    if (!termsAccepted) {
-      toast.error("Veuillez accepter les conditions d'utilisation");
-      return;
-    }
-
-    // Simulation d'inscription avec chargement
-    setLoading(true);
 
     try {
-      // La fonction signup retourne maintenant { verificationToken }
-      const { verificationToken } = await signup(formData);
-
-      // ======================= REDIRECTION VERS LA PAGE DE VÉRIFICATION =======================
-      // On construit l'URL de la page de vérification en y ajoutant deux informations :
-      // 1. Le token de vérification nécessaire pour l'appel API.
-      // 2. L'URL de redirection finale pour que la page de vérification sache où renvoyer l'utilisateur.
-      let verifyUrl = `/verify?token=${verificationToken}`;
-      if (redirectUrl) {
-        verifyUrl += `&redirectUrl=${encodeURIComponent(redirectUrl)}`;
+      const { confirmPassword, ...signupData } = formData;
+      const result = await signup(signupData);
+      
+      console.log('Résultat signup:', result); // Debug
+      
+      // Toujours afficher la page de vérification après inscription
+      if (result && result.verificationToken) {
+        setVerificationToken(result.verificationToken);
+        setNeedsVerification(true);
+        success(result.message || 'Code de vérification envoyé !');
+      } else {
+        // Si pas de token, forcer quand même la vérification
+        setNeedsVerification(true);
+        success('Code de vérification envoyé !');
       }
-      navigate(verifyUrl);
-
     } catch (err) {
-      console.log("erreur ici", err)
-      // setError('Échec de l\'inscription.'); // Message de secours
-    } finally {
-      setLoading(false);
+      setLocalError(err.message || 'Erreur lors de l\'inscription');
     }
   };
 
-  return (
-    <div className="container mx-auto px-4 py-20 min-h-screen flex flex-col justify-center">
-      <div className="max-w-md mx-auto w-full">
-        <h1 className="h2 text-center mb-8 dark:text-n-1 text-n-8">Créer un compte</h1>
-        <div className="p-0.5 rounded-[2rem] bg-conic-gradient">
-          <div className="relative p-8 dark:bg-n-8 bg-white rounded-[1.9375rem] overflow-hidden">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="firstName" className="block text-sm font-medium dark:text-n-1 text-n-8">
-                    Prénom
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiUser className="text-n-4" />
-                    </div>
-                    <input
-                      id="firstName"
-                      name="firstName"
-                      type="text"
-                      required
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      className="block w-full pl-10 pr-3 py-3 border dark:border-n-6 border-n-3 rounded-xl dark:bg-n-7 bg-n-2/40 dark:text-n-1 text-n-8 focus:outline-none focus:ring-2 focus:ring-color-1"
-                      placeholder="Jean"
-                    />
-                  </div>
-                </div>
+  const handleVerification = async (e) => {
+    e.preventDefault();
+    setLocalError('');
 
-                <div className="space-y-2">
-                  <label htmlFor="lastName" className="block text-sm font-medium dark:text-n-1 text-n-8">
-                    Nom
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiUser className="text-n-4" />
-                    </div>
-                    <input
-                      id="lastName"
-                      name="lastName"
-                      type="text"
-                      required
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      className="block w-full pl-10 pr-3 py-3 border dark:border-n-6 border-n-3 rounded-xl dark:bg-n-7 bg-n-2/40 dark:text-n-1 text-n-8 focus:outline-none focus:ring-2 focus:ring-color-1"
-                      placeholder="Dupont"
-                    />
-                  </div>
-                </div>
+    if (verificationCode.length !== 6) {
+      setLocalError('Le code doit contenir 6 chiffres');
+      return;
+    }
+
+    try {
+      await verify({ 
+        verificationToken: verificationToken,
+        code: verificationCode 
+      });
+      navigate('/services');
+    } catch (err) {
+      setLocalError(err.message || 'Code de vérification invalide');
+    }
+  };
+
+  const handleResendCode = async () => {
+    try {
+      setLocalError('');
+      const response = await api.post('/auth/resend-verification', { 
+        verificationToken: verificationToken 
+      });
+      
+      // Mettre à jour le token si un nouveau est retourné
+      if (response.data.data?.verificationToken) {
+        setVerificationToken(response.data.data.verificationToken);
+      }
+      
+      success('Code de vérification renvoyé !');
+      
+      // Démarrer le cooldown
+      setResendCooldown(60);
+      const interval = setInterval(() => {
+        setResendCooldown(prev => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || 'Erreur lors du renvoi';
+      setLocalError(errorMsg);
+      showError(errorMsg);
+    }
+  };
+
+  // Effet pour le cooldown
+  useEffect(() => {
+    return () => {
+      // Nettoyer les intervalles
+    };
+  }, []);
+
+  if (needsVerification) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="bg-card border border-border rounded-lg p-8">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">📬</span>
               </div>
-
-              <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium dark:text-n-1 text-n-8">
-                  Adresse e-mail
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiMail className="text-n-4" />
-                  </div>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-3 border dark:border-n-6 border-n-3 rounded-xl dark:bg-n-7 bg-n-2/40 dark:text-n-1 text-n-8 focus:outline-none focus:ring-2 focus:ring-color-1"
-                    placeholder="votre@email.com"
-                  />
+              <h1 className="text-2xl font-bold mb-2">Vérifiez votre email</h1>
+              <p className="text-muted-foreground">
+                Un code de vérification a été envoyé à
+              </p>
+              <p className="font-medium">{formData.email}</p>
+              
+              {/* Affichage du code pour le développement */}
+              {import.meta.env.DEV && verificationToken && (
+                <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <p className="text-xs text-yellow-800 dark:text-yellow-200 mb-1">
+                    👨‍💻 Mode développement - Code dans le token :
+                  </p>
+                  <code className="text-sm font-mono bg-yellow-100 dark:bg-yellow-900 px-2 py-1 rounded">
+                    {(() => {
+                      try {
+                        const payload = JSON.parse(atob(verificationToken.split('.')[1]));
+                        return payload.code || 'Code non trouvé';
+                      } catch (e) {
+                        return 'Token invalide';
+                      }
+                    })()}
+                  </code>
                 </div>
-              </div>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-medium dark:text-n-1 text-n-8">
-                  Mot de passe
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiLock className="text-n-4" />
-                  </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="block w-full pl-10 pr-10 py-3 border dark:border-n-6 border-n-3 rounded-xl dark:bg-n-7 bg-n-2/40 dark:text-n-1 text-n-8 focus:outline-none focus:ring-2 focus:ring-color-1"
-                    placeholder="••••••••"
-                  />
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="text-n-4 hover:text-n-3 focus:outline-none"
-                    >
-                      {showPassword ? <FiEyeOff /> : <FiEye />}
-                    </button>
-                  </div>
-                </div>
+            {(error || localError) && (
+              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+                {error || localError}
               </div>
+            )}
 
-              <div className="space-y-2">
-                <label htmlFor="confirmPassword" className="block text-sm font-medium dark:text-n-1 text-n-8">
-                  Confirmer le mot de passe
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiLock className="text-n-4" />
-                  </div>
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="block w-full pl-10 pr-10 py-3 border dark:border-n-6 border-n-3 rounded-xl dark:bg-n-7 bg-n-2/40 dark:text-n-1 text-n-8 focus:outline-none focus:ring-2 focus:ring-color-1"
-                    placeholder="••••••••"
-                  />
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="text-n-4 hover:text-n-3 focus:outline-none"
-                    >
-                      {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center">
+            <form onSubmit={handleVerification} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Code de vérification (6 chiffres)</label>
                 <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  checked={termsAccepted}
-                  onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="h-4 w-4 accent-color-1"
+                  type="text"
+                  required
+                  value={verificationCode}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    setVerificationCode(value);
+                  }}
+                  className="w-full px-3 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 text-center text-xl tracking-widest font-mono"
+                  placeholder="000000"
+                  maxLength={6}
+                  disabled={loading}
                 />
-                <label htmlFor="terms" className="ml-2 block text-sm dark:text-n-3 text-n-5">
-                  J'accepte les{" "}
-                  <a href="#" className="font-medium text-color-1 hover:text-color-2">
-                    conditions d'utilisation
-                  </a>{" "}
-                  et la{" "}
-                  <a href="#" className="font-medium text-color-1 hover:text-color-2">
-                    politique de confidentialité
-                  </a>
-                </label>
               </div>
 
-              <div className="pt-4">
-                <Button
-                  className="w-full justify-center"
-                  loading={loading}
-                  disabled={loading || !formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword || !termsAccepted}
-                >
-                  S'inscrire
-                </Button>
-              </div>
+              <button
+                type="submit"
+                disabled={loading || verificationCode.length !== 6}
+                className="w-full py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Vérification...
+                  </div>
+                ) : (
+                  'Vérifier le code'
+                )}
+              </button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm dark:text-n-3 text-n-5">
-                Vous avez déjà un compte ?{" "}
-                <Link to="/login" className="font-medium text-color-1 hover:text-color-2">
-                  Se connecter
-                </Link>
+            <div className="mt-6 text-center space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Vous n'avez pas reçu le code ?
               </p>
+              <button
+                onClick={handleResendCode}
+                disabled={loading || resendCooldown > 0}
+                className="text-primary hover:underline text-sm disabled:opacity-50"
+              >
+                {resendCooldown > 0 ? `Renvoyer dans ${resendCooldown}s` : 'Renvoyer le code'}
+              </button>
+              <br />
+              <button
+                onClick={() => setNeedsVerification(false)}
+                className="text-muted-foreground hover:text-foreground text-sm"
+              >
+                Modifier l'email
+              </button>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="bg-card border border-border rounded-lg p-8">
+          <h1 className="text-2xl font-bold text-center mb-6">Inscription</h1>
+
+          {(error || localError) && (
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+              {error || localError}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Prénom</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2"
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Nom</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Email</label>
+              <input
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2"
+                disabled={loading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Mot de passe</label>
+              <input
+                type="password"
+                required
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2"
+                disabled={loading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Confirmer le mot de passe</label>
+              <input
+                type="password"
+                required
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2"
+                disabled={loading}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Inscription...' : 'S\'inscrire'}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center text-sm">
+            <p className="text-muted-foreground">
+              Déjà un compte ?{' '}
+              <Link to="/login" className="text-primary hover:underline">
+                Se connecter
+              </Link>
+            </p>
           </div>
         </div>
       </div>

@@ -11,6 +11,7 @@ export interface ISimpleApiKey extends Document {
   usageCount: number;
   lastUsedAt?: Date;
   expiresAt?: Date;
+  userId?: string; // Référence à l'utilisateur propriétaire
   createdAt: Date;
   updatedAt: Date;
   hasPermission(requiredPermission: string): boolean;
@@ -58,6 +59,10 @@ const simpleApiKeySchema = new Schema<ISimpleApiKey>({
   },
   expiresAt: {
     type: Date
+  },
+  userId: {
+    type: String,
+    ref: 'User'
   }
 }, {
   timestamps: true,

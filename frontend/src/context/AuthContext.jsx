@@ -1,234 +1,245 @@
-// frontend/src/context/AuthContext.jsx
-
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
+import { useToastContext } from './ToastContext';
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true); // Pour la persistance de session
-    const navigate = useNavigate();
-
-    // Au chargement de l'app, vérifier si l'utilisateur est déjà connecté (persistance)
-    useEffect(() => {
-        const initializeAuth = () => {
-            try {
-                const storedUser = localStorage.getItem('user');
-                const accessToken = localStorage.getItem('accessToken');
-
-                if (storedUser && accessToken) {
-                    setUser(JSON.parse(storedUser));
-                    // L'intercepteur (api.js) s'occupe de mettre le token dans les futures requêtes
-                }
-            } catch (error) {
-                console.error("Échec de l'initialisation de l'authentification:", error);
-                // En cas d'erreur (ex: localStorage corrompu), on nettoie
-                localStorage.clear();
-            } finally {
-                setLoading(false);
-            }
-        };
-        initializeAuth();
-    }, []);
-
-    // -- FONCTIONS DE GESTION DES TOKENS --
-
-    const setAuthData = (user, tokens) => {
-        localStorage.setItem('user', JSON.stringify(user));
-        localStorage.setItem('accessToken', tokens.accessToken);
-        localStorage.setItem('refreshToken', tokens.refreshToken);
-        setUser(user);
-        // L'intercepteur `api.js` utilisera ces tokens pour les prochaines requêtes
-    };
-
-    const clearAuthData = () => {
-        localStorage.removeItem('user');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        setUser(null);
-        delete api.defaults.headers.common['Authorization'];
-    };
-
-    // -- FONCTIONS D'AUTHENTIFICATION --
-
-    // La fonction `login` retourne maintenant les données pour que le composant puisse les utiliser.
-    const login = async ({ email, password }) => {
-        try {
-            const response = await api.post('/auth/login', { email, password });
-            console.log("this current response", response);
-
-            const { user, tokens } = response?.data?.data;
-            console.log("this is user and tokens", user, tokens);
-
-            setAuthData(user, tokens);
-            toast.success('Connexion réussie !');
-            // La navigation est retirée d'ici et sera gérée par la page Login elle-même
-            // navigate('/dashboard'); 
-
-            // On retourne les données pour la redirection
-            return { user, tokens };
-        } catch (error) {
-            console.log("this is error", error);
-            const errorMessage = error.response?.data?.message || 'Email ou mot de passe incorrect.';
-            toast.error(errorMessage);
-            throw error; // Permet au composant de savoir que l'appel a échoué
-        }
-    };
-
-    // La fonction signup ne connecte plus l'utilisateur.
-    // Elle l'enregistre et redirige vers la page de vérification avec un token temporaire.
-    const signup = async (userData) => {
-        try {
-            const { confirmPassword, ...apiData } = userData;
-            const response = await api.post('/auth/register', apiData);
-
-            toast.success(response.data.message || 'Inscription réussie ! Veuillez vérifier votre email.');
-            const verificationToken = response?.data?.data?.verificationToken;
-
-            // On ne navigue plus directement depuis le contexte.
-            // On retourne le token pour que la page Signup puisse gérer la navigation.
-            return { verificationToken };
-        } catch (error) {
-            const errorMessage = error.response?.data?.message || "Une erreur est survenue lors de l'inscription.";
-            toast.error(errorMessage);
-            throw error;
-        }
-    };
-
-    // ======================= NOUVELLE FONCTION VERIFY =======================
-    // C'est cette fonction qui finalise l'inscription, connecte l'utilisateur
-    // et retourne les données pour la redirection finale.
-    const verify = async (verificationToken, verificationCode) => {
-        try {
-            const response = await api.post('/auth/verify', { verificationToken, code: verificationCode });
-            console.log('Réponse de la vérification:', response);
-
-            const { user, tokens } = response?.data?.data;
-            console.log("Utilisateur et tokens reçus:", user, tokens);
-
-            // On stocke les données d'authentification
-            setAuthData(user, tokens);
-            toast.success('Votre compte a été vérifié avec succès !');
-
-            // On retourne les données pour que la page VerifyCode puisse gérer la redirection
-            return { user, tokens };
-        } catch (error) {
-            console.log("Erreur de vérification:", error);
-            const errorMessage = error.response?.data?.message || 'Code de vérification invalide ou expiré.';
-            toast.error(errorMessage);
-            throw error;
-        }
-    };
-
-    const logout = async () => {
-        const refreshToken = localStorage.getItem('refreshToken');
-        try {
-            if (refreshToken) {
-                // Informe le backend d'invalider le token
-                await api.post('/auth/logout', { refreshToken });
-            }
-        } catch (error) {
-            console.error("Échec de la déconnexion côté serveur, mais déconnexion locale en cours...", error);
-        } finally {
-            // Quoi qu'il arrive (succès ou échec), on nettoie le client
-            clearAuthData();
-            toast.info('Vous avez été déconnecté.');
-            navigate('/login');
-        }
-    };
-
-    // -- FONCTIONS DE RÉINITIALISATION DU MOT DE PASSE --
-
-    const forgotPassword = async (email) => {
-        try {
-            await api.post('/auth/forgot-password', { email });
-            toast.success('Un email de réinitialisation vous a été envoyé.');
-        } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Erreur lors de la demande.';
-            toast.error(errorMessage);
-            throw error;
-        }
-    };
-
-    const resetPassword = async (token, password) => {
-        try {
-            await api.post(`/auth/reset-password?token=${token}`, { password });
-            toast.success('Votre mot de passe a été réinitialisé avec succès !');
-            navigate('/login');
-        } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Le lien est invalide ou a expiré.';
-            toast.error(errorMessage);
-            throw error;
-        }
-    };
-
-    // Mettre à jour le profil
-    const updateProfile = async (profileData) => {
-        try {
-            const response = await api.patch('/auth/update-me', profileData);
-            const updatedUser = response.data;
-
-            // Mettre à jour l'état local et le localStorage
-            setUser(updatedUser);
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-
-            toast.success('Profil mis à jour avec succès !');
-        } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Erreur lors de la mise à jour du profil.';
-            toast.error(errorMessage);
-            throw error;
-        }
-    };
-
-    // Mettre à jour le mot de passe
-    const updatePassword = async (passwordData) => {
-        try {
-            await api.patch('/auth/update-password', passwordData);
-            toast.success('Mot de passe mis à jour avec succès !');
-        } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Erreur lors de la mise à jour du mot de passe.';
-            toast.error(errorMessage);
-            throw error;
-        }
-    };
-
-    // Valeur fournie par le contexte
-    const value = {
-        user,
-        isAuthenticated: !!user,
-        loading,
-        login,
-        signup,
-        logout,
-        verify,
-        forgotPassword,
-        resetPassword,
-        updateProfile,
-        updatePassword,
-    };
-
-    // Ne rend rien tant que le chargement initial n'est pas terminé
-    return (
-        <AuthContext.Provider value={value}>
-            {!loading && children}
-            <ToastContainer
-                position="bottom-right"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="dark"
-            />
-        </AuthContext.Provider>
-    );
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Utiliser les toasts si disponibles (éviter l'erreur de contexte)
+  let toast = null;
+  try {
+    toast = useToastContext();
+  } catch (e) {
+    // ToastContext pas encore disponible
+  }
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userApiKey = localStorage.getItem('userApiKey');
+    
+    if (token && userApiKey) {
+      checkAuth();
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await api.get('/auth/me');
+      const userData = response.data.data?.user || response.data.user;
+      
+      setUser({
+        ...userData,
+        token: localStorage.getItem('token'),
+        apiKey: localStorage.getItem('userApiKey')
+      });
+      setError(null);
+    } catch (error) {
+      console.error('Erreur de vérification auth:', error);
+      clearAuthData();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearAuthData = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userApiKey');
+    localStorage.removeItem('user');
+    localStorage.removeItem('refreshToken');
+    setUser(null);
+    setError(null);
+  };
+
+  const login = async (email, password) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await api.post('/auth/login', { email, password });
+      const { user, tokens } = response.data.data;
+      
+      if (!tokens?.accessToken || !user?.apiKey) {
+        throw new Error('Données d\'authentification incomplètes');
+      }
+      
+      // Stocker tous les tokens et données utilisateur
+      localStorage.setItem('token', tokens.accessToken);
+      localStorage.setItem('userApiKey', user.apiKey);
+      localStorage.setItem('refreshToken', tokens.refreshToken);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      setUser({
+        ...user,
+        token: tokens.accessToken,
+        apiKey: user.apiKey
+      });
+      
+      toast?.success('Connexion réussie !');
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Erreur de connexion';
+      setError(errorMessage);
+      toast?.error(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signup = async (userData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await api.post('/auth/register', userData);
+      
+      console.log('Réponse backend signup:', response.data); // Debug
+      
+      // L'inscription retourne un verificationToken
+      const result = {
+        message: response.data.message,
+        requiresVerification: true,
+        verificationToken: response.data.data?.verificationToken,
+        email: userData.email
+      };
+      
+      console.log('Résultat à retourner:', result); // Debug
+      return result;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Erreur d\'inscription';
+      setError(errorMessage);
+      toast?.error(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verify = async (verificationData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await api.post('/auth/verify', {
+        verificationToken: verificationData.verificationToken,
+        code: verificationData.code
+      });
+      
+      const { user, tokens } = response.data.data;
+      
+      if (!tokens?.accessToken || !user?.apiKey) {
+        throw new Error('Données de vérification incomplètes');
+      }
+      
+      // Stocker tous les tokens et données utilisateur
+      localStorage.setItem('token', tokens.accessToken);
+      localStorage.setItem('userApiKey', user.apiKey);
+      localStorage.setItem('refreshToken', tokens.refreshToken);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      setUser({
+        ...user,
+        token: tokens.accessToken,
+        apiKey: user.apiKey
+      });
+      toast?.success('Compte vérifié avec succès !');
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Code de vérification invalide ou expiré';
+      setError(errorMessage);
+      toast?.error(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (refreshToken) {
+        await api.post('/auth/logout', { refreshToken });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    } finally {
+      clearAuthData();
+    }
+  };
+
+  const updateProfile = async (userData) => {
+    try {
+      const response = await api.patch('/auth/update-me', userData);
+      const updatedUser = response.data.data?.user || response.data.user;
+      
+      const userWithTokens = {
+        ...updatedUser,
+        token: localStorage.getItem('token'),
+        apiKey: localStorage.getItem('userApiKey')
+      };
+      
+      setUser(userWithTokens);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      toast?.success('Profil mis à jour avec succès !');
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Erreur de mise à jour';
+      setError(errorMessage);
+      toast?.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
+  const regenerateApiKey = async () => {
+    try {
+      const response = await api.post('/auth/regenerate-api-key');
+      const { apiKey } = response.data.data;
+      
+      localStorage.setItem('userApiKey', apiKey);
+      setUser(prev => ({ ...prev, apiKey }));
+      
+      toast?.success('API Key régénérée avec succès !');
+      return apiKey;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Erreur de régénération';
+      setError(errorMessage);
+      toast?.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
+  const value = {
+    user,
+    loading,
+    error,
+    login,
+    signup,
+    verify,
+    logout,
+    updateProfile,
+    regenerateApiKey,
+    checkAuth,
+    clearError: () => setError(null)
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
