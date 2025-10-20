@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services Manager - Sorikama Hub</title>
+    <meta name="description" content="Manage and monitor external services">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .theme-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glass {
+            backdrop-filter: blur(16px) saturate(180%);
+            background-color: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(209, 213, 219, 0.3);
+        }
+        .dark .glass {
+            background-color: rgba(17, 25, 40, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.125);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .dark .card-hover:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        .status-online { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .service-icon {
+            transition: transform 0.3s ease;
+        }
+        .service-card:hover .service-icon {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="theme-transition bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen">
+
+    <!-- Header -->
+    <header class="glass sticky top-0 z-50 theme-transition border-b border-gray-200 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-network-wired text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Services Manager</h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">External Services</p>
+                    </div>
+                </div>
+                
+                <!-- Controls -->
+                <div class="flex items-center space-x-4">
+                    
+                    <!-- Theme Switcher -->
+                    <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                        <button id="theme-light" class="p-2 rounded-md transition-colors" title="Light mode">
+                            <i class="fas fa-sun text-sm"></i>
+                        </button>
+                        <button id="theme-dark" class="p-2 rounded-md transition-colors" title="Dark mode">
+                            <i class="fas fa-moon text-sm"></i>
+                        </button>
+                        <button id="theme-system" class="p-2 rounded-md transition-colors" title="System mode">
+                            <i class="fas fa-desktop text-sm"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Refresh Button -->
+                    <button id="refreshBtn" onclick="refreshAllServices()" class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-blue-200 dark:hover:bg-blue-800">
+                        <i class="fas fa-sync-alt mr-1"></i>Refresh
+                    </button>
+                    
+                    <!-- Back Button -->
+                    <a href="/api" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        <span class="hidden sm:inline">Back</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Overview Stats -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Services Overview</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Services</p>
+                            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="totalServices">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-server text-blue-600 dark:text-blue-400 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Active Services</p>
+                            <p class="text-2xl font-bold text-green-600 dark:text-green-400" id="activeServices">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Inactive Services</p>
+                            <p class="text-2xl font-bold text-red-600 dark:text-red-400" id="inactiveServices">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-times-circle text-red-600 dark:text-red-400 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Uptime</p>
+                            <p class="text-2xl font-bold text-orange-600 dark:text-orange-400" id="avgUptime">0%</p>
+                        </div>
+                        <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-chart-line text-orange-600 dark:text-orange-400 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <!-- Services Grid -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Sorikama Services</h2>
+            <div id="servicesGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Services will be loaded here -->
+            </div>
+        </div>
+        
+    </main>
+
+    <!-- Test Results Modal -->
+    <div id="testModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="glass rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Service Test Results</h3>
+                <button onclick="closeTestModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="testResults" class="text-gray-700 dark:text-gray-300">
+                <!-- Test results will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Management
+        class ThemeManager {
+            constructor() {
+                this.theme = localStorage.getItem('theme') || 'system';
+                this.init();
+            }
+            
+            init() {
+                this.applyTheme();
+                this.setupEventListeners();
+                this.updateButtons();
+            }
+            
+            applyTheme() {
+                const root = document.documentElement;
+                
+                if (this.theme === 'system') {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    root.classList.toggle('dark', prefersDark);
+                } else {
+                    root.classList.toggle('dark', this.theme === 'dark');
+                }
+            }
+            
+            setTheme(newTheme) {
+                this.theme = newTheme;
+                localStorage.setItem('theme', newTheme);
+                this.applyTheme();
+                this.updateButtons();
+            }
+            
+            updateButtons() {
+                const buttons = {
+                    light: document.getElementById('theme-light'),
+                    dark: document.getElementById('theme-dark'),
+                    system: document.getElementById('theme-system')
+                };
+                
+                Object.keys(buttons).forEach(key => {
+                    const button = buttons[key];
+                    if (button) {
+                        button.classList.toggle('bg-primary-100', key === this.theme);
+                        button.classList.toggle('text-primary-600', key === this.theme);
+                        button.classList.toggle('dark:bg-primary-900', key === this.theme);
+                        button.classList.toggle('dark:text-primary-400', key === this.theme);
+                    }
+                });
+            }
+            
+            setupEventListeners() {
+                document.getElementById('theme-light')?.addEventListener('click', () => this.setTheme('light'));
+                document.getElementById('theme-dark')?.addEventListener('click', () => this.setTheme('dark'));
+                document.getElementById('theme-system')?.addEventListener('click', () => this.setTheme('system'));
+                
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    if (this.theme === 'system') {
+                        this.applyTheme();
+                    }
+                });
+            }
+        }
+
+        // Services Manager
+        class ServicesManager {
+            constructor() {
+                this.services = [];
+                this.init();
+            }
+            
+            init() {
+                this.loadServices();
+                this.startRealTimeUpdates();
+            }
+            
+            startRealTimeUpdates() {
+                // Mettre à jour les stats toutes les 30 secondes
+                setInterval(() => {
+                    this.updateOverview();
+                }, 30000);
+            }
+            
+            loadServices() {
+                if (window.servicesData) {
+                    this.services = window.servicesData;
+                    this.updateOverview();
+                    this.renderServices();
+                }
+            }
+            
+            async updateOverview() {
+                try {
+                    // Récupérer les stats en temps réel
+                    const response = await fetch('/monitoring/stats');
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const stats = result.data;
+                        document.getElementById('totalServices').textContent = stats.services.total;
+                        document.getElementById('activeServices').textContent = stats.services.active;
+                        document.getElementById('inactiveServices').textContent = stats.services.inactive;
+                        document.getElementById('avgUptime').textContent = stats.requests24h.successRate + '%';
+                    } else {
+                        // Fallback sur les données locales
+                        const total = this.services.length;
+                        const active = this.services.filter(s => s.status === 'active').length;
+                        const inactive = total - active;
+                        const avgUptime = Math.round(this.services.reduce((acc, s) => acc + s.uptime, 0) / total);
+                        
+                        document.getElementById('totalServices').textContent = total;
+                        document.getElementById('activeServices').textContent = active;
+                        document.getElementById('inactiveServices').textContent = inactive;
+                        document.getElementById('avgUptime').textContent = avgUptime + '%';
+                    }
+                } catch (error) {
+                    console.error('Erreur récupération stats:', error);
+                    // Fallback sur les données locales
+                    const total = this.services.length;
+                    const active = this.services.filter(s => s.status === 'active').length;
+                    const inactive = total - active;
+                    const avgUptime = Math.round(this.services.reduce((acc, s) => acc + s.uptime, 0) / total);
+                    
+                    document.getElementById('totalServices').textContent = total;
+                    document.getElementById('activeServices').textContent = active;
+                    document.getElementById('inactiveServices').textContent = inactive;
+                    document.getElementById('avgUptime').textContent = avgUptime + '%';
+                }
+            }
+            
+            renderServices() {
+                const grid = document.getElementById('servicesGrid');
+                grid.innerHTML = '';
+                
+                this.services.forEach(service => {
+                    const serviceCard = this.createServiceCard(service);
+                    grid.innerHTML += serviceCard;
+                });
+            }
+            
+            createServiceCard(service) {
+                const statusColor = service.status === 'active' ? 'green' : 'red';
+                const colorMap = {
+                    blue: 'blue',
+                    green: 'green',
+                    yellow: 'yellow',
+                    purple: 'purple',
+                    red: 'red',
+                    indigo: 'indigo'
+                };
+                const serviceColor = colorMap[service.color] || 'blue';
+                
+                return `
+                    <div class="service-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-16 h-16 bg-${serviceColor}-100 dark:bg-${serviceColor}-900 rounded-2xl flex items-center justify-center service-icon">
+                                    <i class="${service.icon} text-${serviceColor}-600 dark:text-${serviceColor}-400 text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">${service.name}</h3>
+                                    <p class="text-sm text-${serviceColor}-600 dark:text-${serviceColor}-400 font-medium">v${service.version}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-${statusColor}-500 rounded-full ${service.status === 'active' ? 'status-online' : ''}"></div>
+                                <span class="text-${statusColor}-600 dark:text-${statusColor}-400 font-medium text-sm capitalize">
+                                    ${service.status === 'active' ? 'Active' : 'Inactive'}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">${service.description}</p>
+                        
+                        <!-- Metrics -->
+                        <div class="grid grid-cols-3 gap-4 mb-4">
+                            <div class="text-center">
+                                <div class="text-lg font-bold text-${serviceColor}-600 dark:text-${serviceColor}-400">${service.responseTime}ms</div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Response</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-bold text-green-600 dark:text-green-400">${service.uptime}%</div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Uptime</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-bold text-blue-600 dark:text-blue-400">${service.requests.toLocaleString()}</div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Requests</p>
+                            </div>
+                        </div>
+                        
+                        <!-- URL -->
+                        <div class="mb-4">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Service URL:</p>
+                            <code class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded font-mono break-all">${service.url}</code>
+                        </div>
+                        
+                        <!-- Endpoints -->
+                        <div class="mb-4">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Endpoints:</p>
+                            <div class="flex flex-wrap gap-1">
+                                ${service.endpoints.map(endpoint => `
+                                    <span class="bg-${serviceColor}-100 dark:bg-${serviceColor}-900 text-${serviceColor}-700 dark:text-${serviceColor}-300 px-2 py-1 rounded text-xs font-mono">
+                                        ${endpoint}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <button onclick="testService('${service.id}')" class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-blue-200 dark:hover:bg-blue-800">
+                                <i class="fas fa-vial mr-1"></i>Test
+                            </button>
+                            
+                            ${service.status === 'active' ? `
+                            <button onclick="launchSSO('${service.id}')" class="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-purple-200 dark:hover:bg-purple-800">
+                                <i class="fas fa-external-link-alt mr-1"></i>Launch
+                            </button>
+                            ` : ''}
+                            
+                            ${service.status === 'active' ? `
+                            <button onclick="disconnectService('${service.id}')" class="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-red-200 dark:hover:bg-red-800">
+                                <i class="fas fa-unlink mr-1"></i>Disconnect
+                            </button>
+                            ` : `
+                            <button onclick="connectService('${service.id}')" class="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-green-200 dark:hover:bg-green-800">
+                                <i class="fas fa-link mr-1"></i>Connect
+                            </button>
+                            `}
+                            
+                            <button onclick="viewLogs('${service.id}')" class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-gray-200 dark:hover:bg-gray-700">
+                                <i class="fas fa-file-alt mr-1"></i>Logs
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Service Actions
+        async function testService(serviceId) {
+            try {
+                const response = await fetch(`/services/test/${serviceId}`, { method: 'POST' });
+                const result = await response.json();
+                
+                const resultsHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-4 h-4 bg-${result.success ? 'green' : 'red'}-500 rounded-full"></div>
+                            <span class="font-semibold">${result.success ? 'Test Successful' : 'Test Failed'}</span>
+                        </div>
+                        <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+                            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${JSON.stringify(result, null, 2)}</pre>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('testResults').innerHTML = resultsHTML;
+                document.getElementById('testModal').classList.remove('hidden');
+                
+            } catch (error) {
+                document.getElementById('testResults').innerHTML = `
+                    <div class="text-red-600 dark:text-red-400">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Error: ${error.message}
+                    </div>
+                `;
+                document.getElementById('testModal').classList.remove('hidden');
+            }
+        }
+        
+        async function disconnectService(serviceId) {
+            if (confirm('Êtes-vous sûr de vouloir déconnecter ce service ?')) {
+                try {
+                    const response = await fetch(`/services/${serviceId}/status`, { 
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'inactive' })
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showNotification(result.message, 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showNotification('Erreur: ' + result.message, 'error');
+                    }
+                } catch (error) {
+                    showNotification('Erreur: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        async function connectService(serviceId) {
+            try {
+                const response = await fetch(`/services/${serviceId}/status`, { 
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'active' })
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showNotification('Erreur: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Erreur: ' + error.message, 'error');
+            }
+        }
+        
+        function viewLogs(serviceId) {
+            window.open(`/logs/viewer?service=${serviceId}`, '_blank');
+        }
+        
+        function closeTestModal() {
+            document.getElementById('testModal').classList.add('hidden');
+        }
+        
+        // Lancer un service via SSO
+        async function launchSSO(serviceId) {
+            try {
+                const response = await fetch(`/services/sso/${serviceId}`, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        redirectUrl: window.location.origin + '/services/manager?launched=' + serviceId 
+                    })
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Redirection vers ' + serviceId + '...', 'info');
+                    // Ouvrir dans un nouvel onglet
+                    window.open(result.ssoUrl, '_blank');
+                } else {
+                    showNotification('Erreur SSO: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Erreur: ' + error.message, 'error');
+            }
+        }
+        
+        // Système de notifications
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500',
+                warning: 'bg-yellow-500'
+            };
+            
+            notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'}-circle"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animation d'entrée
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Suppression automatique
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        function refreshAllServices() {
+            const btn = document.getElementById('refreshBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Actualisation...';
+            btn.disabled = true;
+            
+            showNotification('Actualisation des services...', 'info');
+            
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+
+        // Vérifier si on revient d'un lancement SSO
+        function checkSSOReturn() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const launched = urlParams.get('launched');
+            const ssoSuccess = urlParams.get('sso_success');
+            const ssoError = urlParams.get('sso_error');
+            
+            if (launched && ssoSuccess) {
+                showNotification(`Service ${launched} lancé avec succès !`, 'success');
+                // Nettoyer l'URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (ssoError) {
+                showNotification(`Erreur SSO: ${decodeURIComponent(ssoError)}`, 'error');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+        
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            new ThemeManager();
+            new ServicesManager();
+            checkSSOReturn();
+        });
+    </script>
+
+</body>
+</html>

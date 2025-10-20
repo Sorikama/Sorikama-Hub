@@ -1,7 +1,167 @@
-2024-01-15 10:35:12 [INFO] GET /api/health - 200 - 15ms - IP: 127.0.0.1
-2024-01-15 10:35:33 [INFO] POST /api/auth/login - 200 - 234ms - IP: 192.168.1.100
-2024-01-15 10:36:15 [INFO] GET /api/users/profile - 200 - 45ms - IP: 192.168.1.100
-2024-01-15 10:36:42 [INFO] PUT /api/users/settings - 200 - 123ms - IP: 192.168.1.100
-2024-01-15 10:37:18 [ERROR] POST /api/data/invalid - 400 - 12ms - IP: 203.0.113.45
-2024-01-15 10:37:55 [INFO] GET /api/metrics - 200 - 67ms - IP: 10.0.0.25
-2024-01-15 10:38:22 [INFO] DELETE /api/cache/clear - 200 - 89ms - IP: 127.0.0.1
+[2025-01-20 15:04:12] INFO: 📥 GET /api/health - 200 - 45ms
+[2025-01-20 16:04:12] INFO: 📥 POST /auth/login - 200 - 234ms
+[2025-01-20 17:04:12] INFO: 📥 GET /api/services - 200 - 67ms
+[2025-01-20 18:04:12] INFO: 📥 PUT /api/user/profile - 200 - 123ms
+[2025-01-20 19:04:12] INFO: 📥 GET /logs/viewer - 200 - 89ms
+[2025-01-20 20:04:12] INFO: 📥 GET /api/dashboard - 200 - 156ms[2025-10-20 19:14:55] INFO: 📥 GET /logs/viewer - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:14:56] INFO: 📥 GET /portal/login - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:16:08] INFO: 📥 POST /portal/authenticate - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:16:09] INFO: 📤 POST /portal/authenticate - 200 - 7ms - ::1
+[2025-10-20 19:16:10] INFO: 📥 GET /api - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:16:10] INFO: 📤 GET /api - 200 - 3ms - ::1
+[2025-10-20 19:16:10] INFO: 📥 GET /monitoring/stats - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:16:10] INFO: 📤 GET /monitoring/stats - 200 - 15ms - ::1
+[2025-10-20 19:16:13] INFO: 📥 GET /logs/viewer - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:16:13] INFO: 📤 GET /logs/viewer - 200 - 3ms - ::1
+[2025-10-20 19:16:14] INFO: 📥 GET /logs/files - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:16:14] INFO: 📤 GET /logs/files - 200 - 3ms - ::1
+[2025-10-20 19:16:29] INFO: 📥 POST /logs/generate-test - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:16:29] INFO: 📤 POST /logs/generate-test - 200 - 3ms - ::1
+[2025-10-20 19:16:35] INFO: 📥 GET /logs/viewer - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:16:35] INFO: 📤 GET /logs/viewer - 200 - 1ms - ::1
+[2025-10-20 19:16:35] INFO: 📥 GET /logs/files - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:16:35] INFO: 📤 GET /logs/files - 200 - 4ms - ::1
+[2025-10-20 19:18:22] INFO: 📥 GET /logs/viewer - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:23] INFO: 📥 GET /portal/login - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:24] INFO: 📥 POST /portal/authenticate - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:24] INFO: 📤 POST /portal/authenticate - 200 - 2ms - ::1
+[2025-10-20 19:18:25] INFO: 📥 GET /api - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:25] INFO: 📤 GET /api - 200 - 3ms - ::1
+[2025-10-20 19:18:26] INFO: 📥 GET /monitoring/stats - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:26] INFO: 📤 GET /monitoring/stats - 200 - 9ms - ::1
+[2025-10-20 19:18:27] INFO: 📥 GET /logs/viewer - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:27] INFO: 📤 GET /logs/viewer - 200 - 3ms - ::1
+[2025-10-20 19:18:27] INFO: 📥 GET /logs/files - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:27] INFO: 📤 GET /logs/files - 200 - 97ms - ::1
+[2025-10-20 19:18:27] INFO: 📥 GET /logs/content/application.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:27] INFO: 📤 GET /logs/content/application.log?limit=500&offset=0 - 200 - 5ms - ::1
+[2025-10-20 19:18:30] INFO: 📥 GET /logs/content/application.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:30] INFO: 📤 GET /logs/content/application.log?limit=500&offset=0 - 200 - 14ms - ::1
+[2025-10-20 19:18:33] INFO: 📥 GET /logs/content/error.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:33] INFO: 📤 GET /logs/content/error.log?limit=500&offset=0 - 200 - 4ms - ::1
+[2025-10-20 19:18:33] INFO: 📥 GET /logs/content/error.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:33] INFO: 📤 GET /logs/content/error.log?limit=500&offset=0 - 200 - 3ms - ::1
+[2025-10-20 19:18:35] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:35] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:18:36] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:36] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:18:39] INFO: 📥 GET /logs/content/performance.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:39] INFO: 📤 GET /logs/content/performance.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:18:39] INFO: 📥 GET /logs/content/performance.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:39] INFO: 📤 GET /logs/content/performance.log?limit=500&offset=0 - 200 - 3ms - ::1
+[2025-10-20 19:18:42] INFO: 📥 GET /logs/content/performance.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:42] INFO: 📤 GET /logs/content/performance.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:18:44] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:44] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 3ms - ::1
+[2025-10-20 19:18:45] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:45] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:18:48] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:48] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 3ms - ::1
+[2025-10-20 19:18:51] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:51] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:18:54] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:54] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 6ms - ::1
+[2025-10-20 19:18:58] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:18:58] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:19:01] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:01] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:19:04] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:04] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:19:06] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:06] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 10ms - ::1
+[2025-10-20 19:19:10] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:10] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:19:12] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:12] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:19:23] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:23] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 5ms - ::1
+[2025-10-20 19:19:28] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:28] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:19:28] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:28] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:19:32] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:32] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:19:34] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:34] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:19:37] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:37] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:19:40] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:40] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:19:43] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:43] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:19:46] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:46] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:19:49] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:49] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:19:52] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:52] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:19:55] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:55] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:19:58] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:19:58] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:20:01] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:20:01] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:20:04] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:20:04] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:20:07] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:20:07] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:20:10] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:20:10] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 3ms - ::1
+[2025-10-20 19:21:12] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:21:12] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:21:48] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:21:48] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 4ms - ::1
+[2025-10-20 19:21:48] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:21:48] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:21:52] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:21:52] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:21:55] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:21:55] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:21:57] INFO: 📥 GET /logs/content/alerts.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:21:57] INFO: 📤 GET /logs/content/alerts.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:21:58] INFO: 📥 GET /logs/content/performance.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:21:58] INFO: 📤 GET /logs/content/performance.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:21:59] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:21:59] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:22:00] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:00] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:22:03] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:03] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:22:06] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:06] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 3ms - ::1
+[2025-10-20 19:22:09] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:09] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:22:09] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:09] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 5ms - ::1
+[2025-10-20 19:22:11] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:11] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:22:12] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:12] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 3ms - ::1
+[2025-10-20 19:22:15] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:15] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:22:18] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:18] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:22:21] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:21] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:22:24] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:24] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:22:27] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:27] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:22:30] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:30] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 2ms - ::1
+[2025-10-20 19:22:33] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:33] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:22:36] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:36] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:22:39] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:39] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:22:42] INFO: 📥 GET /logs/content/redis.log?limit=500&offset=0 - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:42] INFO: 📤 GET /logs/content/redis.log?limit=500&offset=0 - 200 - 1ms - ::1
+[2025-10-20 19:22:46] INFO: 📥 GET /api - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:46] INFO: 📤 GET /api - 200 - 3ms - ::1
+[2025-10-20 19:22:46] INFO: 📥 GET /monitoring/stats - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:46] INFO: 📤 GET /monitoring/stats - 200 - 8ms - ::1
+[2025-10-20 19:22:50] INFO: 📥 GET /system/health - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:22:50] INFO: 📤 GET /system/health - 200 - 4ms - ::1
+[2025-10-20 19:23:21] INFO: 📥 GET /system/health - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 19:23:21] INFO: 📤 GET /system/health - 200 - 2ms - ::1

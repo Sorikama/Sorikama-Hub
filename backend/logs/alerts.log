@@ -1,7 +1,44 @@
-2024-01-15 09:45:12 [WARN] Alerte système: Espace disque faible - 85% utilisé
-2024-01-15 09:46:33 [ERROR] Alerte critique: Service SoriPay indisponible
-2024-01-15 09:47:15 [WARN] Alerte performance: Temps de réponse > 2s détecté
-2024-01-15 09:48:22 [ERROR] Alerte sécurité: Tentatives de connexion suspectes
-2024-01-15 09:49:45 [WARN] Alerte mémoire: Utilisation RAM > 80%
-2024-01-15 09:50:18 [ERROR] Alerte base de données: Connexions max atteintes
-2024-01-15 09:51:33 [WARN] Alerte réseau: Latence élevée détectée
+[2025-01-20 16:04:12] WARN: ⚠️ Utilisation mémoire élevée: 85%
+[2025-01-20 18:04:12] WARN: 🚨 Tentative de connexion suspecte depuis IP: 192.168.1.100
+[2025-01-20 20:04:12] WARN: ⚠️ Service SoriStore - Temps de réponse élevé: 2.3s[2025-10-20 19:13:54] ERROR: 🚨 Service soristore en erreur: health_check
+[2025-10-20 19:13:54] ERROR: 🚨 Service soripay en erreur: health_check
+[2025-10-20 19:13:54] ERROR: 🚨 Service soriwallet en erreur: health_check
+[2025-10-20 19:13:54] ERROR: 🚨 Service sorilearn en erreur: health_check
+[2025-10-20 19:13:54] ERROR: 🚨 Service sorihealth en erreur: health_check
+[2025-10-20 19:13:55] ERROR: 🚨 Service soriaccess en erreur: health_check
+[2025-10-20 19:14:31] ERROR: 🚨 Service soristore en erreur: health_check
+[2025-10-20 19:14:31] ERROR: 🚨 Service soripay en erreur: health_check
+[2025-10-20 19:14:31] ERROR: 🚨 Service soriwallet en erreur: health_check
+[2025-10-20 19:14:31] ERROR: 🚨 Service sorilearn en erreur: health_check
+[2025-10-20 19:14:31] ERROR: 🚨 Service sorihealth en erreur: health_check
+[2025-10-20 19:14:31] ERROR: 🚨 Service soriaccess en erreur: health_check
+[2025-10-20 19:14:48] ERROR: 🚨 Service soristore en erreur: health_check
+[2025-10-20 19:14:48] ERROR: 🚨 Service soripay en erreur: health_check
+[2025-10-20 19:14:48] ERROR: 🚨 Service soriwallet en erreur: health_check
+[2025-10-20 19:14:48] ERROR: 🚨 Service sorilearn en erreur: health_check
+[2025-10-20 19:14:48] ERROR: 🚨 Service sorihealth en erreur: health_check
+[2025-10-20 19:14:48] ERROR: 🚨 Service soriaccess en erreur: health_check
+[2025-10-20 19:16:04] ERROR: 🚨 Service soristore en erreur: health_check
+[2025-10-20 19:16:04] ERROR: 🚨 Service soripay en erreur: health_check
+[2025-10-20 19:16:04] ERROR: 🚨 Service soriwallet en erreur: health_check
+[2025-10-20 19:16:04] ERROR: 🚨 Service sorilearn en erreur: health_check
+[2025-10-20 19:16:04] ERROR: 🚨 Service sorihealth en erreur: health_check
+[2025-10-20 19:16:04] ERROR: 🚨 Service soriaccess en erreur: health_check
+[2025-10-20 19:17:50] ERROR: 🚨 Service soristore en erreur: health_check
+[2025-10-20 19:17:50] ERROR: 🚨 Service soripay en erreur: health_check
+[2025-10-20 19:17:50] ERROR: 🚨 Service soriwallet en erreur: health_check
+[2025-10-20 19:17:50] ERROR: 🚨 Service sorilearn en erreur: health_check
+[2025-10-20 19:17:50] ERROR: 🚨 Service sorihealth en erreur: health_check
+[2025-10-20 19:17:50] ERROR: 🚨 Service soriaccess en erreur: health_check
+[2025-10-20 19:18:19] ERROR: 🚨 Service soristore en erreur: health_check
+[2025-10-20 19:18:19] ERROR: 🚨 Service soripay en erreur: health_check
+[2025-10-20 19:18:19] ERROR: 🚨 Service soriwallet en erreur: health_check
+[2025-10-20 19:18:19] ERROR: 🚨 Service sorilearn en erreur: health_check
+[2025-10-20 19:18:19] ERROR: 🚨 Service sorihealth en erreur: health_check
+[2025-10-20 19:18:19] ERROR: 🚨 Service soriaccess en erreur: health_check
+[2025-10-20 19:23:19] ERROR: 🚨 Service soristore en erreur: health_check
+[2025-10-20 19:23:19] ERROR: 🚨 Service soripay en erreur: health_check
+[2025-10-20 19:23:19] ERROR: 🚨 Service soriwallet en erreur: health_check
+[2025-10-20 19:23:19] ERROR: 🚨 Service sorilearn en erreur: health_check
+[2025-10-20 19:23:19] ERROR: 🚨 Service sorihealth en erreur: health_check
+[2025-10-20 19:23:19] ERROR: 🚨 Service soriaccess en erreur: health_check

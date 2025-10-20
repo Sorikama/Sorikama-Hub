@@ -1,8 +1,666 @@
-2024-01-15 10:00:15 [DEBUG] Initialisation du module de routage
-2024-01-15 10:00:16 [DEBUG] Chargement des middlewares de sécurité
-2024-01-15 10:00:17 [DEBUG] Configuration Redis: host=localhost, port=6379
-2024-01-15 10:00:18 [DEBUG] Connexion MongoDB: sorikama_gateway_db
-2024-01-15 10:01:22 [DEBUG] Validation des permissions pour clé: sk_prod_***
-2024-01-15 10:02:33 [DEBUG] Cache miss pour clé: user_profile_456
-2024-01-15 10:03:45 [DEBUG] Exécution du middleware de rate limiting
-2024-01-15 10:04:12 [DEBUG] Parsing des headers de requête HTTP
+[2025-01-20 15:04:12] DEBUG: 🔍 Initialisation des middlewares
+[2025-01-20 16:04:12] DEBUG: 🔍 Chargement des routes API
+[2025-01-20 17:04:12] DEBUG: 🔍 Validation des variables d'environnement
+[2025-01-20 18:04:12] DEBUG: 🔍 Configuration SSL vérifiée
+[2025-01-20 19:04:12] DEBUG: 🔍 Nettoyage des sessions expirées
+[2025-01-20 20:04:12] DEBUG: 🔍 Synchronisation des données utilisateur[2025-10-20 19:13:49] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:13:49] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:13:50] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:13:50] INFO: 🧹 Nettoyage terminé: 0 fichiers supprimés
+[2025-10-20 19:13:50] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-20 19:13:51] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:13:51] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:13:51] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:13:51] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:13:51] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:13:51] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:13:49] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:13:49] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:13:50] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:13:50] INFO: 🧹 Nettoyage terminé: 0 fichiers supprimés
+[2025-10-20 19:13:50] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-20 19:13:51] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:13:51] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:13:51] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:13:51] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:13:51] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:13:51] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:13:51] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$FA2cIAkfnl.KuzdS9EJca.Oa1Yo3bWTrwFNr0KWwkiSc1WfefhuTq
+[2025-10-20 19:13:51] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$7IQabVgCALqUa4aO0.E6g.NT3SCJVkhhuHTqMob2r/oEwrmShfKum
+[2025-10-20 19:13:49] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:13:49] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:13:50] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:13:50] INFO: 🧹 Nettoyage terminé: 0 fichiers supprimés
+[2025-10-20 19:13:50] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-20 19:13:51] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:13:51] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:13:51] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:13:51] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:13:51] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:13:51] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:13:52] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$mBFe33hxH87ORweh6p30Yuhet7xtrZMkrU9LXF95QcjfwgSFP.AqS
+[2025-10-20 19:13:52] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:13:52] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:13:52] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:13:52] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:13:52] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:13:53] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:13:53] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:13:53] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:13:53] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:13:53] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:13:53] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:13:53] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:13:53] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:13:53] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:13:53] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:13:53] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:13:53] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:13:53] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:13:53] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:13:53] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:13:53] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:13:53] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:13:53] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:13:53] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:13:53] INFO: 🔑 API Key Admin: sk_9d0598b686a232e992289d66d9d8bb6eaf348562daea9726aea131797c734f23
+[2025-10-20 19:13:53] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:13:53] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:13:53] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:13:53] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:13:53] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:13:53] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:13:53] INFO: 🔑 API Key Admin: sk_ce33543b7205dcb00c8e55017fecdb12c5bfa13df04f3e80ab6efa8b7159b944
+[2025-10-20 19:13:53] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:13:53] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:13:54] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:13:54] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:13:54] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:13:54] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:13:53] INFO: ✅ Tous les seeders terminés avec succès
+[2025-10-20 19:13:53] INFO: API Key Admin générée automatiquement
+[2025-10-20 19:13:54] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-20 19:13:54] INFO: ⚙️ Système: Système de logs initialisé
+[2025-10-20 19:13:54] INFO: 🔍 Démarrage du monitoring (intervalle: 5min)
+[2025-10-20 19:13:54] INFO: ⚙️ Système: Serveur HTTP démarré sur le port 7000
+[2025-10-20 19:13:54] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:13:54] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:13:54] ERROR: 🔗 Service soristore - health_check - Success: false - 190ms
+[2025-10-20 19:13:54] WARN: 🚨 Service SoriStore indisponible
+[2025-10-20 19:13:54] ERROR: 🔗 Service soripay - health_check - Success: false - 3ms
+[2025-10-20 19:13:54] WARN: 🚨 Service SoriPay indisponible
+[2025-10-20 19:13:54] ERROR: 🔗 Service soriwallet - health_check - Success: false - 3ms
+[2025-10-20 19:13:54] WARN: 🚨 Service SoriWallet indisponible
+[2025-10-20 19:13:54] ERROR: 🔗 Service sorilearn - health_check - Success: false - 5ms
+[2025-10-20 19:13:54] WARN: 🚨 Service SoriLearn indisponible
+[2025-10-20 19:13:54] ERROR: 🔗 Service sorihealth - health_check - Success: false - 3ms
+[2025-10-20 19:13:54] WARN: 🚨 Service SoriHealth indisponible
+[2025-10-20 19:13:55] ERROR: 🔗 Service soriaccess - health_check - Success: false - 3ms
+[2025-10-20 19:13:55] WARN: 🚨 Service SoriAccess indisponible
+[2025-10-20 19:13:55] INFO: 📊 Health check terminé: 0/6 services opérationnels
+[2025-10-20 19:13:55] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:13:55] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:13:55] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:13:55] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:13:55] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:13:55] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:13:55] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:13:55] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:13:55] INFO: 🔑 API Key Admin: sk_c491972e24fbd1a756389ab030c935097ac1cdd5be145cab4a74419a667d7adc
+[2025-10-20 19:13:55] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:13:55] INFO: 🌐 Accès au portail: http://localhost:7000/portal/login
+[2025-10-20 19:13:55] INFO: ⚙️ Système: Démarrage complet du système Sorikama Hub - {"port":7000}
+[2025-10-20 19:14:14] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:14:14] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:14:18] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:14:21] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:14:21] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:14:22] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:14:22] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:14:22] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:14:22] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:14:14] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:14:14] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:14:19] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:14:21] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:14:21] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:14:22] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:14:22] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:14:22] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:14:22] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:14:23] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:14:23] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:14:24] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$zNs1slAE7VYc3JI45XhX9uKM4qcKWSHlsK2bApmuUjpuNXNv4H0hq
+[2025-10-20 19:14:24] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$UJwBh5BywO7wn65DL8Pm1.mLdiMsMr5R5EBmENSTp5HXMtyJ2weTy
+[2025-10-20 19:14:24] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:14:24] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:14:25] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:14:25] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:14:25] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:14:25] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:14:25] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:14:25] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:14:25] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:14:25] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:14:19] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:14:19] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:14:24] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:14:26] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:14:26] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:14:27] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:14:27] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:14:27] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:14:27] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:14:28] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:14:28] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:14:28] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:14:28] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:14:28] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:14:28] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:14:28] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:14:28] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:14:28] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$7cq3WDWz1VASAGaRniT2kukRLfIZys26EEg4MZtYNFwCvSE4dtNNW
+[2025-10-20 19:14:29] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:14:30] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:14:30] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:14:30] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:14:30] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:14:30] INFO: 🔑 API Key Admin: sk_0759800bd9a70076f9eb040c75c59263b9960bd5ad632c26db7fbc7beca3be71
+[2025-10-20 19:14:30] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:14:30] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:14:30] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:14:30] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:14:30] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:14:30] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:14:30] INFO: 🔑 API Key Admin: sk_5a50128ea0baafb455afbdce76c00d9efcacbf7c6431c944dc5417fc08bf26da
+[2025-10-20 19:14:30] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:14:30] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:14:31] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:14:30] INFO: ✅ Tous les seeders terminés avec succès
+[2025-10-20 19:14:30] INFO: API Key Admin générée automatiquement
+[2025-10-20 19:14:31] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-20 19:14:31] INFO: ⚙️ Système: Système de logs initialisé
+[2025-10-20 19:14:31] INFO: 🔍 Démarrage du monitoring (intervalle: 5min)
+[2025-10-20 19:14:31] INFO: ⚙️ Système: Serveur HTTP démarré sur le port 7000
+[2025-10-20 19:14:31] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:14:31] ERROR: 🔗 Service soristore - health_check - Success: false - 241ms
+[2025-10-20 19:14:31] WARN: 🚨 Service SoriStore indisponible
+[2025-10-20 19:14:31] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:14:31] ERROR: 🔗 Service soripay - health_check - Success: false - 10ms
+[2025-10-20 19:14:31] WARN: 🚨 Service SoriPay indisponible
+[2025-10-20 19:14:31] ERROR: 🔗 Service soriwallet - health_check - Success: false - 5ms
+[2025-10-20 19:14:31] WARN: 🚨 Service SoriWallet indisponible
+[2025-10-20 19:14:31] ERROR: 🔗 Service sorilearn - health_check - Success: false - 5ms
+[2025-10-20 19:14:31] WARN: 🚨 Service SoriLearn indisponible
+[2025-10-20 19:14:31] ERROR: 🔗 Service sorihealth - health_check - Success: false - 11ms
+[2025-10-20 19:14:31] WARN: 🚨 Service SoriHealth indisponible
+[2025-10-20 19:14:31] ERROR: 🔗 Service soriaccess - health_check - Success: false - 4ms
+[2025-10-20 19:14:31] WARN: 🚨 Service SoriAccess indisponible
+[2025-10-20 19:14:31] INFO: 📊 Health check terminé: 0/6 services opérationnels
+[2025-10-20 19:14:32] INFO: 🌐 Accès au portail: http://localhost:7000/portal/login
+[2025-10-20 19:14:32] INFO: ⚙️ Système: Démarrage complet du système Sorikama Hub - {"port":7000}
+[2025-10-20 19:14:40] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:14:40] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:14:42] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:14:43] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:14:43] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:14:43] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:14:43] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:14:43] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:14:43] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:14:44] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$a4LGdpp.k.c4HRUtdJucGOa9YtgQPbc1fIk9YiAgYkea2JWFS0r92
+[2025-10-20 19:14:43] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:14:43] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:14:44] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:14:44] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:14:45] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:14:45] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:14:45] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:14:45] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:14:45] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:14:45] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:14:45] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:14:45] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:14:45] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:14:46] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:14:46] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:14:46] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$SDC.77caI0/xzf85XuAPj./hld6h56OfkHX4b.JiDtGNM6mnkrpSq
+[2025-10-20 19:14:46] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:14:46] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:14:46] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:14:46] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:14:46] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:14:46] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:14:46] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:14:46] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:14:46] INFO: 🔑 API Key Admin: sk_46d53f464104d8ec70a45a502636fadbbb48ed27a38fca177155cf5ad078daf7
+[2025-10-20 19:14:46] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:14:46] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:14:47] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:14:47] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:14:47] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:14:47] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:14:47] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:14:47] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:14:46] INFO: ✅ Tous les seeders terminés avec succès
+[2025-10-20 19:14:46] INFO: API Key Admin générée automatiquement
+[2025-10-20 19:14:47] INFO: 🗑️ Fichier log supprimé: errors.log
+[2025-10-20 19:14:47] INFO: 🗑️ Fichier log supprimé: redis-errors.log
+[2025-10-20 19:14:47] INFO: 🗑️ Fichier log supprimé: redis-metrics.log
+[2025-10-20 19:14:47] INFO: 🧹 Nettoyage terminé: 3 fichiers supprimés
+[2025-10-20 19:14:47] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-20 19:14:47] INFO: ⚙️ Système: Système de logs initialisé
+[2025-10-20 19:14:47] INFO: 🔍 Démarrage du monitoring (intervalle: 5min)
+[2025-10-20 19:14:47] INFO: ⚙️ Système: Serveur HTTP démarré sur le port 7000
+[2025-10-20 19:14:48] ERROR: 🔗 Service soristore - health_check - Success: false - 266ms
+[2025-10-20 19:14:48] WARN: 🚨 Service SoriStore indisponible
+[2025-10-20 19:14:48] ERROR: 🔗 Service soripay - health_check - Success: false - 10ms
+[2025-10-20 19:14:48] WARN: 🚨 Service SoriPay indisponible
+[2025-10-20 19:14:48] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:14:48] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:14:48] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:14:48] ERROR: 🔗 Service soriwallet - health_check - Success: false - 4ms
+[2025-10-20 19:14:48] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:14:48] WARN: 🚨 Service SoriWallet indisponible
+[2025-10-20 19:14:48] ERROR: 🔗 Service sorilearn - health_check - Success: false - 3ms
+[2025-10-20 19:14:48] WARN: 🚨 Service SoriLearn indisponible
+[2025-10-20 19:14:48] ERROR: 🔗 Service sorihealth - health_check - Success: false - 8ms
+[2025-10-20 19:14:48] WARN: 🚨 Service SoriHealth indisponible
+[2025-10-20 19:14:48] ERROR: 🔗 Service soriaccess - health_check - Success: false - 11ms
+[2025-10-20 19:14:48] WARN: 🚨 Service SoriAccess indisponible
+[2025-10-20 19:14:48] INFO: 📊 Health check terminé: 0/6 services opérationnels
+[2025-10-20 19:14:48] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:14:48] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:14:48] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:14:48] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:14:48] INFO: 🔑 API Key Admin: sk_ae0a4ea562c71312b3e20c5d16b9716455d1dfc53c3cb72f40883098dd6fcd52
+[2025-10-20 19:14:48] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:14:48] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:14:49] INFO: 🌐 Accès au portail: http://localhost:7000/portal/login
+[2025-10-20 19:14:49] INFO: ⚙️ Système: Démarrage complet du système Sorikama Hub - {"port":7000}
+[2025-10-20 19:14:51] INFO: 🚫 Lancement automatique désactivé (3/3 tentatives atteintes)
+[2025-10-20 19:14:51] INFO: 💡 Accédez manuellement à: http://localhost:7000
+[2025-10-20 19:14:55] WARN: 🚨 Accès non autorisé - Pas de token de session
+[2025-10-20 19:15:06] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:15:06] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:15:07] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:15:08] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:15:08] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:15:08] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:15:08] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:15:08] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:15:08] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:15:08] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$JS8RFVWs00cT0AXFB3kIUeFuXORROMAQvbx3eAYJ0L.SQh2NZcap6
+[2025-10-20 19:15:09] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:15:09] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:15:09] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:15:09] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:15:09] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:15:09] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:15:09] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:15:09] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:15:09] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:15:10] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:15:10] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:15:10] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:15:10] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:15:10] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:15:10] INFO: 🔑 API Key Admin: sk_1123ecc89c31c72bfd7c180f1e58b30cd1718a7b5e06d8ef5bb73dd825dda7eb
+[2025-10-20 19:15:10] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:15:10] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:15:12] INFO: [ROUTING] Service soristore status changed: unhealthy
+[2025-10-20 19:15:12] INFO: [ROUTING] Service soripay status changed: unhealthy
+[2025-10-20 19:15:12] INFO: [ROUTING] Service soriwallet status changed: unhealthy
+[2025-10-20 19:15:12] INFO: [ROUTING] Service sorilearn status changed: unhealthy
+[2025-10-20 19:15:12] INFO: [ROUTING] Service sorihealth status changed: unhealthy
+[2025-10-20 19:15:12] INFO: [ROUTING] Service soriaccess status changed: unhealthy
+[2025-10-20 19:15:29] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:15:29] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:15:29] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:15:30] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:15:30] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:15:30] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:15:30] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:15:30] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:15:30] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:15:30] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$M/PV0OB/V5b2H0iznagayePtcAAdY/7wYjP7GyscUhKtr5ZiBsRHu
+[2025-10-20 19:15:32] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:15:32] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:15:32] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:15:32] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:15:32] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:15:32] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:15:32] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:15:32] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:15:32] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:15:32] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:15:32] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:15:32] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:15:32] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:15:32] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:15:32] INFO: 🔑 API Key Admin: sk_f49b52da5f9cb0e4d1b908808918debab9f5419f162662957d9445690916a9c6
+[2025-10-20 19:15:32] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:15:32] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:16:00] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:16:00] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:16:01] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:16:02] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:16:02] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:16:02] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:16:02] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:16:02] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:16:02] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:16:02] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$7Q5FeYGAyGIrFijGi6ObEONBtYVOFxKalRGlrnAIZnM/gSL300JZe
+[2025-10-20 19:16:04] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:16:04] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:16:04] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:16:04] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:16:04] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:16:04] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:16:04] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:16:04] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:16:04] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:16:04] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:16:04] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:16:04] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:16:04] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:16:04] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:16:04] INFO: 🔑 API Key Admin: sk_a0ee4dd42b0084d317e0015f1629f5f5b53981550215144dd7c5df47159841c3
+[2025-10-20 19:16:04] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:16:04] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:16:04] INFO: ✅ Tous les seeders terminés avec succès
+[2025-10-20 19:16:04] INFO: API Key Admin générée automatiquement
+[2025-10-20 19:16:04] INFO: 🗑️ Fichier log supprimé: errors.log
+[2025-10-20 19:16:04] INFO: 🗑️ Fichier log supprimé: redis-errors.log
+[2025-10-20 19:16:04] INFO: 🗑️ Fichier log supprimé: redis-metrics.log
+[2025-10-20 19:16:04] INFO: 🧹 Nettoyage terminé: 3 fichiers supprimés
+[2025-10-20 19:16:04] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-20 19:16:04] INFO: ⚙️ Système: Système de logs initialisé
+[2025-10-20 19:16:04] INFO: 🔍 Démarrage du monitoring (intervalle: 5min)
+[2025-10-20 19:16:04] INFO: ⚙️ Système: Serveur HTTP démarré sur le port 7000
+[2025-10-20 19:16:04] ERROR: 🔗 Service soristore - health_check - Success: false - 58ms
+[2025-10-20 19:16:04] WARN: 🚨 Service SoriStore indisponible
+[2025-10-20 19:16:04] ERROR: 🔗 Service soripay - health_check - Success: false - 3ms
+[2025-10-20 19:16:04] WARN: 🚨 Service SoriPay indisponible
+[2025-10-20 19:16:04] ERROR: 🔗 Service soriwallet - health_check - Success: false - 2ms
+[2025-10-20 19:16:04] WARN: 🚨 Service SoriWallet indisponible
+[2025-10-20 19:16:04] ERROR: 🔗 Service sorilearn - health_check - Success: false - 2ms
+[2025-10-20 19:16:04] WARN: 🚨 Service SoriLearn indisponible
+[2025-10-20 19:16:04] ERROR: 🔗 Service sorihealth - health_check - Success: false - 3ms
+[2025-10-20 19:16:04] WARN: 🚨 Service SoriHealth indisponible
+[2025-10-20 19:16:04] ERROR: 🔗 Service soriaccess - health_check - Success: false - 4ms
+[2025-10-20 19:16:04] WARN: 🚨 Service SoriAccess indisponible
+[2025-10-20 19:16:04] INFO: 📊 Health check terminé: 0/6 services opérationnels
+[2025-10-20 19:16:05] INFO: 🌐 Accès au portail: http://localhost:7000/portal/login
+[2025-10-20 19:16:05] INFO: ⚙️ Système: Démarrage complet du système Sorikama Hub - {"port":7000}
+[2025-10-20 19:16:07] INFO: 🚫 Lancement automatique désactivé (3/3 tentatives atteintes)
+[2025-10-20 19:16:07] INFO: 💡 Accédez manuellement à: http://localhost:7000
+[2025-10-20 19:16:09] INFO: ✅ Connexion portail réussie
+[2025-10-20 19:16:09] DEBUG: 📊 Métriques collectées: POST /authenticate 200 5ms
+[2025-10-20 19:16:10] DEBUG: 📊 Métriques collectées: GET /api 200 3ms
+[2025-10-20 19:16:10] DEBUG: 📊 Métriques collectées: GET /stats 200 12ms
+[2025-10-20 19:16:13] DEBUG: 📊 Métriques collectées: GET /viewer 200 3ms
+[2025-10-20 19:16:14] DEBUG: 📊 Métriques collectées: GET /files 200 2ms
+[2025-10-20 19:16:29] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-20 19:16:29] DEBUG: 📊 Métriques collectées: POST /generate-test 200 3ms
+[2025-10-20 19:16:31] INFO: [ROUTING] Service soristore status changed: unhealthy
+[2025-10-20 19:16:31] INFO: [ROUTING] Service soripay status changed: unhealthy
+[2025-10-20 19:16:31] INFO: [ROUTING] Service soriwallet status changed: unhealthy
+[2025-10-20 19:16:31] INFO: [ROUTING] Service sorilearn status changed: unhealthy
+[2025-10-20 19:16:31] INFO: [ROUTING] Service sorihealth status changed: unhealthy
+[2025-10-20 19:16:31] INFO: [ROUTING] Service soriaccess status changed: unhealthy
+[2025-10-20 19:16:35] DEBUG: 📊 Métriques collectées: GET /viewer 200 1ms
+[2025-10-20 19:16:35] DEBUG: 📊 Métriques collectées: GET /files 200 3ms
+[2025-10-20 19:17:47] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:17:47] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:17:47] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:17:47] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:17:48] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:17:48] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:17:48] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:17:48] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:17:48] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:17:47] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:17:47] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:17:48] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:17:48] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:17:48] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:17:48] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:17:48] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:17:48] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:17:48] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:17:47] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:17:47] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:17:48] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:17:48] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:17:48] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:17:48] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:17:48] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:17:48] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:17:48] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:17:48] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$oC7jkXACOBaDy3Sz6pl3nulCU9yuXTFyHFU1LCS1HW3y6dt3wZnW2
+[2025-10-20 19:17:48] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$C5HU7THnBLNsq5CohereJumjX8wjdcsvBS64Zpz.n0K2pX1vhMePG
+[2025-10-20 19:17:48] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$4QlSs.Os1kC.C53sIdVqcOcGXdmSudq4H2Eu83hGv4zYGULPz07.C
+[2025-10-20 19:17:49] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:17:49] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:17:49] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:17:49] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:17:49] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:17:50] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:17:50] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:17:50] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:17:50] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:17:50] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:17:50] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:17:50] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:17:50] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:17:50] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:17:50] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:17:50] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:17:50] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:17:50] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:17:50] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:17:50] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:17:50] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:17:50] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:17:50] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:17:50] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:17:50] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:17:50] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:17:50] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:17:50] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:17:50] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:17:50] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:17:50] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:17:50] INFO: 🔑 API Key Admin: sk_144aeddbfa421e5b07a3388eeca71bbb44b4a4bda0767730bcc20e3b853cb394
+[2025-10-20 19:17:50] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:17:50] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:17:50] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:17:50] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:17:50] INFO: 🔑 API Key Admin: sk_332993401c5bb222ca65fb5657b0a4d536d992217992efb5fbf1e8fcbdf1880a
+[2025-10-20 19:17:50] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:17:50] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:17:50] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:17:50] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:17:50] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:17:50] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:17:50] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:17:50] INFO: ✅ Tous les seeders terminés avec succès
+[2025-10-20 19:17:50] INFO: API Key Admin générée automatiquement
+[2025-10-20 19:17:50] INFO: 🗑️ Fichier log supprimé: errors.log
+[2025-10-20 19:17:50] INFO: 🗑️ Fichier log supprimé: redis-errors.log
+[2025-10-20 19:17:50] INFO: 🗑️ Fichier log supprimé: redis-metrics.log
+[2025-10-20 19:17:50] INFO: 🧹 Nettoyage terminé: 3 fichiers supprimés
+[2025-10-20 19:17:50] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-20 19:17:50] INFO: ⚙️ Système: Système de logs initialisé
+[2025-10-20 19:17:50] INFO: 🔍 Démarrage du monitoring (intervalle: 5min)
+[2025-10-20 19:17:50] INFO: ⚙️ Système: Serveur HTTP démarré sur le port 7000
+[2025-10-20 19:17:50] ERROR: 🔗 Service soristore - health_check - Success: false - 99ms
+[2025-10-20 19:17:50] WARN: 🚨 Service SoriStore indisponible
+[2025-10-20 19:17:50] ERROR: 🔗 Service soripay - health_check - Success: false - 6ms
+[2025-10-20 19:17:50] WARN: 🚨 Service SoriPay indisponible
+[2025-10-20 19:17:50] ERROR: 🔗 Service soriwallet - health_check - Success: false - 3ms
+[2025-10-20 19:17:50] WARN: 🚨 Service SoriWallet indisponible
+[2025-10-20 19:17:50] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:17:50] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:17:50] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:17:50] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:17:50] INFO: 🔑 API Key Admin: sk_ca3c74eadd6ce63488bf6cb53307d16df51055194f0e65b191c3999fd87b6664
+[2025-10-20 19:17:50] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:17:50] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:17:50] ERROR: 🔗 Service sorilearn - health_check - Success: false - 2ms
+[2025-10-20 19:17:50] WARN: 🚨 Service SoriLearn indisponible
+[2025-10-20 19:17:50] ERROR: 🔗 Service sorihealth - health_check - Success: false - 7ms
+[2025-10-20 19:17:50] WARN: 🚨 Service SoriHealth indisponible
+[2025-10-20 19:17:50] ERROR: 🔗 Service soriaccess - health_check - Success: false - 4ms
+[2025-10-20 19:17:50] WARN: 🚨 Service SoriAccess indisponible
+[2025-10-20 19:17:50] INFO: 📊 Health check terminé: 0/6 services opérationnels
+[2025-10-20 19:17:51] INFO: 🌐 Accès au portail: http://localhost:7000/portal/login
+[2025-10-20 19:17:51] INFO: ⚙️ Système: Démarrage complet du système Sorikama Hub - {"port":7000}
+[2025-10-20 19:17:53] INFO: 🚫 Lancement automatique désactivé (3/3 tentatives atteintes)
+[2025-10-20 19:17:53] INFO: 💡 Accédez manuellement à: http://localhost:7000
+[2025-10-20 19:18:15] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-20 19:18:15] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-20 19:18:16] INFO: [ROUTING] 6 routes initialisées
+[2025-10-20 19:18:16] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-20 19:18:16] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-20 19:18:16] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-20 19:18:16] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-20 19:18:17] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-20 19:18:17] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-20 19:18:17] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$AgthzTyz2hyCOobhXlk.Iehi.c/SB3Pn9n4Y803TqP/DU1A8.0HX.
+[2025-10-20 19:18:18] INFO: 🔍 Vérification de Redis...
+[2025-10-20 19:18:18] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-20 19:18:18] INFO: Connexion à MongoDB réussie.
+[2025-10-20 19:18:18] INFO: 🌱 Démarrage des seeders...
+[2025-10-20 19:18:18] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-20 19:18:18] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-20 19:18:18] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-20 19:18:18] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-20 19:18:18] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-20 19:18:18] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-20 19:18:19] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-20 19:18:19] INFO: 👨‍💼 Seeding admin...
+[2025-10-20 19:18:19] INFO: ℹ️ Utilisateur admin existe déjà - mise à jour de l'API key
+[2025-10-20 19:18:19] INFO: ✅ Nouvelle API key admin générée
+[2025-10-20 19:18:19] INFO: 🔑 API Key Admin: sk_3dbaba27f223d17b6a6fb732888cac46d553832e81a34104022469f0631b5035
+[2025-10-20 19:18:19] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-20 19:18:19] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-20 19:18:19] INFO: ✅ Tous les seeders terminés avec succès
+[2025-10-20 19:18:19] INFO: API Key Admin générée automatiquement
+[2025-10-20 19:18:19] INFO: 🗑️ Fichier log supprimé: errors.log
+[2025-10-20 19:18:19] INFO: 🗑️ Fichier log supprimé: redis-errors.log
+[2025-10-20 19:18:19] INFO: 🗑️ Fichier log supprimé: redis-metrics.log
+[2025-10-20 19:18:19] INFO: 🧹 Nettoyage terminé: 3 fichiers supprimés
+[2025-10-20 19:18:19] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-20 19:18:19] INFO: ⚙️ Système: Système de logs initialisé
+[2025-10-20 19:18:19] INFO: 🔍 Démarrage du monitoring (intervalle: 5min)
+[2025-10-20 19:18:19] INFO: ⚙️ Système: Serveur HTTP démarré sur le port 7000
+[2025-10-20 19:18:19] ERROR: 🔗 Service soristore - health_check - Success: false - 68ms
+[2025-10-20 19:18:19] WARN: 🚨 Service SoriStore indisponible
+[2025-10-20 19:18:19] ERROR: 🔗 Service soripay - health_check - Success: false - 3ms
+[2025-10-20 19:18:19] WARN: 🚨 Service SoriPay indisponible
+[2025-10-20 19:18:19] ERROR: 🔗 Service soriwallet - health_check - Success: false - 2ms
+[2025-10-20 19:18:19] WARN: 🚨 Service SoriWallet indisponible
+[2025-10-20 19:18:19] ERROR: 🔗 Service sorilearn - health_check - Success: false - 3ms
+[2025-10-20 19:18:19] WARN: 🚨 Service SoriLearn indisponible
+[2025-10-20 19:18:19] ERROR: 🔗 Service sorihealth - health_check - Success: false - 6ms
+[2025-10-20 19:18:19] WARN: 🚨 Service SoriHealth indisponible
+[2025-10-20 19:18:19] ERROR: 🔗 Service soriaccess - health_check - Success: false - 21ms
+[2025-10-20 19:18:19] WARN: 🚨 Service SoriAccess indisponible
+[2025-10-20 19:18:19] INFO: 📊 Health check terminé: 0/6 services opérationnels
+[2025-10-20 19:18:20] INFO: 🌐 Accès au portail: http://localhost:7000/portal/login
+[2025-10-20 19:18:20] INFO: ⚙️ Système: Démarrage complet du système Sorikama Hub - {"port":7000}
+[2025-10-20 19:18:22] INFO: 🚫 Lancement automatique désactivé (3/3 tentatives atteintes)
+[2025-10-20 19:18:22] INFO: 💡 Accédez manuellement à: http://localhost:7000
+[2025-10-20 19:18:24] INFO: ✅ Connexion portail réussie
+[2025-10-20 19:18:24] DEBUG: 📊 Métriques collectées: POST /authenticate 200 2ms
+[2025-10-20 19:18:26] DEBUG: 📊 Métriques collectées: GET /api 200 2ms
+[2025-10-20 19:18:26] DEBUG: 📊 Métriques collectées: GET /stats 200 8ms
+[2025-10-20 19:18:27] DEBUG: 📊 Métriques collectées: GET /viewer 200 2ms
+[2025-10-20 19:18:27] DEBUG: 📊 Métriques collectées: GET /files 200 96ms
+[2025-10-20 19:18:27] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 3ms
+[2025-10-20 19:18:30] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 13ms
+[2025-10-20 19:18:33] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 3ms
+[2025-10-20 19:18:33] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 2ms
+[2025-10-20 19:18:35] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:18:36] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:18:39] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:18:39] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 2ms
+[2025-10-20 19:18:42] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 2ms
+[2025-10-20 19:18:44] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 2ms
+[2025-10-20 19:18:45] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:18:46] INFO: [ROUTING] Service soristore status changed: unhealthy
+[2025-10-20 19:18:46] INFO: [ROUTING] Service soripay status changed: unhealthy
+[2025-10-20 19:18:46] INFO: [ROUTING] Service soriwallet status changed: unhealthy
+[2025-10-20 19:18:46] INFO: [ROUTING] Service sorilearn status changed: unhealthy
+[2025-10-20 19:18:46] INFO: [ROUTING] Service sorihealth status changed: unhealthy
+[2025-10-20 19:18:46] INFO: [ROUTING] Service soriaccess status changed: unhealthy
+[2025-10-20 19:18:48] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 2ms
+[2025-10-20 19:18:51] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:18:54] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 3ms
+[2025-10-20 19:18:58] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:01] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:04] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:06] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 9ms
+[2025-10-20 19:19:10] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:13] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:23] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 2ms
+[2025-10-20 19:19:28] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:28] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:32] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:34] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 2ms
+[2025-10-20 19:19:37] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:40] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:43] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:46] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:49] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:52] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:19:55] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 0ms
+[2025-10-20 19:19:58] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 0ms
+[2025-10-20 19:20:01] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:20:04] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:20:07] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:20:10] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:21:12] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:21:48] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 2ms
+[2025-10-20 19:21:48] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 0ms
+[2025-10-20 19:21:52] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 0ms
+[2025-10-20 19:21:55] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:21:57] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:21:58] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:21:59] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:00] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:03] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 0ms
+[2025-10-20 19:22:06] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 3ms
+[2025-10-20 19:22:09] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:09] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 5ms
+[2025-10-20 19:22:11] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:12] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 2ms
+[2025-10-20 19:22:15] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:18] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:21] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:24] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:27] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:30] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:33] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:36] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:39] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 1ms
+[2025-10-20 19:22:42] DEBUG: 📊 Métriques collectées: GET /content/:filename 200 0ms
+[2025-10-20 19:22:46] DEBUG: 📊 Métriques collectées: GET /api 200 2ms
+[2025-10-20 19:22:46] DEBUG: 📊 Métriques collectées: GET /stats 200 8ms
+[2025-10-20 19:22:50] DEBUG: 📊 Métriques collectées: GET /health 200 3ms
+[2025-10-20 19:23:19] ERROR: 🔗 Service soristore - health_check - Success: false - 3ms
+[2025-10-20 19:23:19] WARN: 🚨 Service SoriStore indisponible
+[2025-10-20 19:23:19] ERROR: 🔗 Service soripay - health_check - Success: false - 2ms
+[2025-10-20 19:23:19] WARN: 🚨 Service SoriPay indisponible
+[2025-10-20 19:23:19] ERROR: 🔗 Service soriwallet - health_check - Success: false - 3ms
+[2025-10-20 19:23:19] WARN: 🚨 Service SoriWallet indisponible
+[2025-10-20 19:23:19] ERROR: 🔗 Service sorilearn - health_check - Success: false - 4ms
+[2025-10-20 19:23:19] WARN: 🚨 Service SoriLearn indisponible
+[2025-10-20 19:23:19] ERROR: 🔗 Service sorihealth - health_check - Success: false - 2ms
+[2025-10-20 19:23:19] WARN: 🚨 Service SoriHealth indisponible
+[2025-10-20 19:23:19] ERROR: 🔗 Service soriaccess - health_check - Success: false - 4ms
+[2025-10-20 19:23:19] WARN: 🚨 Service SoriAccess indisponible
+[2025-10-20 19:23:19] INFO: 📊 Health check terminé: 0/6 services opérationnels
+[2025-10-20 19:23:21] DEBUG: 📊 Métriques collectées: GET /health 200 0ms

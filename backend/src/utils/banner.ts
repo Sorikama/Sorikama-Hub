@@ -64,9 +64,13 @@ export class Banner {
    * Génère une barre de progression
    */
   private static getProgressBar(current: number, total: number): string {
-    const percentage = Math.round((current / total) * 100);
-    const filled = Math.round((current / total) * 20);
-    const empty = 20 - filled;
+    // Sécuriser les valeurs pour éviter les erreurs
+    const safeCurrent = Math.max(0, Math.min(current, total));
+    const safeTotal = Math.max(1, total);
+    
+    const percentage = Math.round((safeCurrent / safeTotal) * 100);
+    const filled = Math.max(0, Math.round((safeCurrent / safeTotal) * 20));
+    const empty = Math.max(0, 20 - filled);
     
     const bar = '█'.repeat(filled) + '░'.repeat(empty);
     return `${bar} ${percentage}%`;

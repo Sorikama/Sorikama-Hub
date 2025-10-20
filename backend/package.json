@@ -6,6 +6,7 @@
     "start": "node dist/index.js",
     "build": "tsc",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev:quick": "node start-dev.js",
     "db:seed": "ts-node src/database/seeders/index.ts"
   },
   "dependencies": {

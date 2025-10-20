@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dependencies - Sorikama Hub</title>
+    <meta name="description" content="Project dependencies and packages overview">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .theme-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glass {
+            backdrop-filter: blur(16px) saturate(180%);
+            background-color: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(209, 213, 219, 0.3);
+        }
+        .dark .glass {
+            background-color: rgba(17, 25, 40, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.125);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .dark .card-hover:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        .version-badge {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+    </style>
+</head>
+<body class="theme-transition bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen">
+
+    <!-- Header -->
+    <header class="glass sticky top-0 z-50 theme-transition border-b border-gray-200 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-cube text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Dependencies</h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Project Packages</p>
+                    </div>
+                </div>
+                
+                <!-- Controls -->
+                <div class="flex items-center space-x-4">
+                    
+                    <!-- Theme Switcher -->
+                    <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                        <button id="theme-light" class="p-2 rounded-md transition-colors" title="Light mode">
+                            <i class="fas fa-sun text-sm"></i>
+                        </button>
+                        <button id="theme-dark" class="p-2 rounded-md transition-colors" title="Dark mode">
+                            <i class="fas fa-moon text-sm"></i>
+                        </button>
+                        <button id="theme-system" class="p-2 rounded-md transition-colors" title="System mode">
+                            <i class="fas fa-desktop text-sm"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Search -->
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="Search packages..."
+                            class="w-64 pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        >
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Back Button -->
+                    <a href="/api" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        <span class="hidden sm:inline">Back</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Project Info -->
+        <div class="mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Project Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-primary-600 dark:text-primary-400" id="projectName">Loading...</div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Project Name</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-400" id="projectVersion">Loading...</div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Version</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-600 dark:text-purple-400" id="nodeVersion">Loading...</div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Node.js</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-orange-600 dark:text-orange-400" id="totalPackages">0</div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Total Packages</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <div class="mb-6">
+            <div class="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                <button id="tab-all" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm">
+                    All (<span id="count-all">0</span>)
+                </button>
+                <button id="tab-prod" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                    Production (<span id="count-prod">0</span>)
+                </button>
+                <button id="tab-dev" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                    Development (<span id="count-dev">0</span>)
+                </button>
+            </div>
+        </div>
+        
+        <!-- Dependencies Grid -->
+        <div id="dependenciesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Dependencies will be loaded here -->
+        </div>
+        
+        <!-- No Results -->
+        <div id="noResults" class="hidden text-center py-12">
+            <i class="fas fa-search text-gray-400 text-4xl mb-4"></i>
+            <p class="text-gray-600 dark:text-gray-400 text-lg">No packages found matching your search.</p>
+        </div>
+        
+    </main>
+
+    <script>
+        // Theme Management
+        class ThemeManager {
+            constructor() {
+                this.theme = localStorage.getItem('theme') || 'system';
+                this.init();
+            }
+            
+            init() {
+                this.applyTheme();
+                this.setupEventListeners();
+                this.updateButtons();
+            }
+            
+            applyTheme() {
+                const root = document.documentElement;
+                
+                if (this.theme === 'system') {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    root.classList.toggle('dark', prefersDark);
+                } else {
+                    root.classList.toggle('dark', this.theme === 'dark');
+                }
+            }
+            
+            setTheme(newTheme) {
+                this.theme = newTheme;
+                localStorage.setItem('theme', newTheme);
+                this.applyTheme();
+                this.updateButtons();
+            }
+            
+            updateButtons() {
+                const buttons = {
+                    light: document.getElementById('theme-light'),
+                    dark: document.getElementById('theme-dark'),
+                    system: document.getElementById('theme-system')
+                };
+                
+                Object.keys(buttons).forEach(key => {
+                    const button = buttons[key];
+                    if (button) {
+                        button.classList.toggle('bg-primary-100', key === this.theme);
+                        button.classList.toggle('text-primary-600', key === this.theme);
+                        button.classList.toggle('dark:bg-primary-900', key === this.theme);
+                        button.classList.toggle('dark:text-primary-400', key === this.theme);
+                    }
+                });
+            }
+            
+            setupEventListeners() {
+                document.getElementById('theme-light')?.addEventListener('click', () => this.setTheme('light'));
+                document.getElementById('theme-dark')?.addEventListener('click', () => this.setTheme('dark'));
+                document.getElementById('theme-system')?.addEventListener('click', () => this.setTheme('system'));
+                
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    if (this.theme === 'system') {
+                        this.applyTheme();
+                    }
+                });
+            }
+        }
+
+        // Dependencies Manager
+        class DependenciesManager {
+            constructor() {
+                this.dependencies = { production: {}, development: {} };
+                this.currentFilter = 'all';
+                this.searchTerm = '';
+                this.init();
+            }
+            
+            async init() {
+                await this.loadDependencies();
+                this.setupEventListeners();
+                this.renderDependencies();
+            }
+            
+            async loadDependencies() {
+                try {
+                    // This will be populated by server-side data
+                    if (window.packageData) {
+                        this.dependencies.production = window.packageData.dependencies || {};
+                        this.dependencies.development = window.packageData.devDependencies || {};
+                        
+                        // Update project info
+                        document.getElementById('projectName').textContent = window.packageData.name || 'Unknown';
+                        document.getElementById('projectVersion').textContent = window.packageData.version || '0.0.0';
+                        document.getElementById('nodeVersion').textContent = window.packageData.nodeVersion || 'Unknown';
+                        
+                        const totalPackages = Object.keys(this.dependencies.production).length + Object.keys(this.dependencies.development).length;
+                        document.getElementById('totalPackages').textContent = totalPackages;
+                        
+                        // Update counts
+                        document.getElementById('count-all').textContent = totalPackages;
+                        document.getElementById('count-prod').textContent = Object.keys(this.dependencies.production).length;
+                        document.getElementById('count-dev').textContent = Object.keys(this.dependencies.development).length;
+                    }
+                } catch (error) {
+                    console.error('Error loading dependencies:', error);
+                }
+            }
+            
+            setupEventListeners() {
+                // Tab filters
+                document.getElementById('tab-all').addEventListener('click', () => this.setFilter('all'));
+                document.getElementById('tab-prod').addEventListener('click', () => this.setFilter('production'));
+                document.getElementById('tab-dev').addEventListener('click', () => this.setFilter('development'));
+                
+                // Search
+                document.getElementById('searchInput').addEventListener('input', (e) => {
+                    this.searchTerm = e.target.value.toLowerCase();
+                    this.renderDependencies();
+                });
+            }
+            
+            setFilter(filter) {
+                this.currentFilter = filter;
+                this.updateTabStyles();
+                this.renderDependencies();
+            }
+            
+            updateTabStyles() {
+                const tabs = ['tab-all', 'tab-prod', 'tab-dev'];
+                const filters = ['all', 'production', 'development'];
+                
+                tabs.forEach((tabId, index) => {
+                    const tab = document.getElementById(tabId);
+                    const isActive = filters[index] === this.currentFilter;
+                    
+                    if (isActive) {
+                        tab.className = 'flex-1 py-2 px-4 rounded-md font-medium transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm';
+                    } else {
+                        tab.className = 'flex-1 py-2 px-4 rounded-md font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white';
+                    }
+                });
+            }
+            
+            renderDependencies() {
+                const grid = document.getElementById('dependenciesGrid');
+                const noResults = document.getElementById('noResults');
+                
+                let filteredDeps = [];
+                
+                // Filter by type
+                if (this.currentFilter === 'all') {
+                    filteredDeps = [
+                        ...Object.entries(this.dependencies.production).map(([name, version]) => ({ name, version, type: 'production' })),
+                        ...Object.entries(this.dependencies.development).map(([name, version]) => ({ name, version, type: 'development' }))
+                    ];
+                } else if (this.currentFilter === 'production') {
+                    filteredDeps = Object.entries(this.dependencies.production).map(([name, version]) => ({ name, version, type: 'production' }));
+                } else {
+                    filteredDeps = Object.entries(this.dependencies.development).map(([name, version]) => ({ name, version, type: 'development' }));
+                }
+                
+                // Filter by search term
+                if (this.searchTerm) {
+                    filteredDeps = filteredDeps.filter(dep => 
+                        dep.name.toLowerCase().includes(this.searchTerm)
+                    );
+                }
+                
+                // Sort alphabetically
+                filteredDeps.sort((a, b) => a.name.localeCompare(b.name));
+                
+                if (filteredDeps.length === 0) {
+                    grid.classList.add('hidden');
+                    noResults.classList.remove('hidden');
+                    return;
+                }
+                
+                grid.classList.remove('hidden');
+                noResults.classList.add('hidden');
+                
+                grid.innerHTML = filteredDeps.map(dep => this.createDependencyCard(dep)).join('');
+            }
+            
+            createDependencyCard(dep) {
+                const typeColor = dep.type === 'production' ? 'green' : 'blue';
+                const typeIcon = dep.type === 'production' ? 'fas fa-box' : 'fas fa-tools';
+                
+                return `
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="${typeIcon} text-${typeColor}-500 text-sm"></i>
+                                <h3 class="font-semibold text-gray-900 dark:text-white text-sm">${dep.name}</h3>
+                            </div>
+                            <span class="bg-${typeColor}-100 dark:bg-${typeColor}-900 text-${typeColor}-700 dark:text-${typeColor}-300 px-2 py-1 rounded-full text-xs font-medium">
+                                ${dep.type === 'production' ? 'Prod' : 'Dev'}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="version-badge bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs font-mono">
+                                ${dep.version}
+                            </span>
+                            <button onclick="openNpmPage('${dep.name}')" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-xs font-medium">
+                                <i class="fas fa-external-link-alt mr-1"></i>NPM
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Utility functions
+        function openNpmPage(packageName) {
+            window.open(`https://www.npmjs.com/package/${packageName}`, '_blank');
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            new ThemeManager();
+            new DependenciesManager();
+        });
+    </script>
+
+</body>
+</html>

@@ -4,6 +4,7 @@ import authRouter from './auth.routes';
 import proxyRouter from './proxy.routes';
 import apiKeyRouter from './apiKey.routes';
 import systemRouter from './system.routes';
+import ssoRouter from './sso.routes';
 import path from 'path';
 
 const router = Router();
@@ -21,6 +22,9 @@ router.use('/api/keys', apiKeyRouter);
 
 // Routes système (rôles, permissions, services)
 router.use('/system', systemRouter);
+
+// Routes SSO
+router.use('/sso', ssoRouter);
 
 // Routes de proxy vers les microservices
 router.use('/', proxyRouter);
