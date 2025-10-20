@@ -197,14 +197,12 @@ const startServer = async () => {
         });
 
         app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-          customCss: '.swagger-ui .topbar { display: none }',
-          customSiteTitle: 'Sorikama API Gateway Documentation',
+          customSiteTitle: 'Sorikama API Gateway - Documentation',
           explorer: false,
           swaggerOptions: {
             defaultModelsExpandDepth: -1,
             docExpansion: 'list',
             requestInterceptor: (req: any) => {
-              // Injecter automatiquement l'API key admin dans Swagger
               if (global.ADMIN_API_KEY) {
                 req.headers['X-API-Key'] = global.ADMIN_API_KEY;
                 console.log('🔑 API Key admin injectée automatiquement dans Swagger');
@@ -214,7 +212,7 @@ const startServer = async () => {
           }
         }));
 
-        logger.info(`🔑 API Key Admin générée automatiquement`);
+        logger.info('API Key Admin générée automatiquement');
       } catch (e) {
         logger.error('❌ Erreur de chargement de la documentation Swagger:', e);
       }
@@ -296,13 +294,7 @@ const startServer = async () => {
                 </div>
             </a>
             
-            <a href="/dashboard" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
-                <div class="text-center">
-                    <i class="fas fa-chart-line text-green-300 text-3xl mb-3"></i>
-                    <h3 class="text-white font-semibold mb-2">Dashboard</h3>
-                    <p class="text-green-200 text-sm">Métriques et statistiques</p>
-                </div>
-            </a>
+
             
             <a href="/performance/metrics" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
                 <div class="text-center">
