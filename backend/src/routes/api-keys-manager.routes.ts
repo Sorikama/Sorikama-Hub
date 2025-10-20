@@ -3,13 +3,54 @@ import { Router } from 'express';
 import { SimpleApiKeyModel } from '../database/models/simpleApiKey.model';
 import { logger } from '../utils/logger';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 
 const router = Router();
 
 /**
- * GET /api-keys/manager - Gestionnaire des clés API
+ * GET /api-keys/manager - Page API Keys Manager
  */
-router.get('/manager', async (req, res) => {
+router.get('/manager', (req, res) => {
+  try {
+    const path = require('path');
+    const viewerPath = path.join(__dirname, '../../public/views/api-keys-manager.html');
+    
+    if (fs.existsSync(viewerPath)) {
+      const html = fs.readFileSync(viewerPath, 'utf8');
+      res.send(html);
+    } else {
+      res.status(404).send('Page API Keys Manager non trouvée');
+    }
+  } catch (error) {
+    res.status(500).send('Erreur lors du chargement de la page API Keys Manager');
+  }
+});
+
+/**
+ * GET /api-keys/list - Liste des clés API
+ */
+router.get('/list', async (req, res) => {
+  try {
+    const apiKeys = await SimpleApiKeyModel.find({}).sort({ createdAt: -1 });
+    
+    res.json({
+      success: true,
+      data: apiKeys
+    });
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération des clés API'
+    });
+  }
+});
+
+/**
+ * GET /api-keys/manager-old - Ancienne version (fallback)
+ */
+router.get('/manager-old', async (req, res) => {
   try {
     const apiKeys = await SimpleApiKeyModel.find({}).sort({ createdAt: -1 });
     

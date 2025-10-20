@@ -16,6 +16,7 @@ import { errorHandler } from './middlewares/errorHandler.middleware';
 import { MonitoringService } from './services/monitoring.service';
 import { LogsGenerator } from './services/logsGenerator.service';
 import { httpRequestLogger, logSystemEvent } from './middlewares/realLogging.middleware';
+import { PortManager } from './utils/portManager';
 import rateLimiter from './middlewares/rateLimiter.middleware';
 import { handleUnauthorizedAttempts } from './middlewares/unauthorizedHandler.middleware';
 import { securityHeaders, detectInjection, requestSizeLimit, validateUserAgent, timingAttackProtection } from './middlewares/security.middleware';
@@ -49,6 +50,11 @@ const startServer = async () => {
   try {
     // Affichage du banner
     await Banner.displayBanner();
+    
+    // Étape 0: Préparation du port
+    Banner.displayStartupStep('Préparation du port', 'loading');
+    await PortManager.preparePort(7000);
+    Banner.displayStartupStep('Port prêt', 'success', `Port 7000`);
     
     // Étape 1: Démarrage de Redis
     Banner.displayStartupStep('Démarrage de Redis', 'loading');
@@ -426,19 +432,19 @@ const startServer = async () => {
     // Étape 5: Démarrage du serveur
     Banner.displayStartupStep('Démarrage du serveur HTTP', 'loading');
     
-    server.listen(PORT, () => {
-      Banner.displayStartupStep('Serveur HTTP démarré', 'success', `Port ${PORT}`);
-      logSystemEvent(`Serveur HTTP démarré sur le port ${PORT}`, 'info');
+    server.listen(7000, () => {
+      Banner.displayStartupStep('Serveur HTTP démarré', 'success', `Port 7000`);
+      logSystemEvent(`Serveur HTTP démarré sur le port 7000`, 'info');
       
       // Attendre un peu pour les connexions Redis
       setTimeout(async () => {
-        await Banner.displayStartupComplete(Number(PORT));
-        logger.info(`🌐 Accès au portail: http://localhost:${PORT}/portal/login`);
-        logSystemEvent('Démarrage complet du système Sorikama Hub', 'info', { port: PORT });
+        await Banner.displayStartupComplete(7000);
+        logger.info(`🌐 Accès au portail: http://localhost:7000/portal/login`);
+        logSystemEvent('Démarrage complet du système Sorikama Hub', 'info', { port: 7000 });
         
         // Lancement automatique du navigateur
         setTimeout(() => {
-          BrowserLauncher.autoLaunch(Number(PORT));
+          BrowserLauncher.autoLaunch(7000);
         }, 2000);
       }, 1000);
     });
