@@ -1,19 +1,43 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
-import Header from "./Header";
-import Footer from "./Footer";
-import ScrollToTop from "./ScrollToTop";
+import React from 'react';
+import Navbar from './Navbar';
+import Loader from './Loader';
+import AuthTest from './AuthTest';
+import Toast from './Toast';
+import { useAuth } from '../context/AuthContext';
+import { useToastContext } from '../context/ToastContext';
+import { useTokenRefresh } from '../hooks/useTokenRefresh';
 
-const Layout = () => {
+const Layout = ({ children }) => {
+  const { loading } = useAuth();
+  const { toasts, hideToast } = useToastContext();
+  
+  // Gestion automatique du refresh token
+  useTokenRefresh();
+
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
-    <>
-      <Header />
-      <main className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden">
-        <Outlet />
+    <div className="min-h-screen bg-background text-foreground transition-colors">
+      <Navbar />
+      <main className="pt-16">
+        {children}
       </main>
-      <Footer />
-      <ScrollToTop />
-    </>
+      <AuthTest />
+      
+      {/* Toasts */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        {toasts.map(toast => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onClose={() => hideToast(toast.id)}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 

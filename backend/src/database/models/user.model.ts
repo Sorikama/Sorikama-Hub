@@ -17,6 +17,7 @@ export interface IUser extends Document {
     isVerified: boolean;
     isActive: boolean;
     roles: string[] | IRole[];
+    apiKey?: string; // Clé API personnelle de l'utilisateur
     comparePassword(password: string): Promise<boolean>;
     passwordResetToken?: string;
     passwordResetExpires?: Date;
@@ -83,6 +84,12 @@ const userSchema = new Schema<IUser>({
     passwordResetExpires: {
         type: Date,
         select: false,
+    },
+    // Clé API personnelle de l'utilisateur
+    apiKey: {
+        type: String,
+        unique: true,
+        sparse: true // Permet les valeurs null/undefined
     },
     // Références vers les rôles de l'utilisateur
     roles: [{

@@ -7,9 +7,11 @@ import crypto from 'crypto';
 // Imports des modèles et services
 import { UserModel } from '../database/models/user.model';
 import { RoleModel } from '../database/models/role.model';
+import { SimpleApiKeyModel } from '../database/models/simpleApiKey.model';
 import { generateTokens } from './auth.service';
 import { sendEmail } from '../utils/email';
 import { createBlindIndex, encrypt } from '../utils/crypto';
+import { generateUserApiKey } from '../utils/apiKeyGenerator';
 
 // Imports des utilitaires et de la configuration
 import AppError from '../utils/AppError';
@@ -103,6 +105,9 @@ export const verifyAndCreateAccount = async (req: Request, res: Response, next: 
 
         const emailHash = createBlindIndex(email);
 
+        // Générer une API Key unique pour l'utilisateur
+        const userApiKey = await generateUserApiKey('temp_id', `${firstName} ${lastName}`);
+        
         const newUser = await UserModel.create({
             firstName,
             lastName,
@@ -111,7 +116,18 @@ export const verifyAndCreateAccount = async (req: Request, res: Response, next: 
             password,
             roles: [userRole._id],
             isVerified: true,
+            apiKey: userApiKey,
         });
+        
+        // Mettre à jour l'API Key avec le vrai ID utilisateur
+        await SimpleApiKeyModel.findOneAndUpdate(
+            { keyId: userApiKey },
+            { 
+                userId: newUser._id,
+                name: `User API Key - ${firstName} ${lastName}`,
+                description: `Clé API personnelle pour ${firstName} ${lastName} (ID: ${newUser._id})`
+            }
+        );
 
         await newUser.populate<{
             roles: { permissions: any[] }[]
@@ -423,6 +439,34 @@ export const updateMe = async (req: Request, res: Response, next: NextFunction) 
         });
     } catch (error) {
         logger.error('Erreur lors de la mise à jour du profil:', error);
+        next(error);
+    }
+};
+
+/**
+ * Régénère l'API Key de l'utilisateur connecté.
+ * @param {Request} req - L'objet de la requête Express authentifiée.
+ * @param {Response} res - L'objet de la réponse Express.
+ * @param {NextFunction} next - Le prochain middleware.
+ */
+export const regenerateApiKey = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = req.user;
+        const { regenerateUserApiKey } = require('../utils/apiKeyGenerator');
+        
+        // Générer une nouvelle API Key
+        const newApiKey = await regenerateUserApiKey(user._id, `${user.firstName} ${user.lastName}`);
+        
+        // Mettre à jour l'utilisateur avec la nouvelle clé
+        await UserModel.findByIdAndUpdate(user._id, { apiKey: newApiKey });
+        
+        res.status(StatusCodes.OK).json({
+            status: 'success',
+            message: 'API Key régénérée avec succès.',
+            data: { apiKey: newApiKey },
+        });
+    } catch (error) {
+        logger.error('Erreur lors de la régénération de l\'API Key:', error);
         next(error);
     }
 };

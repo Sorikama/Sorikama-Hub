@@ -165,3 +165,24 @@
 [2025-10-20 19:22:50] INFO: 📤 GET /system/health - 200 - 4ms - ::1
 [2025-10-20 19:23:21] INFO: 📥 GET /system/health - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
 [2025-10-20 19:23:21] INFO: 📤 GET /system/health - 200 - 2ms - ::1
+[2025-10-20 22:05:24] INFO: 📥 POST /api/v1/auth/register - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 22:05:24] REQUEST: Request issue {"method":"POST","url":"/api/v1/auth/register","statusCode":400,"responseTime":"21ms","ip":"::1"}
+[2025-10-20 22:05:51] INFO: 📥 POST /api/v1/auth/register - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 22:05:53] INFO: 📤 POST /api/v1/auth/register - 200 - 2153ms - ::1
+[2025-10-20 22:05:53] REQUEST: Request issue {"method":"POST","url":"/api/v1/auth/register","statusCode":200,"responseTime":"2153ms","ip":"::1"}
+[2025-10-20 22:08:41] INFO: 📥 GET /api/v1/auth/me - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 22:08:41] REQUEST: Request issue {"method":"GET","url":"/api/v1/auth/me","statusCode":401,"responseTime":"24ms","ip":"::1"}
+[2025-10-20 22:08:46] INFO: 📥 GET /api/v1/system/health - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 22:08:46] INFO: 📤 GET /api/v1/system/health - 200 - 2ms - ::1
+[2025-10-20 22:08:50] INFO: 📥 POST /api/v1/auth/login - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 22:08:50] REQUEST: Request issue {"method":"POST","url":"/api/v1/auth/login","statusCode":401,"responseTime":"18ms","ip":"::1"}
+[2025-10-20 22:10:59] INFO: 📥 POST /api/v1/auth/register - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 22:11:01] INFO: 📤 POST /api/v1/auth/register - 200 - 1907ms - ::1
+[2025-10-20 22:11:01] REQUEST: Request issue {"method":"POST","url":"/api/v1/auth/register","statusCode":200,"responseTime":"1908ms","ip":"::1"}
+[2025-10-20 22:11:15] INFO: 📥 POST /api/v1/auth/register - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 22:11:17] INFO: 📤 POST /api/v1/auth/register - 200 - 1912ms - ::1
+[2025-10-20 22:11:17] REQUEST: Request issue {"method":"POST","url":"/api/v1/auth/register","statusCode":200,"responseTime":"1913ms","ip":"::1"}
+[2025-10-20 22:18:28] INFO: 📥 POST /api/v1/auth/register - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 22:18:28] REQUEST: Request issue {"method":"POST","url":"/api/v1/auth/register","statusCode":401,"responseTime":"12ms","ip":"::1"}
+[2025-10-20 22:18:41] INFO: 📥 POST /api/v1/auth/register - IP: ::1 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+[2025-10-20 22:18:41] REQUEST: Request issue {"method":"POST","url":"/api/v1/auth/register","statusCode":401,"responseTime":"4ms","ip":"::1"}

@@ -4,6 +4,7 @@ import { seedPermissions } from './permissions.seeder';
 import { seedRoles } from './roles.seeder';
 import { seedAdmin } from './admin.seeder';
 import { seedApiKeys } from './apiKeys.seeder';
+import { seedSimpleApiKeys } from './simpleApiKeys.seeder';
 
 export const runSeeders = async (force = false) => {
   try {
@@ -24,6 +25,9 @@ export const runSeeders = async (force = false) => {
     } catch (error) {
       logger.warn('⚠️ Seeder API Keys ignoré (peut ne pas exister)');
     }
+    
+    // 5. Simple API Keys (clé système)
+    await seedSimpleApiKeys();
     
     logger.info('✅ Tous les seeders terminés avec succès');
     
