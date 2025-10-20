@@ -1,90 +1,180 @@
 // src/middlewares/security.middleware.ts
 import { Request, Response, NextFunction } from 'express';
-import rateLimit from 'express-rate-limit';
 import { logger } from '../utils/logger';
 
-// Rate limiting strict pour les tentatives sans API key
-export const unauthorizedRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Maximum 5 tentatives par IP
-  message: {
-    error: 'Trop de tentatives d\'accès non autorisées',
-    retryAfter: '15 minutes'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req: Request) => req.ip,
-  handler: (req, res) => {
-    logger.warn(`[SECURITY] Tentatives d'accès non autorisées répétées - IP: ${req.ip} - URL: ${req.originalUrl}`);
-    res.status(429).json({
-      error: 'Trop de tentatives d\'accès non autorisées',
-      message: 'Votre IP a été temporairement bloquée pour tentatives répétées sans authentification',
-      retryAfter: '15 minutes'
-    });
+/**
+ * Middleware de sécurité global
+ */
+export const securityHeaders = (req: Request, res: Response, next: NextFunction) => {
+  // Headers de sécurité
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  
+  // CSP pour les pages HTML
+  if (req.path.includes('.html') || req.path === '/' || req.path.startsWith('/portal/')) {
+    res.setHeader('Content-Security-Policy', 
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; " +
+      "style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
+      "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
+      "img-src 'self' data: https:; " +
+      "connect-src 'self'; " +
+      "frame-ancestors 'none';"
+    );
   }
-});
+  
+  next();
+};
 
-// Inspection des données sensibles
-export const dataInspection = (req: Request, res: Response, next: NextFunction) => {
+/**
+ * Détection d'attaques par injection
+ */
+export const detectInjection = (req: Request, res: Response, next: NextFunction) => {
   const suspiciousPatterns = [
-    // Injection SQL
-    /(union\s+select|drop\s+table|insert\s+into|delete\s+from|update\s+set)/gi,
-    // XSS
-    /(<script|javascript:|data:text\/html|vbscript:|onload=|onerror=)/gi,
-    // Command injection
-    /(;|\||&|`|\$\(|\${|exec\(|system\(|eval\()/g,
-    // Path traversal
-    /(\.\.\/|\.\.\\|%2e%2e%2f|%2e%2e%5c)/gi,
-    // LDAP injection
-    /(\*\)|\(\||\)\(|\(\&)/g
+    /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)/i,
+    /<script[^>]*>.*?<\/script>/gi,
+    /javascript:/gi,
+    /on\w+\s*=/gi,
+    /\b(eval|setTimeout|setInterval)\s*\(/gi,
+    /\.\.\//g,
+    /\/etc\/passwd/gi,
+    /cmd\.exe/gi
   ];
-
-  const checkData = (data: any, path: string = ''): boolean => {
-    if (typeof data === 'string') {
-      return suspiciousPatterns.some(pattern => pattern.test(data));
-    }
-    
-    if (typeof data === 'object' && data !== null) {
-      for (const [key, value] of Object.entries(data)) {
-        if (checkData(value, `${path}.${key}`)) {
+  
+  const checkValue = (value: any, path: string): boolean => {
+    if (typeof value === 'string') {
+      for (const pattern of suspiciousPatterns) {
+        if (pattern.test(value)) {
+          logger.error('🚨 TENTATIVE D\'INJECTION DÉTECTÉE', {
+            pattern: pattern.toString(),
+            value: value.substring(0, 100),
+            path,
+            ip: req.ip,
+            userAgent: req.get('User-Agent'),
+            timestamp: new Date().toISOString()
+          });
+          return true;
+        }
+      }
+    } else if (typeof value === 'object' && value !== null) {
+      for (const [key, val] of Object.entries(value)) {
+        if (checkValue(val, `${path}.${key}`)) {
           return true;
         }
       }
     }
-    
     return false;
   };
-
-  // Vérifier query params
-  if (checkData(req.query, 'query')) {
-    logger.error(`[SECURITY] Injection détectée dans query - IP: ${req.ip} - URL: ${req.originalUrl}`);
+  
+  // Vérifier les paramètres de requête
+  if (checkValue(req.query, 'query')) {
     return res.status(400).json({
-      error: 'Données suspectes détectées',
-      message: 'Votre requête contient des données potentiellement malveillantes'
+      success: false,
+      message: 'Malicious input detected in query parameters'
     });
   }
-
-  // Vérifier body
-  if (req.body && checkData(req.body, 'body')) {
-    logger.error(`[SECURITY] Injection détectée dans body - IP: ${req.ip} - URL: ${req.originalUrl}`);
+  
+  // Vérifier le body
+  if (checkValue(req.body, 'body')) {
     return res.status(400).json({
-      error: 'Données suspectes détectées',
-      message: 'Votre requête contient des données potentiellement malveillantes'
+      success: false,
+      message: 'Malicious input detected in request body'
     });
   }
+  
+  // Vérifier les headers
+  if (checkValue(req.headers, 'headers')) {
+    return res.status(400).json({
+      success: false,
+      message: 'Malicious input detected in headers'
+    });
+  }
+  
+  next();
+};
 
-  // Vérifier headers sensibles
-  const sensitiveHeaders = ['user-agent', 'referer', 'x-forwarded-for'];
-  for (const header of sensitiveHeaders) {
-    const value = req.headers[header];
-    if (value && typeof value === 'string' && checkData(value, `header.${header}`)) {
-      logger.error(`[SECURITY] Injection détectée dans header ${header} - IP: ${req.ip}`);
-      return res.status(400).json({
-        error: 'En-têtes suspects détectés',
-        message: 'Vos en-têtes contiennent des données potentiellement malveillantes'
+/**
+ * Limitation de taille des requêtes
+ */
+export const requestSizeLimit = (req: Request, res: Response, next: NextFunction) => {
+  const maxSize = 1024 * 1024; // 1MB
+  
+  if (req.headers['content-length']) {
+    const contentLength = parseInt(req.headers['content-length']);
+    if (contentLength > maxSize) {
+      logger.warn('🚨 Requête trop volumineuse rejetée', {
+        size: contentLength,
+        maxSize,
+        ip: req.ip,
+        path: req.path
+      });
+      
+      return res.status(413).json({
+        success: false,
+        message: 'Request too large'
       });
     }
   }
+  
+  next();
+};
 
+/**
+ * Validation des User-Agents suspects
+ */
+export const validateUserAgent = (req: Request, res: Response, next: NextFunction) => {
+  const userAgent = req.get('User-Agent');
+  
+  if (!userAgent) {
+    logger.warn('🚨 Requête sans User-Agent', {
+      ip: req.ip,
+      path: req.path
+    });
+  }
+  
+  // Patterns de bots malveillants
+  const maliciousPatterns = [
+    /sqlmap/i,
+    /nikto/i,
+    /nessus/i,
+    /burp/i,
+    /nmap/i,
+    /masscan/i,
+    /zap/i
+  ];
+  
+  if (userAgent) {
+    for (const pattern of maliciousPatterns) {
+      if (pattern.test(userAgent)) {
+        logger.error('🚨 User-Agent malveillant détecté', {
+          userAgent,
+          ip: req.ip,
+          path: req.path
+        });
+        
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied'
+        });
+      }
+    }
+  }
+  
+  next();
+};
+
+/**
+ * Protection contre les attaques de timing
+ */
+export const timingAttackProtection = async (req: Request, res: Response, next: NextFunction) => {
+  // Ajouter un délai aléatoire pour masquer les temps de réponse
+  if (req.path.includes('/authenticate') || req.path.includes('/login')) {
+    const delay = Math.random() * 100 + 50; // 50-150ms
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+  
   next();
 };
