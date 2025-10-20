@@ -29,32 +29,83 @@ const prodFormat = winston.format.combine(
 // On choisit le format en fonction de l'environnement
 const format = NODE_ENV === 'production' ? prodFormat : devFormat;
 
-// Définit les "transports" (où les logs sont envoyés)
-// <-- CORRIGÉ : On type explicitement le tableau pour qu'il accepte n'importe quel transport Winston.
-const transportsConfig: winston.transport[] = [
-    // On logue toujours dans la console
-    new winston.transports.Console(),
-];
+// Format pour les fichiers (sans couleurs ANSI)
+const fileFormat = winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.uncolorize(), // Supprime les codes ANSI
+    winston.format.printf(
+        (info) => `[${info.timestamp}] ${info.level.toUpperCase()}: ${info.message}`
+    )
+);
 
-// En production, on ajoute également des logs dans des fichiers
-if (NODE_ENV === 'production') {
-    transportsConfig.push(
-        // Un fichier pour tous les logs d'erreur
-        new winston.transports.File({
-            filename: 'logs/error.log',
-            level: 'error',
-        }),
-        // Un fichier pour tous les logs
-        new winston.transports.File({ filename: 'logs/combined.log' })
-    );
-}
+// Définit les "transports" (où les logs sont envoyés)
+const transportsConfig: winston.transport[] = [
+    // Console avec couleurs
+    new winston.transports.Console(),
+    
+    // Fichiers de logs spécialisés (toujours actifs)
+    new winston.transports.File({
+        filename: 'logs/application.log',
+        format: fileFormat
+    }),
+    new winston.transports.File({
+        filename: 'logs/error.log',
+        level: 'error',
+        format: fileFormat
+    }),
+    new winston.transports.File({
+        filename: 'logs/debug.log',
+        level: 'debug',
+        format: fileFormat
+    })
+];
 
 // Création de l'instance du logger
 export const logger = winston.createLogger({
-    level: NODE_ENV === 'production' ? 'info' : 'debug', // En dev, on logue plus de détails
+    level: NODE_ENV === 'production' ? 'info' : 'debug',
     levels,
-    format,
+    format, // Pour la console
     transports: transportsConfig,
-    // Ne pas quitter l'application en cas d'erreur non gérée
     exitOnError: false,
+});
+
+// Loggers spécialisés pour différents types
+export const securityLogger = winston.createLogger({
+    level: 'info',
+    format: fileFormat,
+    transports: [
+        new winston.transports.File({ filename: 'logs/security.log' })
+    ]
+});
+
+export const performanceLogger = winston.createLogger({
+    level: 'info',
+    format: fileFormat,
+    transports: [
+        new winston.transports.File({ filename: 'logs/performance.log' })
+    ]
+});
+
+export const requestLogger = winston.createLogger({
+    level: 'info',
+    format: fileFormat,
+    transports: [
+        new winston.transports.File({ filename: 'logs/requests.log' })
+    ]
+});
+
+export const alertsLogger = winston.createLogger({
+    level: 'warn',
+    format: fileFormat,
+    transports: [
+        new winston.transports.File({ filename: 'logs/alerts.log' })
+    ]
+});
+
+export const redisLogger = winston.createLogger({
+    level: 'info',
+    format: fileFormat,
+    transports: [
+        new winston.transports.File({ filename: 'logs/redis.log' })
+    ]
 });

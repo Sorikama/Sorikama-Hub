@@ -1,5 +1,5 @@
 // src/database/models/simpleApiKey.model.ts
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Model } from 'mongoose';
 
 export interface ISimpleApiKey extends Document {
   name: string;
@@ -64,8 +64,7 @@ const simpleApiKeySchema = new Schema<ISimpleApiKey>({
   collection: 'simple_api_keys'
 });
 
-// Index pour optimiser les requêtes
-simpleApiKeySchema.index({ keyId: 1 });
+// Index pour optimiser les requêtes (keyId déjà indexé par unique: true)
 simpleApiKeySchema.index({ isActive: 1 });
 simpleApiKeySchema.index({ hashedKey: 1 });
 

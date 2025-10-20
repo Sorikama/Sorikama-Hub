@@ -9,7 +9,17 @@ const router = Router();
  * GET /logs/viewer - Visualiseur de logs en temps réel
  */
 router.get('/viewer', (req, res) => {
-  const logsViewerHTML = `
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const viewerPath = path.join(__dirname, '../../public/views/logs-viewer.html');
+    
+    if (fs.existsSync(viewerPath)) {
+      const html = fs.readFileSync(viewerPath, 'utf8');
+      res.send(html);
+    } else {
+      // Fallback HTML si le fichier n'existe pas
+      const logsViewerHTML = `
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -96,14 +106,7 @@ router.get('/viewer', (req, res) => {
                     <div class="flex items-center space-x-2">
                         <label class="text-sm font-medium text-gray-300">Fichier:</label>
                         <select id="logFileSelect" class="bg-white border border-gray-600 rounded-lg px-3 py-2 text-black text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            <option value="application.log">Application</option>
-                            <option value="error.log">Erreurs</option>
-                            <option value="security.log">Securite</option>
-                            <option value="performance.log">Performance</option>
-                            <option value="redis.log">Redis</option>
-                            <option value="alerts.log">Alertes</option>
-                            <option value="debug.log">Debug</option>
-                            <option value="requests.log">Requetes</option>
+                            <!-- Options chargées dynamiquement -->
                         </select>
                     </div>
                     
@@ -129,7 +132,7 @@ router.get('/viewer', (req, res) => {
                     </div>
                     
                     <button onclick="clearLogs()" class="bg-red-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-red-300 hover:text-white transition-all text-sm">
-                        <i class="fas fa-trash mr-2"></i>Effacer
+                        <i class="fas fa-trash mr-2"></i>Vider fichier
                     </button>
                     
                     <button onclick="downloadLogs()" class="bg-blue-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-blue-300 hover:text-white transition-all text-sm">
@@ -138,6 +141,10 @@ router.get('/viewer', (req, res) => {
                     
                     <button onclick="runTests()" class="bg-purple-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-purple-300 hover:text-white transition-all text-sm">
                         <i class="fas fa-flask mr-2"></i>Tests
+                    </button>
+                    
+                    <button onclick="cleanUnusedLogs()" class="bg-orange-500 bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-orange-300 hover:text-white transition-all text-sm">
+                        <i class="fas fa-broom mr-2"></i>Nettoyer
                     </button>
                 </div>
             </div>
@@ -179,6 +186,11 @@ router.get('/viewer', (req, res) => {
         async function loadLogs() {
             try {
                 const logFile = document.getElementById('logFileSelect').value;
+                if (!logFile) {
+                    document.getElementById('logsContainer').innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fas fa-info-circle text-2xl mb-2"></i><p>Sélectionnez un fichier de log</p></div>';
+                    return;
+                }
+                
                 const response = await fetch('/logs/content/' + logFile);
                 const data = await response.json();
                 
@@ -199,6 +211,7 @@ router.get('/viewer', (req, res) => {
         window.downloadLogs = downloadLogs;
         window.runTests = runTests;
         window.loadMoreLogs = loadMoreLogs;
+        window.cleanUnusedLogs = cleanUnusedLogs;
         
         let currentOffset = 0;
         let allLogs = [];
@@ -285,9 +298,21 @@ router.get('/viewer', (req, res) => {
         }
         
         function clearLogs() {
-            if (confirm('Etes-vous sur de vouloir effacer les logs?')) {
-                document.getElementById('logsContainer').innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fas fa-broom text-2xl mb-2"></i><p>Logs effaces</p></div>';
-                document.getElementById('logCount').textContent = '0';
+            const logFile = document.getElementById('logFileSelect').value;
+            if (confirm('Etes-vous sur de vouloir vider le fichier ' + logFile + '?')) {
+                fetch('/logs/clear/' + logFile, { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('logsContainer').innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fas fa-broom text-2xl mb-2"></i><p>Fichier vide</p></div>';
+                            document.getElementById('logCount').textContent = '0';
+                        } else {
+                            alert('Erreur: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erreur: ' + error.message);
+                    });
             }
         }
         
@@ -323,17 +348,70 @@ router.get('/viewer', (req, res) => {
             }
         }
         
+        function cleanUnusedLogs() {
+            if (confirm('Nettoyer les fichiers de logs inutilises et vides?')) {
+                fetch('/logs/clean-unused', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Nettoyage termine! ' + data.cleanedCount + ' fichiers supprimes.');
+                            loadLogFiles(); // Recharger la liste des fichiers
+                        } else {
+                            alert('Erreur lors du nettoyage: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erreur: ' + error.message);
+                    });
+            }
+        }
+        
         document.getElementById('logFileSelect').addEventListener('change', loadLogs);
         document.getElementById('logLevelFilter').addEventListener('change', loadLogs);
         document.getElementById('searchInput').addEventListener('input', loadLogs);
         document.getElementById('dateFilter').addEventListener('change', loadLogs);
         
-        loadLogs();
+        // Charger la liste des fichiers de logs disponibles
+        loadLogFiles();
+        
+        async function loadLogFiles() {
+            try {
+                const response = await fetch('/logs/files');
+                const data = await response.json();
+                
+                if (data.success && data.files && data.files.length > 0) {
+                    const select = document.getElementById('logFileSelect');
+                    select.innerHTML = '';
+                    
+                    data.files.forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file.name;
+                        option.textContent = file.readable + ' (' + file.lines + ' lignes)';
+                        select.appendChild(option);
+                    });
+                    
+                    // Charger les logs du premier fichier
+                    loadLogs();
+                } else {
+                    const select = document.getElementById('logFileSelect');
+                    select.innerHTML = '<option value="">Aucun fichier de log trouvé</option>';
+                    document.getElementById('logsContainer').innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fas fa-info-circle text-2xl mb-2"></i><p>Aucun fichier de log disponible</p></div>';
+                }
+            } catch (error) {
+                console.error('Erreur chargement fichiers:', error);
+                const select = document.getElementById('logFileSelect');
+                select.innerHTML = '<option value="">Erreur de chargement</option>';
+            }
+        }
     </script>
 </body>
 </html>`;
   
-  res.send(logsViewerHTML);
+      res.send(logsViewerHTML);
+    }
+  } catch (error) {
+    res.status(500).send('Erreur lors du chargement de la page logs viewer');
+  }
 });
 
 router.get('/content/:filename', (req, res) => {
@@ -344,64 +422,106 @@ router.get('/content/:filename', (req, res) => {
     if (!fs.existsSync(logPath)) {
       return res.json({
         success: false,
-        message: 'Fichier de log non trouve'
+        message: 'Fichier de log non trouvé'
       });
     }
     
     const logContent = fs.readFileSync(logPath, 'utf8');
     const lines = logContent.split('\n').filter(line => line.trim());
     
-    // Prendre toutes les lignes, pas seulement les 100 dernières
-    const { limit = '100', offset = '0' } = req.query;
+    const { limit = '100', offset = '0', level, search, date } = req.query;
     
-    const logs = lines.map(line => {
+    const logs = lines.map((line, index) => {
       if (!line.trim()) return null;
       
       let timestamp = '';
-      let level = 'info';
+      let logLevel = 'info';
       let message = line;
       
-      // Format: [2025-10-09 22:48:21] INFO: MESSAGE
+      // Format: [2024-01-15 10:30:15] INFO: MESSAGE
       const match1 = line.match(/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] (\w+): (.+)$/);
       if (match1) {
         timestamp = match1[1];
-        level = match1[2].toLowerCase();
+        logLevel = match1[2].toLowerCase();
         message = match1[3];
       } else {
         // Format: 2024-01-15 10:30:15 [INFO] MESSAGE
         const match2 = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(\w+)\] (.+)$/);
         if (match2) {
           timestamp = match2[1];
-          level = match2[2].toLowerCase();
+          logLevel = match2[2].toLowerCase();
           message = match2[3];
+        } else {
+          // Format: INFO: MESSAGE (sans timestamp)
+          const match3 = line.match(/^(\w+): (.+)$/);
+          if (match3) {
+            logLevel = match3[1].toLowerCase();
+            message = match3[2];
+            timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+          }
         }
       }
       
       return {
+        id: index,
         timestamp,
-        level: ['error', 'warn', 'info', 'debug'].includes(level) ? level : 'info',
+        level: ['error', 'warn', 'info', 'debug'].includes(logLevel) ? logLevel : 'info',
         message,
         fullLine: line,
-        date: timestamp.split(' ')[0] || ''
+        date: timestamp.split(' ')[0] || '',
+        size: line.length
       };
     }).filter(log => log !== null);
     
-    // Prendre les dernières lignes par défaut
-    const startIndex = Math.max(0, logs.length - parseInt(limit) - parseInt(offset));
-    const endIndex = logs.length - parseInt(offset);
-    const selectedLogs = logs.slice(startIndex, endIndex).reverse();
+    // Appliquer les filtres
+    let filteredLogs = logs;
+    
+    if (level && level !== 'all') {
+      const levels = level.split(',');
+      filteredLogs = filteredLogs.filter(log => levels.includes(log.level));
+    }
+    
+    if (search) {
+      const searchTerm = search.toLowerCase();
+      filteredLogs = filteredLogs.filter(log => 
+        log.fullLine.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    if (date) {
+      filteredLogs = filteredLogs.filter(log => log.date === date);
+    }
+    
+    // Pagination - Garder l'ordre chronologique (ancien vers nouveau)
+    const limitNum = parseInt(limit);
+    const offsetNum = parseInt(offset);
+    const startIndex = Math.max(0, filteredLogs.length - limitNum - offsetNum);
+    const endIndex = filteredLogs.length - offsetNum;
+    const selectedLogs = filteredLogs.slice(startIndex, endIndex); // Pas de reverse()
+    
+    // Statistiques
+    const stats = {
+      total: logs.length,
+      filtered: filteredLogs.length,
+      error: logs.filter(log => log.level === 'error').length,
+      warn: logs.filter(log => log.level === 'warn').length,
+      info: logs.filter(log => log.level === 'info').length,
+      debug: logs.filter(log => log.level === 'debug').length
+    };
     
     res.json({
       success: true,
       logs: selectedLogs,
-      total: logs.length,
-      hasMore: startIndex > 0
+      stats,
+      hasMore: startIndex > 0,
+      fileSize: logContent.length,
+      lastModified: fs.statSync(logPath).mtime
     });
     
   } catch (error) {
     res.json({
       success: false,
-      message: 'Erreur lors de la lecture du fichier de log'
+      message: 'Erreur lors de la lecture du fichier de log: ' + error.message
     });
   }
 });
@@ -491,6 +611,298 @@ router.post('/run-tests', (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Erreur lors du lancement des tests'
+    });
+  }
+});
+
+// Route pour les logs en temps réel (Server-Sent Events)
+router.get('/stream/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const logPath = path.join(process.cwd(), 'logs', filename);
+  
+  if (!fs.existsSync(logPath)) {
+    return res.status(404).json({
+      success: false,
+      message: 'Fichier de log non trouvé'
+    });
+  }
+  
+  // Configuration SSE
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Cache-Control'
+  });
+  
+  // Envoyer un ping initial
+  res.write('data: {"type": "connected", "message": "Connexion établie"}\n\n');
+  
+  let lastSize = fs.statSync(logPath).size;
+  
+  // Surveiller les changements du fichier
+  const watcher = fs.watchFile(logPath, { interval: 1000 }, (curr, prev) => {
+    if (curr.size > lastSize) {
+      // Lire les nouvelles lignes
+      const stream = fs.createReadStream(logPath, {
+        start: lastSize,
+        end: curr.size
+      });
+      
+      let buffer = '';
+      stream.on('data', (chunk) => {
+        buffer += chunk.toString();
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Garder la dernière ligne partielle
+        
+        lines.forEach(line => {
+          if (line.trim()) {
+            const logData = {
+              type: 'log',
+              line: line,
+              timestamp: new Date().toISOString()
+            };
+            res.write(`data: ${JSON.stringify(logData)}\n\n`);
+          }
+        });
+      });
+      
+      lastSize = curr.size;
+    }
+  });
+  
+  // Nettoyage lors de la fermeture de la connexion
+  req.on('close', () => {
+    fs.unwatchFile(logPath);
+  });
+  
+  // Ping périodique pour maintenir la connexion
+  const pingInterval = setInterval(() => {
+    res.write('data: {"type": "ping"}\n\n');
+  }, 30000);
+  
+  req.on('close', () => {
+    clearInterval(pingInterval);
+  });
+});
+
+// Route pour obtenir la liste des fichiers de logs
+router.get('/files', (req, res) => {
+  try {
+    const logsDir = path.join(process.cwd(), 'logs');
+    
+    if (!fs.existsSync(logsDir)) {
+      return res.json({
+        success: false,
+        message: 'Répertoire logs non trouvé'
+      });
+    }
+    
+    // Fonction helper pour compter les lignes
+    const countLines = (filePath) => {
+      try {
+        const content = fs.readFileSync(filePath, 'utf8');
+        return content.split('\n').filter(line => line.trim()).length;
+      } catch (error) {
+        return 0;
+      }
+    };
+    
+    const files = fs.readdirSync(logsDir)
+      .filter(file => file.endsWith('.log'))
+      .map(file => {
+        const filePath = path.join(logsDir, file);
+        const stats = fs.statSync(filePath);
+        const readableNames = {
+          'application.log': 'Application',
+          'error.log': 'Erreurs',
+          'security.log': 'Sécurité',
+          'performance.log': 'Performance',
+          'redis.log': 'Redis',
+          'alerts.log': 'Alertes',
+          'debug.log': 'Debug',
+          'requests.log': 'Requêtes HTTP'
+        };
+        
+        const lines = countLines(filePath);
+        return {
+          name: file,
+          size: stats.size,
+          modified: stats.mtime,
+          lines: lines,
+          readable: readableNames[file] || file.replace('.log', '').replace(/[-_]/g, ' ').toUpperCase()
+        };
+      })
+      .sort((a, b) => b.modified - a.modified);
+    
+    res.json({
+      success: true,
+      files
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: 'Erreur lors de la lecture du répertoire logs'
+    });
+  }
+});
+
+// Route pour générer des logs de test
+router.post('/generate-test', (req, res) => {
+  try {
+    const { LogsGenerator } = require('../services/logsGenerator.service');
+    LogsGenerator.generateTestLogs();
+    
+    res.json({
+      success: true,
+      message: 'Logs de test générés avec succès'
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: 'Erreur lors de la génération des logs de test'
+    });
+  }
+});
+
+// Route pour démarrer la génération continue
+router.post('/start-continuous', (req, res) => {
+  try {
+    const { LogsGenerator } = require('../services/logsGenerator.service');
+    LogsGenerator.startContinuousLogging();
+    
+    res.json({
+      success: true,
+      message: 'Génération continue de logs démarrée'
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: 'Erreur lors du démarrage de la génération continue'
+    });
+  }
+});
+
+// Route pour nettoyer les anciens logs
+router.post('/cleanup', (req, res) => {
+  try {
+    const { days = 7 } = req.body;
+    const { LogsGenerator } = require('../services/logsGenerator.service');
+    const deletedCount = LogsGenerator.cleanOldLogs(days);
+    
+    res.json({
+      success: true,
+      message: `${deletedCount} fichiers de logs supprimés`,
+      deletedCount
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: 'Erreur lors du nettoyage des logs'
+    });
+  }
+});
+
+// Route pour vider un fichier de log spécifique
+router.post('/clear/:filename', (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const logPath = path.join(process.cwd(), 'logs', filename);
+    
+    if (!fs.existsSync(logPath)) {
+      return res.json({
+        success: false,
+        message: 'Fichier de log non trouvé'
+      });
+    }
+    
+    // Vider le fichier
+    fs.writeFileSync(logPath, '');
+    
+    res.json({
+      success: true,
+      message: `Fichier ${filename} vidé avec succès`
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: 'Erreur lors du vidage du fichier'
+    });
+  }
+});
+
+// Route pour nettoyer les fichiers inutilisés
+router.post('/clean-unused', (req, res) => {
+  try {
+    const { LogsGenerator } = require('../services/logsGenerator.service');
+    const cleanedCount = LogsGenerator.cleanEmptyLogs();
+    
+    res.json({
+      success: true,
+      message: `${cleanedCount} fichiers inutilisés supprimés`,
+      cleanedCount
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: 'Erreur lors du nettoyage des fichiers inutilisés'
+    });
+  }
+});
+
+// Route pour les statistiques globales des logs
+router.get('/stats', (req, res) => {
+  try {
+    const logsDir = path.join(process.cwd(), 'logs');
+    const stats = {
+      totalFiles: 0,
+      totalSize: 0,
+      oldestLog: null,
+      newestLog: null,
+      errorCount: 0,
+      warnCount: 0,
+      infoCount: 0,
+      debugCount: 0
+    };
+    
+    if (fs.existsSync(logsDir)) {
+      const files = fs.readdirSync(logsDir).filter(file => file.endsWith('.log'));
+      stats.totalFiles = files.length;
+      
+      files.forEach(file => {
+        const filePath = path.join(logsDir, file);
+        const fileStats = fs.statSync(filePath);
+        stats.totalSize += fileStats.size;
+        
+        if (!stats.oldestLog || fileStats.mtime < stats.oldestLog) {
+          stats.oldestLog = fileStats.mtime;
+        }
+        if (!stats.newestLog || fileStats.mtime > stats.newestLog) {
+          stats.newestLog = fileStats.mtime;
+        }
+        
+        // Compter les niveaux de logs (approximatif)
+        try {
+          const content = fs.readFileSync(filePath, 'utf8');
+          stats.errorCount += (content.match(/\[ERROR\]|ERROR:/g) || []).length;
+          stats.warnCount += (content.match(/\[WARN\]|WARN:/g) || []).length;
+          stats.infoCount += (content.match(/\[INFO\]|INFO:/g) || []).length;
+          stats.debugCount += (content.match(/\[DEBUG\]|DEBUG:/g) || []).length;
+        } catch (e) {
+          // Ignorer les erreurs de lecture
+        }
+      });
+    }
+    
+    res.json({
+      success: true,
+      stats
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: 'Erreur lors du calcul des statistiques'
     });
   }
 });
