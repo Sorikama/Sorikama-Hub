@@ -267,4 +267,62 @@ router.patch('/api-keys/:id/revoke', async (req, res) => {
   }
 });
 
+// Endpoint analytics (alias pour stats)
+router.get('/analytics', async (req, res) => {
+  try {
+    const totalUsers = await UserModel.countDocuments();
+    const activeUsers = await UserModel.countDocuments({ isActive: true });
+    const totalRequests = await MetricsService.get('api.requests.total') || 0;
+    const totalServices = 6;
+    const uptime = Math.round(process.uptime());
+    
+    res.json({
+      success: true,
+      data: {
+        totalUsers,
+        activeUsers,
+        totalRequests,
+        totalServices,
+        uptime
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Erreur analytics' });
+  }
+});
+
+// Supprimer un utilisateur
+router.delete('/users/:userId', async (req, res) => {
+  try {
+    const user = await UserModel.findByIdAndDelete(req.params.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé' });
+    }
+    res.json({ success: true, message: 'Utilisateur supprimé' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+});
+
+// Lister toutes les sessions SSO
+router.get('/sessions', async (req, res) => {
+  try {
+    // Simulation des sessions SSO
+    const sessions = [
+      {
+        _id: '1',
+        userId: '37707ab0-9693-4d71-ae1a-9acd3d56a1ae',
+        serviceId: 'soristore',
+        sessionToken: 'sess_abc123',
+        expiresAt: new Date(Date.now() + 86400000),
+        isActive: true,
+        createdAt: new Date()
+      }
+    ];
+    res.json({ success: true, data: sessions });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+});
+
 export default router;

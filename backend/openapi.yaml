@@ -1,39 +1,57 @@
 openapi: '3.0.0'
 info:
-  title: API Gateway Sorikama
+  title: Sorikama API Gateway - Hub Central
   version: '1.0.0'
-  description: Documentation de l'API Gateway pour le projet Sorikama.
+  description: API Gateway centralisée pour l'écosystème Sorikama
+  contact:
+    name: Support Sorikama
+    url: https://sorikama.com/support
+    email: support@sorikama.com
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+
 servers:
   - url: http://localhost:7000/api/v1
-    description: Serveur de développement
+    description: Serveur de développement local
+
 tags:
   - name: Authentification
-    description: Endpoints pour l'inscription, la connexion et la récupération de compte.
+    description: Endpoints d'authentification et inscription
   - name: Gestion de Compte
-    description: Endpoints pour la gestion du profil utilisateur une fois connecté.
+    description: Gestion du profil utilisateur connecté
+  - name: API Keys
+    description: Gestion des clés API pour intégrations
+  - name: Système
+    description: Endpoints système, rôles et permissions
+  - name: SSO
+    description: Single Sign-On et sessions
+  - name: Proxy
+    description: Routage vers les microservices
+  - name: Administration
+    description: Endpoints d'administration système
 
-# --- Définition de la Sécurité ---
 components:
   securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API Key d'authentification
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: 'Entrez le token JWT obtenu lors de la connexion. Ne pas inclure le préfixe "Bearer ".'
+      description: Token JWT d'authentification
+
   schemas:
     Error:
       type: object
       properties:
-        status:
-          type: string
-          example: 'fail'
-        message:
-          type: string
-      required:
-        - status
-        - message
-    
-    # --- Schémas pour l'Authentification ---
+        status: { type: string, example: 'fail' }
+        message: { type: string }
+      required: [status, message]
+
     SignupRequest:
       type: object
       required: [firstName, lastName, email, password]
@@ -42,51 +60,58 @@ components:
         lastName: { type: string, example: "Curie" }
         email: { type: string, format: email, example: "marie.curie@example.com" }
         password: { type: string, format: password, example: "Password@123" }
+
     VerifyAccountRequest:
       type: object
       required: [verificationToken, code]
       properties:
-        verificationToken: { type: string, description: "Token temporaire reçu lors de l'appel à /register." }
-        code: { type: string, description: "Le code à 6 chiffres.", example: "123456" }
+        verificationToken: { type: string }
+        code: { type: string, example: "123456" }
+
     LoginRequest:
       type: object
       required: [email, password]
       properties:
         email: { type: string, format: email, example: "marie.curie@example.com" }
         password: { type: string, format: password, example: "Password@123" }
+
     AuthTokens:
       type: object
       properties:
         accessToken: { type: string }
         refreshToken: { type: string }
+
     RefreshTokenRequest:
       type: object
       required: [refreshToken]
       properties:
         refreshToken: { type: string }
+
     ForgotPasswordRequest:
       type: object
       required: [email]
       properties:
         email: { type: string, format: email, example: "marie.curie@example.com" }
+
     ResetPasswordRequest:
       type: object
       required: [password]
       properties:
-        password: { type: string, format: password, example: "NewStrongPassword@123" }
-    
-    # --- Schémas pour la Gestion de Compte ---
+        password: { type: string, format: password, example: "NewPassword@123" }
+
     UpdateMeRequest:
       type: object
       properties:
         firstName: { type: string, example: "Maria" }
         lastName: { type: string, example: "Skłodowska" }
+
     UpdatePasswordRequest:
       type: object
       required: [currentPassword, newPassword]
       properties:
-        currentPassword: { type: string, format: password, example: "Password@123" }
-        newPassword: { type: string, format: password, example: "NewStrongerPassword@123" }
+        currentPassword: { type: string, format: password }
+        newPassword: { type: string, format: password }
+
     User:
       type: object
       properties:
@@ -96,9 +121,136 @@ components:
         email: { type: string, example: "marie.curie@example.com" }
         roles: { type: array, items: { type: string, example: "user" } }
 
-# --- Définition des Routes ---
+    ApiKey:
+      type: object
+      properties:
+        id: { type: string, example: "key-uuid-123" }
+        name: { type: string, example: "Mon App Mobile" }
+        prefix: { type: string, example: "sk_12345" }
+        permissions: { type: array, items: { type: string } }
+        isActive: { type: boolean, example: true }
+        usageCount: { type: number, example: 1250 }
+        lastUsed: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
+
+    Role:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string, example: "admin" }
+        description: { type: string }
+        permissions: { type: array, items: { type: string } }
+
+    Permission:
+      type: object
+      properties:
+        id: { type: string }
+        action: { type: string, example: "read" }
+        subject: { type: string, example: "user" }
+        description: { type: string }
+
+    Service:
+      type: object
+      properties:
+        id: { type: string, example: "soristore" }
+        name: { type: string, example: "SoriStore" }
+        description: { type: string, example: "Marketplace e-commerce" }
+        url: { type: string, example: "http://localhost:3001" }
+        icon: { type: string, example: "🛍️" }
+        color: { type: string, example: "#3b82f6" }
+        status: { type: string, enum: ["active", "inactive", "maintenance"], example: "active" }
+        version: { type: string, example: "1.0.0" }
+        endpoints: { type: array, items: { type: string } }
+        responseTime: { type: number, example: 150 }
+        uptime: { type: number, example: 99.9 }
+        requestCount: { type: number, example: 1250 }
+        errorCount: { type: number, example: 5 }
+        ssoEnabled: { type: boolean, example: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    UserComplete:
+      type: object
+      properties:
+        _id: { type: string, example: "a1b2c3d4-e5f6-..." }
+        firstName: { type: string, example: "Marie" }
+        lastName: { type: string, example: "Curie" }
+        email: { type: string, example: "marie.curie@example.com" }
+        isVerified: { type: boolean, example: true }
+        isActive: { type: boolean, example: true }
+        roles: { type: array, items: { type: string, example: "user" } }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    ApiKeyComplete:
+      type: object
+      properties:
+        _id: { type: string, example: "key-uuid-123" }
+        userId: { type: string, example: "user-uuid-456" }
+        name: { type: string, example: "Mon App Mobile" }
+        prefix: { type: string, example: "sk_12345" }
+        permissions: { type: array, items: { type: string } }
+        isActive: { type: boolean, example: true }
+        lastUsed: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
+        rateLimit:
+          type: object
+          properties:
+            requests: { type: number, example: 1000 }
+            windowMs: { type: number, example: 3600000 }
+        allowedIPs: { type: array, items: { type: string } }
+        allowedDomains: { type: array, items: { type: string } }
+        usageCount: { type: number, example: 1250 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    RefreshToken:
+      type: object
+      properties:
+        _id: { type: string }
+        userId: { type: string }
+        token: { type: string }
+        expiresAt: { type: string, format: date-time }
+        isRevoked: { type: boolean, example: false }
+        createdAt: { type: string, format: date-time }
+
+    SSOSession:
+      type: object
+      properties:
+        _id: { type: string }
+        userId: { type: string }
+        serviceId: { type: string }
+        sessionToken: { type: string }
+        expiresAt: { type: string, format: date-time }
+        isActive: { type: boolean, example: true }
+        createdAt: { type: string, format: date-time }
+
+    ServiceRequest:
+      type: object
+      properties:
+        _id: { type: string }
+        serviceId: { type: string }
+        userId: { type: string }
+        method: { type: string, example: "GET" }
+        endpoint: { type: string, example: "/api/products" }
+        statusCode: { type: number, example: 200 }
+        responseTime: { type: number, example: 150 }
+        timestamp: { type: string, format: date-time }
+        userAgent: { type: string }
+        ipAddress: { type: string }
+
+    SimpleApiKey:
+      type: object
+      properties:
+        _id: { type: string }
+        name: { type: string, example: "Admin Key" }
+        key: { type: string, example: "sk_admin_..." }
+        permissions: { type: array, items: { type: string } }
+        isActive: { type: boolean, example: true }
+        createdAt: { type: string, format: date-time }
+
 paths:
-  # --- Routes d'Authentification ---
+  # === AUTHENTIFICATION ===
   /auth/register:
     post:
       tags: [Authentification]
@@ -106,9 +258,16 @@ paths:
       requestBody:
         required: true
         content:
-          application/json: { schema: { $ref: '#/components/schemas/SignupRequest' } }
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
       responses:
-        '200': { description: Email de vérification envoyé. }
+        '200':
+          description: Email de vérification envoyé
+        '400':
+          description: Données invalides
+        '409':
+          description: Email déjà utilisé
 
   /auth/verify:
     post:
@@ -117,12 +276,16 @@ paths:
       requestBody:
         required: true
         content:
-          application/json: { schema: { $ref: '#/components/schemas/VerifyAccountRequest' } }
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyAccountRequest'
       responses:
         '201':
-          description: Compte créé.
+          description: Compte créé avec succès
           content:
-            application/json: { schema: { $ref: '#/components/schemas/AuthTokens' } }
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
 
   /auth/login:
     post:
@@ -131,12 +294,16 @@ paths:
       requestBody:
         required: true
         content:
-          application/json: { schema: { $ref: '#/components/schemas/LoginRequest' } }
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
-          description: Connexion réussie.
+          description: Connexion réussie
           content:
-            application/json: { schema: { $ref: '#/components/schemas/AuthTokens' } }
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
 
   /auth/refresh-token:
     post:
@@ -145,96 +312,190 @@ paths:
       requestBody:
         required: true
         content:
-          application/json: { schema: { $ref: '#/components/schemas/RefreshTokenRequest' } }
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
       responses:
         '200':
-          description: Nouveaux tokens générés.
+          description: Nouveaux tokens générés
           content:
-            application/json: { schema: { $ref: '#/components/schemas/AuthTokens' } }
-  
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+
   /auth/forgot-password:
     post:
       tags: [Authentification]
-      summary: Demander une réinitialisation de mot de passe (Étape 1)
+      summary: Demander une réinitialisation de mot de passe
       requestBody:
         required: true
         content:
-          application/json: { schema: { $ref: '#/components/schemas/ForgotPasswordRequest' } }
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
       responses:
-        '200': { description: Demande traitée. }
+        '200':
+          description: Email de réinitialisation envoyé
 
   /auth/reset-password/{token}:
     post:
       tags: [Authentification]
-      summary: Réinitialiser le mot de passe avec un token (Étape 2)
+      summary: Réinitialiser le mot de passe avec un token
       parameters:
         - in: path
           name: token
           required: true
-          schema: { type: string }
+          schema:
+            type: string
       requestBody:
         required: true
         content:
-          application/json: { schema: { $ref: '#/components/schemas/ResetPasswordRequest' } }
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
       responses:
-        '200': { description: Mot de passe réinitialisé. }
+        '200':
+          description: Mot de passe réinitialisé
 
-  # --- Routes de Gestion de Compte ---
+  # === GESTION DE COMPTE ===
   /auth/logout:
     post:
       tags: [Gestion de Compte]
       summary: Déconnexion de l'utilisateur
-      security: [{ bearerAuth: [] }]
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
-          application/json: { schema: { $ref: '#/components/schemas/RefreshTokenRequest' } }
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
       responses:
-        '200': { description: Déconnexion réussie. }
+        '200':
+          description: Déconnexion réussie
 
   /auth/me:
     get:
       tags: [Gestion de Compte]
       summary: Récupérer le profil de l'utilisateur connecté
-      security: [{ bearerAuth: [] }]
+      security:
+        - bearerAuth: []
       responses:
         '200':
-          description: Profil de l'utilisateur.
+          description: Profil de l'utilisateur
           content:
-            application/json: { schema: { $ref: '#/components/schemas/User' } }
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
 
   /auth/update-me:
     patch:
       tags: [Gestion de Compte]
-      summary: Mettre à jour le profil de l'utilisateur (prénom, nom)
-      security: [{ bearerAuth: [] }]
+      summary: Mettre à jour le profil utilisateur
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
-          application/json: { schema: { $ref: '#/components/schemas/UpdateMeRequest' } }
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMeRequest'
       responses:
         '200':
-          description: Profil mis à jour.
+          description: Profil mis à jour
           content:
-            application/json: { schema: { $ref: '#/components/schemas/User' } }
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
 
   /auth/update-password:
     patch:
       tags: [Gestion de Compte]
-      summary: Mettre à jour le mot de passe de l'utilisateur connecté
-      security: [{ bearerAuth: [] }]
+      summary: Mettre à jour le mot de passe
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
-          application/json: { schema: { $ref: '#/components/schemas/UpdatePasswordRequest' } }
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePasswordRequest'
       responses:
-        '200': { description: Mot de passe mis à jour. }
+        '200':
+          description: Mot de passe mis à jour
 
-  # --- Routes Système ---
+  # === API KEYS ===
+  /api/keys:
+    get:
+      tags: [API Keys]
+      summary: Lister toutes les clés API
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des clés API
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiKey'
+    post:
+      tags: [API Keys]
+      summary: Créer une nouvelle clé API
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, example: "Mon App" }
+                permissions: { type: array, items: { type: string } }
+      responses:
+        '201':
+          description: Clé API créée
+
+  /api/keys/{keyId}:
+    get:
+      tags: [API Keys]
+      summary: Détails d'une clé API
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: keyId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Détails de la clé
+    delete:
+      tags: [API Keys]
+      summary: Supprimer une clé API
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: keyId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Clé supprimée
+
+  # === SYSTÈME ===
   /system/health:
     get:
       tags: [Système]
       summary: Vérification de santé du système
+      security:
+        - ApiKeyAuth: []
+        - bearerAuth: []
       responses:
         '200':
           description: Système opérationnel
@@ -243,34 +504,376 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: true
+                  success: { type: boolean, example: true }
                   data:
                     type: object
                     properties:
-                      status:
-                        type: string
-                        example: "healthy"
-                      timestamp:
-                        type: string
-                        format: date-time
-                      gateway:
-                        type: object
-                        properties:
-                          version:
-                            type: string
-                            example: "1.0.0"
-                          uptime:
-                            type: number
-                            example: 3600
-        '503':
-          description: Service indisponible
+                      status: { type: string, example: "healthy" }
+                      timestamp: { type: string, format: date-time }
+
+  /system/roles:
+    get:
+      tags: [Système]
+      summary: Lister tous les rôles
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des rôles
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
 
-# Sécurité globale
+  /system/permissions:
+    get:
+      tags: [Système]
+      summary: Lister toutes les permissions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des permissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Permission'
+
+  /system/services:
+    get:
+      tags: [Système]
+      summary: Lister tous les services
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+    post:
+      tags: [Système]
+      summary: Créer un nouveau service
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                url: { type: string }
+                icon: { type: string }
+                color: { type: string }
+      responses:
+        '201':
+          description: Service créé
+
+  /system/services/{serviceId}:
+    get:
+      tags: [Système]
+      summary: Détails d'un service
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Détails du service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+    put:
+      tags: [Système]
+      summary: Mettre à jour un service
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+      responses:
+        '200':
+          description: Service mis à jour
+    delete:
+      tags: [Système]
+      summary: Supprimer un service
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service supprimé
+
+  # === SSO ===
+  /sso/login:
+    post:
+      tags: [SSO]
+      summary: Connexion SSO
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                service: { type: string, example: "soristore" }
+                redirectUrl: { type: string }
+      responses:
+        '200':
+          description: Redirection SSO
+
+  /sso/callback:
+    get:
+      tags: [SSO]
+      summary: Callback SSO
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+        - in: query
+          name: service
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Authentification SSO réussie
+
+  # === ADMINISTRATION ===
+  /admin/users:
+    get:
+      tags: [Administration]
+      summary: Lister tous les utilisateurs
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Liste des utilisateurs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserComplete'
+
+  /admin/users/{userId}:
+    get:
+      tags: [Administration]
+      summary: Détails d'un utilisateur
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Détails de l'utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserComplete'
+    delete:
+      tags: [Administration]
+      summary: Supprimer un utilisateur
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Utilisateur supprimé
+
+  /admin/api-keys:
+    get:
+      tags: [Administration]
+      summary: Lister toutes les clés API
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Liste des clés API
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiKeyComplete'
+
+  /admin/sessions:
+    get:
+      tags: [Administration]
+      summary: Lister toutes les sessions SSO
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Liste des sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SSOSession'
+
+  /admin/analytics:
+    get:
+      tags: [Administration]
+      summary: Statistiques d'utilisation
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Statistiques
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalUsers: { type: number }
+                  activeUsers: { type: number }
+                  totalRequests: { type: number }
+                  totalServices: { type: number }
+                  uptime: { type: number }
+
+  # === PROXY ROUTES ===
+  /soristore/{path}:
+    get:
+      tags: [Proxy]
+      summary: Proxy vers SoriStore
+      security:
+        - ApiKeyAuth: []
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Réponse du service SoriStore
+
+  /soripay/{path}:
+    get:
+      tags: [Proxy]
+      summary: Proxy vers SoriPay
+      security:
+        - ApiKeyAuth: []
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Réponse du service SoriPay
+
+  /soriwallet/{path}:
+    get:
+      tags: [Proxy]
+      summary: Proxy vers SoriWallet
+      security:
+        - ApiKeyAuth: []
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Réponse du service SoriWallet
+
+  /sorilearn/{path}:
+    get:
+      tags: [Proxy]
+      summary: Proxy vers SoriLearn
+      security:
+        - ApiKeyAuth: []
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Réponse du service SoriLearn
+
+  /sorihealth/{path}:
+    get:
+      tags: [Proxy]
+      summary: Proxy vers SoriHealth
+      security:
+        - ApiKeyAuth: []
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Réponse du service SoriHealth
+
+  /soriaccess/{path}:
+    get:
+      tags: [Proxy]
+      summary: Proxy vers SoriAccess
+      security:
+        - ApiKeyAuth: []
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Réponse du service SoriAccess
+
 security:
+  - ApiKeyAuth: []
   - bearerAuth: []

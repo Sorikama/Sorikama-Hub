@@ -9,6 +9,7 @@ import { validateBody } from '../middlewares/validation.middleware';
 import * as schemas from '../auth/auth.validation';
 // Importe le middleware pour protéger les routes
 import { protect } from '../middlewares/auth.middleware';
+import { requireApiKeyAndJWT } from '../middlewares/dualAuth.middleware';
 
 const router = Router();
 
@@ -180,9 +181,9 @@ router.post('/refresh-token', validateBody(schemas.refreshTokenSchema), authCont
 // --- 🔒 Routes Protégées (nécessitent un token JWT valide) ---
 // ===================================================================================
 
-// Le middleware 'protect' est appliqué à toutes les routes définies après cette ligne.
-// Il vérifie la validité du token JWT et attache l'utilisateur à la requête (req.user).
-router.use(protect);
+// Le middleware 'requireApiKeyAndJWT' est appliqué à toutes les routes définies après cette ligne.
+// Il vérifie l'API Key ET le token JWT.
+router.use(requireApiKeyAndJWT);
 
 /**
  * @swagger

@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import jwt from 'jsonwebtoken';
-import { config } from '../config';
+import { JWT_SECRET } from '../config';
 import AppError from '../utils/AppError';
 import { UserModel } from '../database/models/user.model';
 import { logger } from '../utils/logger';
@@ -50,7 +50,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
     }
 
     // Vérification du token
-    const decoded = jwt.verify(token, config.jwt.secret!) as UserPayload;
+    const decoded = jwt.verify(token, JWT_SECRET) as UserPayload;
     
     // Vérification de la session si présente
     if (decoded.sessionId) {
