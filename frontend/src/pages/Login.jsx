@@ -30,8 +30,29 @@ export default function Login() {
     
     try {
       await login(credentials);
-      const from = location.state?.from?.pathname || '/dashboard';
-      navigate(from, { replace: true });
+      
+      // Vérifier s'il y a un paramètre redirect dans l'URL
+      const searchParams = new URLSearchParams(location.search);
+      const redirectUrl = searchParams.get('redirect');
+      
+      console.log('Connexion reussie');
+      
+      // Verifier s'il y a une URL d'autorisation sauvegardee
+      const savedAuthorizeUrl = localStorage.getItem('sorikama_authorize_url');
+      console.log('URL authorize sauvegardee:', savedAuthorizeUrl);
+      
+      if (savedAuthorizeUrl) {
+        console.log('Redirection vers URL sauvegardee:', savedAuthorizeUrl);
+        navigate(savedAuthorizeUrl, { replace: true });
+      } else if (redirectUrl) {
+        const decodedUrl = decodeURIComponent(redirectUrl);
+        console.log('Redirection vers redirect param:', decodedUrl);
+        navigate(decodedUrl, { replace: true });
+      } else {
+        console.log('Redirection vers dashboard');
+        const from = location.state?.from?.pathname || '/dashboard';
+        navigate(from, { replace: true });
+      }
     } catch (error) {
       console.error('Erreur connexion:', error);
     }

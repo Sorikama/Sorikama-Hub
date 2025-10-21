@@ -10,6 +10,7 @@ import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
+import Authorize from './pages/Authorize';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -42,6 +43,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/authorize" 
+            element={
+              <ProtectedRoute>
+                <Authorize />
               </ProtectedRoute>
             } 
           />
