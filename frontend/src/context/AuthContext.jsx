@@ -324,6 +324,34 @@ export function AuthProvider({ children }) {
     },
 
     /**
+     * Mise à jour du mot de passe
+     * 
+     * @param {Object} passwordData - Ancien et nouveau mot de passe
+     * @returns {Promise} Confirmation
+     */
+    async updatePassword(passwordData) {
+      try {
+        dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
+        
+        console.log('🔒 Mise à jour du mot de passe...');
+        const response = await authService.updatePassword(passwordData);
+        
+        console.log('✅ Mot de passe mis à jour');
+        
+        // Afficher un toast de succès
+        toast.success('Mot de passe mis à jour avec succès !');
+        
+        return response;
+        
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || 'Erreur lors de la mise à jour du mot de passe';
+        console.error('❌ Erreur mise à jour mot de passe:', errorMessage);
+        dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage });
+        throw error;
+      }
+    },
+
+    /**
      * Régénération de l'API Key personnelle
      * L'ancienne clé devient invalide
      * 
