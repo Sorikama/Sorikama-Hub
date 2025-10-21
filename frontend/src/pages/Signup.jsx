@@ -3,11 +3,12 @@
  */
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Signup() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { register, verify, isLoading, error } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -59,7 +60,29 @@ export default function Signup() {
     e.preventDefault();
     try {
       await verify(verificationCode);
-      navigate('/dashboard');
+      
+      console.log('Inscription reussie');
+      
+      // Verifier s'il y a une URL d'autorisation sauvegardee
+      const savedAuthorizeUrl = localStorage.getItem('sorikama_authorize_url');
+      console.log('URL authorize sauvegardee:', savedAuthorizeUrl);
+      
+      if (savedAuthorizeUrl) {
+        console.log('Redirection vers URL sauvegardee:', savedAuthorizeUrl);
+        navigate(savedAuthorizeUrl, { replace: true });
+      } else {
+        const searchParams = new URLSearchParams(location.search);
+        const redirectUrl = searchParams.get('redirect');
+        
+        if (redirectUrl) {
+          const decodedUrl = decodeURIComponent(redirectUrl);
+          console.log('Redirection vers redirect param:', decodedUrl);
+          navigate(decodedUrl, { replace: true });
+        } else {
+          console.log('Redirection vers dashboard');
+          navigate('/dashboard');
+        }
+      }
     } catch (error) {
       console.error('Erreur vérification:', error);
     }
