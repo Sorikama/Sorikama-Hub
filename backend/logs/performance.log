@@ -319,3 +319,5 @@
 [2025-10-21 13:55:58] WARN: 🐌 Requête lente détectée: 1250ms
 [2025-10-21 14:55:58] INFO: 🔄 Nettoyage automatique du cache
 [2025-10-21 15:55:58] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-21 17:58:57] WARN: 🐌 Requête lente: 📤 POST /api/v1/auth/register - 200 - 2175ms - ::1
+[2025-10-21 17:58:57] PERF: Very slow request {"method":"POST","url":"/api/v1/auth/register","responseTime":"2177ms","statusCode":200,"level":"warn"}

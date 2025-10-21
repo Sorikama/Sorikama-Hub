@@ -1,91 +1,455 @@
+/* Styles globaux pour Sorikama Hub - Design Futuriste */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Variables CSS pour les thèmes */
+/* Import de la police Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* Variables CSS personnalisées */
 :root {
-  --background: 255 255 255;
-  --foreground: 0 0 0;
-  --muted: 245 245 245;
-  --muted-foreground: 115 115 115;
-  --border: 229 229 229;
-  --primary: 59 130 246;
-  --primary-foreground: 255 255 255;
-  --destructive: 239 68 68;
-  --destructive-foreground: 255 255 255;
-  --card: 255 255 255;
-  --card-foreground: 0 0 0;
+  --primary-gradient: linear-gradient(135deg, #06b6d4, #8b5cf6);
+  --secondary-gradient: linear-gradient(135deg, #f59e0b, #ef4444);
+  --dark-gradient: linear-gradient(135deg, #0f172a, #1e1b4b);
 }
 
-[data-theme="dark"] {
-  --background: 0 0 0;
-  --foreground: 255 255 255;
-  --muted: 23 23 23;
-  --muted-foreground: 163 163 163;
-  --border: 39 39 42;
-  --primary: 59 130 246;
-  --primary-foreground: 255 255 255;
-  --destructive: 239 68 68;
-  --destructive-foreground: 255 255 255;
-  --card: 23 23 23;
-  --card-foreground: 255 255 255;
-}
-
+/* Styles de base */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  color: #1f2937;
+  background-color: #0f172a;
+  overflow-x: hidden;
 }
 
-/* Classes utilitaires */
-.bg-background { background-color: rgb(var(--background)); }
-.text-foreground { color: rgb(var(--foreground)); }
-.bg-muted { background-color: rgb(var(--muted)); }
-.text-muted-foreground { color: rgb(var(--muted-foreground)); }
-.border-border { border-color: rgb(var(--border)); }
-.bg-primary { background-color: rgb(var(--primary)); }
-.text-primary { color: rgb(var(--primary)); }
-.text-primary-foreground { color: rgb(var(--primary-foreground)); }
-.bg-destructive { background-color: rgb(var(--destructive)); }
-.text-destructive-foreground { color: rgb(var(--destructive-foreground)); }
-.bg-card { background-color: rgb(var(--card)); }
-.text-card-foreground { color: rgb(var(--card-foreground)); }
-
-/* Transitions */
-.transition-colors {
-  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+/* Animations personnalisées avancées */
+@keyframes blob {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translate(30px, -50px) scale(1.1) rotate(90deg);
+  }
+  50% {
+    transform: translate(-20px, 20px) scale(0.9) rotate(180deg);
+  }
+  75% {
+    transform: translate(-30px, -30px) scale(1.05) rotate(270deg);
+  }
 }
 
-/* Hover states */
-.hover\:bg-primary\/90:hover { background-color: rgb(var(--primary) / 0.9); }
-.hover\:bg-destructive\/90:hover { background-color: rgb(var(--destructive) / 0.9); }
-.hover\:text-foreground:hover { color: rgb(var(--foreground)); }
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
 
-/* Focus states */
-.focus\:outline-none:focus { outline: none; }
-.focus\:ring-2:focus { box-shadow: 0 0 0 2px rgb(var(--primary) / 0.5); }
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+  }
+}
 
-/* Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes textGlow {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
+  }
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    border-color: rgba(6, 182, 212, 0.3);
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+  }
+  50% {
+    border-color: rgba(139, 92, 246, 0.6);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  }
+}
+
+/* Classes d'animation */
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.8s ease-out;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.6s ease-out;
+}
+
+.animate-text-glow {
+  animation: textGlow 2s ease-in-out infinite;
+}
+
+.animate-border-glow {
+  animation: borderGlow 2s ease-in-out infinite;
+}
+
+/* Délais d'animation */
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-400 { animation-delay: 0.4s; }
+.animation-delay-600 { animation-delay: 0.6s; }
+.animation-delay-800 { animation-delay: 0.8s; }
+.animation-delay-1000 { animation-delay: 1s; }
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
+
+/* Effets de glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Effets de néon */
+.neon-cyan {
+  box-shadow: 
+    0 0 5px #06b6d4,
+    0 0 10px #06b6d4,
+    0 0 15px #06b6d4,
+    0 0 20px #06b6d4;
+}
+
+.neon-purple {
+  box-shadow: 
+    0 0 5px #8b5cf6,
+    0 0 10px #8b5cf6,
+    0 0 15px #8b5cf6,
+    0 0 20px #8b5cf6;
+}
+
+/* Effets de texte holographique */
+.holographic-text {
+  background: linear-gradient(45deg, #06b6d4, #8b5cf6, #ec4899, #06b6d4);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: holographic 3s ease-in-out infinite;
+}
+
+@keyframes holographic {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Effets de particules */
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(6, 182, 212, 0.6);
+  border-radius: 50%;
+  animation: particle-float 4s linear infinite;
+}
+
+@keyframes particle-float {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Styles pour les boutons futuristes */
+.btn-futuristic {
+  position: relative;
+  background: linear-gradient(45deg, #06b6d4, #8b5cf6);
+  border: none;
+  border-radius: 12px;
+  padding: 16px 32px;
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-futuristic::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-futuristic:hover::before {
+  left: 100%;
+}
+
+.btn-futuristic:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(6, 182, 212, 0.3);
+}
+
+/* Styles pour les cartes 3D */
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.card-3d:hover {
+  transform: rotateY(5deg) rotateX(5deg) translateZ(20px);
+}
+
+/* Effets de survol avancés */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Styles pour les gradients animés */
+.gradient-animated {
+  background: linear-gradient(-45deg, #06b6d4, #8b5cf6, #ec4899, #f59e0b);
+  background-size: 400% 400%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Styles pour les bordures animées */
+.border-animated {
+  position: relative;
+  background: linear-gradient(45deg, #06b6d4, #8b5cf6);
+  padding: 2px;
+  border-radius: 12px;
+}
+
+.border-animated::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: #0f172a;
+  border-radius: 10px;
+  z-index: -1;
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #06b6d4, #8b5cf6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #0891b2, #7c3aed);
+}
+
+/* Styles pour les formulaires futuristes */
+.input-futuristic {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: white;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.input-futuristic:focus {
+  outline: none;
+  border-color: #06b6d4;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.input-futuristic::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Styles pour les alertes */
+.alert-futuristic {
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 8px;
+  padding: 16px;
+  color: #06b6d4;
+  backdrop-filter: blur(10px);
+}
+
+/* Styles pour les loaders */
+.loader-ring {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(6, 182, 212, 0.3);
+  border-radius: 50%;
+  border-top-color: #06b6d4;
+  animation: spin 1s ease-in-out infinite;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-.animate-spin { animation: spin 1s linear infinite; }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+/* Styles pour les tooltips futuristes */
+.tooltip-futuristic {
+  position: relative;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  backdrop-filter: blur(10px);
 }
-.animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
-/* Backdrop blur */
-.backdrop-blur-md {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+/* Styles pour les badges */
+.badge-futuristic {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: linear-gradient(45deg, #06b6d4, #8b5cf6);
+  color: white;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .holographic-text {
+    font-size: 2.5rem;
+  }
+  
+  .card-3d:hover {
+    transform: none;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+}
+
+/* Mode sombre amélioré */
+.dark {
+  color-scheme: dark;
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .input-futuristic {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.dark .input-futuristic:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+/* Styles pour les transitions de page */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 300ms, transform 300ms;
 }

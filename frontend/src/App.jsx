@@ -2,6 +2,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Pages
 import Login from './pages/Login';
@@ -15,10 +16,11 @@ import Navbar from './components/Navbar';
 
 function App() {
   return (
-    <AuthProvider>
-      <div className="App">
-        <Navbar />
-        <Routes>
+    <ThemeProvider>
+      <AuthProvider>
+        <div className="App">
+          <Navbar />
+          <Routes>
           {/* Routes publiques */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -39,6 +41,7 @@ function App() {
         </Routes>
       </div>
     </AuthProvider>
+  </ThemeProvider>
   );
 }
 
