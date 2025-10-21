@@ -9,10 +9,10 @@
 export const API_CONFIG = {
   // URL de base de l'API Gateway (port 7000 forcé côté backend)
   BASE_URL: import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:7000/api/v1',
-  
+
   // API Key système fournie par l'admin (préfixe sk_)
   SYSTEM_API_KEY: import.meta.env.VITE_API_KEY || 'sk_59105e8b548140fe11e8bad8db2572f174a6266fe4b3c4ab',
-  
+
   // Timeout des requêtes HTTP (10 secondes)
   TIMEOUT: 10000
 };
@@ -30,7 +30,7 @@ export const ENDPOINTS = {
     UPDATE_ME: '/auth/update-me',            // Mise à jour du profil
     REGENERATE_API_KEY: '/auth/regenerate-api-key'  // Régénération API Key personnelle
   },
-  
+
   // Routes système
   SYSTEM: {
     HEALTH: '/system/health'                 // État de santé du système

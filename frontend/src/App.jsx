@@ -9,10 +9,12 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
+import ToastContainer from './components/ToastContainer';
 
 function App() {
   return (
@@ -28,6 +30,14 @@ function App() {
           
           {/* Routes protégées */}
           <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
             path="/profile" 
             element={
               <ProtectedRoute>
@@ -39,6 +49,9 @@ function App() {
           {/* Redirection par défaut */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        
+        {/* Conteneur des toasts - Affiché globalement */}
+        <ToastContainer />
       </div>
     </AuthProvider>
   </ThemeProvider>

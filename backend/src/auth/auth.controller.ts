@@ -262,8 +262,12 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
 export const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { refreshToken } = req.body;
-        const allTokens = await RefreshTokenModel.find({});
-        const storedToken = allTokens.find(t => t.token === refreshToken);
+        
+        // Chiffrer le token reçu pour le comparer avec ceux en base
+        const encryptedToken = encrypt(refreshToken);
+        
+        // Rechercher directement le token chiffré en base
+        const storedToken = await RefreshTokenModel.findOne({ token: encryptedToken });
 
         if (!storedToken || new Date() > storedToken.expiresAt) {
             return next(new AppError('Refresh token invalide ou expiré.', StatusCodes.UNAUTHORIZED));
@@ -286,7 +290,10 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
         const payload = { id: user._id, roles: (user.roles as any[]).map(r => r.name), permissions: Array.from(permissions) };
         const newTokens = await generateTokens(payload);
 
+        // Supprimer l'ancien refresh token
         await storedToken.deleteOne();
+
+        logger.info(`Refresh token renouvelé pour l'utilisateur ${user.email}`);
 
         res.status(StatusCodes.OK).json({ status: 'success', data: { user, tokens: newTokens } });
     } catch (error) {

@@ -10,6 +10,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authService, authUtils } from '../services/api.js';
+import { useToast } from './ToastContext.jsx';
 
 // Création du contexte d'authentification
 const AuthContext = createContext();
@@ -102,6 +103,7 @@ function authReducer(state, action) {
  */
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const toast = useToast();
 
   /**
    * Initialisation de l'authentification au démarrage de l'app
@@ -170,6 +172,10 @@ export function AuthProvider({ children }) {
         
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
         console.log('✅ Code de vérification envoyé');
+        
+        // Afficher un toast de succès
+        toast.success('Code de vérification envoyé à votre email !');
+        
         return response;
         
       } catch (error) {
@@ -205,6 +211,10 @@ export function AuthProvider({ children }) {
         // Utilisateur créé et connecté automatiquement
         dispatch({ type: AUTH_ACTIONS.SET_USER, payload: response.data.user });
         console.log('✅ Compte créé et utilisateur connecté');
+        
+        // Afficher un toast de succès
+        toast.success(`Bienvenue ${response.data.user.firstName} ! Votre compte a été créé avec succès.`);
+        
         return response;
         
       } catch (error) {
@@ -233,6 +243,10 @@ export function AuthProvider({ children }) {
         // Utilisateur connecté
         dispatch({ type: AUTH_ACTIONS.SET_USER, payload: response.data.user });
         console.log('✅ Connexion réussie');
+        
+        // Afficher un toast de succès
+        toast.success(`Bon retour ${response.data.user.firstName} !`);
+        
         return response;
         
       } catch (error) {
@@ -246,17 +260,36 @@ export function AuthProvider({ children }) {
     /**
      * Déconnexion utilisateur
      * Invalide les tokens et nettoie l'état
+     * IMPORTANT : Ne déconnecte QUE si le backend répond OK
      */
     async logout() {
       try {
         console.log('🚪 Déconnexion en cours...');
-        await authService.logout();
+        const result = await authService.logout();
+        
+        // Si la déconnexion a réussi, mettre à jour l'état
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
         console.log('✅ Déconnexion réussie');
+        
+        // Afficher un toast de succès
+        if (result?.warning) {
+          toast.warning(result.warning);
+        } else {
+          toast.success('Vous avez été déconnecté avec succès');
+        }
+        
+        // Retourner le résultat (peut contenir un warning)
+        return result;
+        
       } catch (error) {
-        console.error('⚠️ Erreur lors de la déconnexion:', error);
-        // Déconnecter quand même côté client
-        dispatch({ type: AUTH_ACTIONS.LOGOUT });
+        console.error('❌ Erreur lors de la déconnexion:', error);
+        
+        // Définir l'erreur dans l'état pour que le composant puisse l'afficher
+        const errorMessage = error.message || 'Erreur lors de la déconnexion';
+        dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage });
+        
+        // Propager l'erreur pour que le composant puisse la gérer
+        throw error;
       }
     },
 
@@ -276,6 +309,10 @@ export function AuthProvider({ children }) {
         // Mettre à jour l'utilisateur dans l'état
         dispatch({ type: AUTH_ACTIONS.SET_USER, payload: response.data.user });
         console.log('✅ Profil mis à jour');
+        
+        // Afficher un toast de succès
+        toast.success('Profil mis à jour avec succès !');
+        
         return response;
         
       } catch (error) {
@@ -304,6 +341,10 @@ export function AuthProvider({ children }) {
         dispatch({ type: AUTH_ACTIONS.SET_USER, payload: updatedUser });
         
         console.log('✅ API Key régénérée');
+        
+        // Afficher un toast de succès
+        toast.success('API Key régénérée avec succès !');
+        
         return response;
         
       } catch (error) {

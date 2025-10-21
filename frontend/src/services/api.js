@@ -23,6 +23,9 @@ const api = axios.create({
   }
 });
 
+// Flag pour indiquer qu'une déconnexion est en cours
+let isLoggingOut = false;
+
 /**
  * Intercepteur de requête - Ajoute automatiquement les headers d'authentification
  * 
@@ -33,26 +36,37 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // === NIVEAU 1 : API KEY OBLIGATOIRE ===
-    // Récupérer l'API Key utilisateur (uk_) ou utiliser celle du système (sk_)
     const userApiKey = localStorage.getItem(STORAGE_KEYS.USER_API_KEY);
     const systemApiKey = API_CONFIG.SYSTEM_API_KEY;
-    
-    // Priorité à l'API Key utilisateur si elle existe
-    config.headers['X-API-Key'] = userApiKey || systemApiKey;
-    
-    // === NIVEAU 2 : JWT TOKEN (routes protégées seulement) ===
     const isPublicRoute = PUBLIC_ROUTES.some(route => config.url?.includes(route));
     
+    // Pour les utilisateurs connectés : TOUJOURS utiliser leur API Key
+    if (userApiKey && userApiKey !== 'null' && userApiKey !== 'undefined') {
+      config.headers['X-API-Key'] = userApiKey;
+      console.log('🔑 Utilisation de l\'API Key utilisateur');
+    } 
+    // Pour les routes publiques (login, register, etc.) : utiliser l'API Key système
+    else if (isPublicRoute) {
+      config.headers['X-API-Key'] = systemApiKey;
+      console.log('🔑 Utilisation de l\'API Key système (route publique)');
+    }
+    // Si pas d'API Key utilisateur et route protégée : erreur
+    else {
+      console.error('❌ Aucune API Key utilisateur disponible pour une route protégée');
+      config.headers['X-API-Key'] = systemApiKey; // Fallback pour éviter l'erreur
+    }
+    
+    // === NIVEAU 2 : JWT TOKEN (routes protégées seulement) ===
     if (!isPublicRoute) {
       const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-      if (accessToken) {
+      if (accessToken && accessToken !== 'null' && accessToken !== 'undefined') {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
     }
     
     // Log pour debug (masquer les clés sensibles)
-    console.log(`🔑 Requête API: ${config.method?.toUpperCase()} ${config.url}`, {
-      apiKey: config.headers['X-API-Key']?.substring(0, 8) + '...',
+    console.log(`📡 ${config.method?.toUpperCase()} ${config.url}`, {
+      apiKey: config.headers['X-API-Key']?.substring(0, 10) + '...',
       hasJWT: !!config.headers.Authorization,
       isPublic: isPublicRoute
     });
@@ -79,8 +93,17 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     
-    // Si erreur 401 et qu'on n'a pas déjà tenté le refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Ne pas tenter de refresh si c'est une requête de logout ou si on est en train de se déconnecter
+    const isLogoutRequest = originalRequest.url?.includes('/auth/logout');
+    
+    // Si on est en train de se déconnecter, ignorer les erreurs 401
+    if (isLoggingOut) {
+      console.log('⚠️ Erreur ignorée pendant la déconnexion');
+      return Promise.reject(error);
+    }
+    
+    // Si erreur 401 et qu'on n'a pas déjà tenté le refresh et que ce n'est pas un logout
+    if (error.response?.status === 401 && !originalRequest._retry && !isLogoutRequest) {
       originalRequest._retry = true;
       
       const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
@@ -202,24 +225,65 @@ export const authService = {
   /**
    * Déconnexion utilisateur
    * Invalide le refresh token côté serveur et nettoie le stockage local
+   * IMPORTANT : Le localStorage n'est nettoyé QUE si le backend répond OK
    */
   async logout() {
+    const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+    
+    // Vérifier qu'on a bien un refresh token
+    if (!refreshToken || refreshToken === 'null' || refreshToken === 'undefined') {
+      console.warn('⚠️ Pas de refresh token - déconnexion locale uniquement');
+      authUtils.clearStorage();
+      isLoggingOut = false;
+      return;
+    }
+    
+    // Activer le flag de déconnexion
+    isLoggingOut = true;
+    
     try {
-      const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+      console.log('🚪 Envoi de la requête de déconnexion au serveur...');
       
-      if (refreshToken) {
-        console.log('🚪 Déconnexion en cours...');
-        await api.post(ENDPOINTS.AUTH.LOGOUT, { refreshToken });
+      // Envoyer la requête de logout au serveur avec l'API Key utilisateur
+      const response = await api.post(ENDPOINTS.AUTH.LOGOUT, { refreshToken });
+      
+      console.log('✅ Réponse du serveur reçue:', response.status);
+      
+      // Vérifier que le serveur a bien répondu OK (200-299)
+      if (response.status >= 200 && response.status < 300) {
+        console.log('✅ Déconnexion validée par le serveur');
+        
+        // SEULEMENT MAINTENANT on nettoie le localStorage
+        authUtils.clearStorage();
+        console.log('✅ Stockage local nettoyé');
+        
+        // Désactiver le flag
+        isLoggingOut = false;
+        
+        return { success: true };
+      } else {
+        throw new Error(`Réponse inattendue du serveur: ${response.status}`);
       }
       
-      // Nettoyer le stockage local dans tous les cas
-      authUtils.clearStorage();
-      console.log('✅ Déconnexion réussie');
-      
     } catch (error) {
-      console.error('⚠️ Erreur lors de la déconnexion:', error);
-      // Nettoyer quand même le stockage local
-      authUtils.clearStorage();
+      console.error('❌ Erreur lors de la déconnexion:', error);
+      
+      // Désactiver le flag
+      isLoggingOut = false;
+      
+      // Si c'est une erreur réseau ou serveur, on peut quand même déconnecter localement
+      if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || error.response?.status >= 500) {
+        console.warn('⚠️ Erreur serveur - déconnexion locale forcée');
+        authUtils.clearStorage();
+        return { success: true, warning: 'Déconnexion locale effectuée (serveur injoignable)' };
+      }
+      
+      // Pour les autres erreurs (401, 403, etc.), on ne déconnecte PAS
+      const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de la déconnexion';
+      console.error('❌ Déconnexion refusée:', errorMessage);
+      
+      // Retourner l'erreur pour que le composant puisse l'afficher
+      throw new Error(errorMessage);
     }
   },
 
