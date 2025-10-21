@@ -313,3 +313,9 @@
 [2025-10-20 18:20:16] WARN: 🐌 Requête lente détectée: 1250ms
 [2025-10-20 19:20:16] INFO: 🔄 Nettoyage automatique du cache
 [2025-10-20 20:20:16] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-21 10:55:58] INFO: ⚡ Monitoring des performances activé
+[2025-10-21 11:55:58] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-21 12:55:58] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-21 13:55:58] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-21 14:55:58] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-21 15:55:58] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%

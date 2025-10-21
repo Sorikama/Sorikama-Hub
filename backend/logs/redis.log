@@ -270,3 +270,44 @@
 [2025-10-20 22:20:15] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
 [2025-10-20 22:20:15] INFO: REDIS_CHECK_START 
 [2025-10-20 22:20:15] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-21 17:55:55] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-21 17:55:55] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":0,"host":"localhost","port":6379}
+[2025-10-21 17:55:55] WARN: CACHE_RETRY_ATTEMPT {"attempt":1,"delay":50,"maxAttempts":10}
+[2025-10-21 17:55:55] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:55] INFO: CACHE_RECONNECTING {"delay":50,"attempt":2}
+[2025-10-21 17:55:55] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":1,"host":"localhost","port":6379}
+[2025-10-21 17:55:55] WARN: CACHE_RETRY_ATTEMPT {"attempt":2,"delay":100,"maxAttempts":10}
+[2025-10-21 17:55:55] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:55] INFO: CACHE_RECONNECTING {"delay":100,"attempt":3}
+[2025-10-21 17:55:55] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":2,"host":"localhost","port":6379}
+[2025-10-21 17:55:55] WARN: CACHE_RETRY_ATTEMPT {"attempt":3,"delay":150,"maxAttempts":10}
+[2025-10-21 17:55:55] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:55] INFO: CACHE_RECONNECTING {"delay":150,"attempt":4}
+[2025-10-21 17:55:55] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":3,"host":"localhost","port":6379}
+[2025-10-21 17:55:55] WARN: CACHE_RETRY_ATTEMPT {"attempt":4,"delay":200,"maxAttempts":10}
+[2025-10-21 17:55:55] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:55] INFO: CACHE_RECONNECTING {"delay":200,"attempt":5}
+[2025-10-21 17:55:56] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":4,"host":"localhost","port":6379}
+[2025-10-21 17:55:56] WARN: CACHE_RETRY_ATTEMPT {"attempt":5,"delay":250,"maxAttempts":10}
+[2025-10-21 17:55:56] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:56] INFO: CACHE_RECONNECTING {"delay":250,"attempt":6}
+[2025-10-21 17:55:56] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":5,"host":"localhost","port":6379}
+[2025-10-21 17:55:56] WARN: CACHE_RETRY_ATTEMPT {"attempt":6,"delay":300,"maxAttempts":10}
+[2025-10-21 17:55:56] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:56] INFO: CACHE_RECONNECTING {"delay":300,"attempt":7}
+[2025-10-21 17:55:56] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":6,"host":"localhost","port":6379}
+[2025-10-21 17:55:56] WARN: CACHE_RETRY_ATTEMPT {"attempt":7,"delay":350,"maxAttempts":10}
+[2025-10-21 17:55:56] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:56] INFO: CACHE_RECONNECTING {"delay":350,"attempt":8}
+[2025-10-21 17:55:57] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":7,"host":"localhost","port":6379}
+[2025-10-21 17:55:57] WARN: CACHE_RETRY_ATTEMPT {"attempt":8,"delay":400,"maxAttempts":10}
+[2025-10-21 17:55:57] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:57] INFO: CACHE_RECONNECTING {"delay":400,"attempt":9}
+[2025-10-21 17:55:57] INFO: REDIS_CHECK_START 
+[2025-10-21 17:55:57] INFO: REDIS_AUTO_START 
+[2025-10-21 17:55:57] INFO: REDIS_STARTING {"pid":4648}
+[2025-10-21 17:55:57] INFO: REDIS_INITIALIZED {"pid":4648}
+[2025-10-21 17:55:57] INFO: REDIS_READY {"port":6379,"pid":4648}
+[2025-10-21 17:55:57] INFO: REDIS_STATUS_CHECK {"cache":{"status":"connecting","retryCount":8},"metrics":{"status":"connecting","retryCount":8}}
+[2025-10-21 17:55:57] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":9}
+[2025-10-21 17:55:57] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":9,"connectionTime":"2025-10-21T15:55:57.564Z"}
