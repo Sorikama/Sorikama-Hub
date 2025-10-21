@@ -1,11 +1,7 @@
 /**
- * Composant Navbar - Barre de navigation principale
+ * Composant Navbar - Barre de navigation simple
  * 
- * Affiche la navigation principale de l'application avec :
- * - Logo et nom de l'application
- * - Menu différent selon l'état d'authentification
- * - Informations utilisateur si connecté
- * - Boutons de connexion/inscription si non connecté
+ * Navigation propre sans sélecteur de thème
  */
 
 import React from 'react';
@@ -16,13 +12,10 @@ export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
-  /**
-   * Gérer la déconnexion utilisateur
-   */
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/'); // Rediriger vers l'accueil après déconnexion
+      navigate('/');
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
     }
@@ -33,7 +26,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           
-          {/* Logo et nom de l'application */}
+          {/* Logo et nom */}
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
               <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
@@ -50,7 +43,6 @@ export default function Navbar() {
             {isAuthenticated ? (
               // Menu utilisateur connecté
               <>
-                {/* Informations utilisateur */}
                 <div className="flex items-center space-x-3">
                   <div className="hidden sm:block">
                     <span className="text-sm text-gray-700">
@@ -58,7 +50,6 @@ export default function Navbar() {
                     </span>
                   </div>
                   
-                  {/* Avatar utilisateur */}
                   <div className="h-8 w-8 bg-indigo-100 rounded-full flex items-center justify-center">
                     <span className="text-indigo-600 font-medium text-sm">
                       {user?.firstName?.charAt(0)?.toUpperCase()}
@@ -66,7 +57,6 @@ export default function Navbar() {
                   </div>
                 </div>
 
-                {/* Liens de navigation */}
                 <Link
                   to="/profile"
                   className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
@@ -74,7 +64,6 @@ export default function Navbar() {
                   Mon Profil
                 </Link>
 
-                {/* Bouton de déconnexion */}
                 <button
                   onClick={handleLogout}
                   className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors duration-200"

@@ -1848,3 +1848,44 @@ Raison�: Il n'existe aucune instance en cours de cette t�che.
 [2025-10-21 17:55:58] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
 [2025-10-21 17:55:58] INFO: [SEEDER] Début du seeding des Simple API keys...
 [2025-10-21 17:55:58] INFO: [SEEDER] Clé système créée: sk_59105e8b548140fe11e8bad8db2572f174a6266fe4b3c4ab
+[2025-10-21 17:55:58] INFO: [SEEDER] Simple API keys seedées avec succès
+[2025-10-21 17:55:58] INFO: ✅ Tous les seeders terminés avec succès
+[2025-10-21 17:55:58] INFO: API Key Admin générée automatiquement
+[2025-10-21 17:55:58] INFO: 🗑️ Fichier log supprimé: errors.log
+[2025-10-21 17:55:58] INFO: 🗑️ Fichier log supprimé: redis-errors.log
+[2025-10-21 17:55:58] INFO: 🗑️ Fichier log supprimé: redis-metrics.log
+[2025-10-21 17:55:58] INFO: 🧹 Nettoyage terminé: 3 fichiers supprimés
+[2025-10-21 17:55:58] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-21 17:55:58] INFO: ⚙️ Système: Système de logs initialisé
+[2025-10-21 17:55:58] INFO: 🔍 Démarrage du monitoring (intervalle: 5min)
+[2025-10-21 17:55:58] INFO: ⚙️ Système: Serveur HTTP démarré sur le port 7000
+[2025-10-21 17:55:58] INFO: 📊 Health check terminé: 0/0 services opérationnels
+[2025-10-21 17:55:59] INFO: 🌐 Accès au portail: http://localhost:7000/portal/login
+[2025-10-21 17:55:59] INFO: ⚙️ Système: Démarrage complet du système Sorikama Hub - {"port":7000}
+[2025-10-21 17:56:01] INFO: 🚫 Lancement automatique désactivé (3/3 tentatives atteintes)
+[2025-10-21 17:56:01] INFO: 💡 Accédez manuellement à: http://localhost:7000
+[2025-10-21 17:56:24] INFO: [ROUTING] Service soristore status changed: unhealthy
+[2025-10-21 17:56:24] INFO: [ROUTING] Service soripay status changed: unhealthy
+[2025-10-21 17:56:24] INFO: [ROUTING] Service soriwallet status changed: unhealthy
+[2025-10-21 17:56:24] INFO: [ROUTING] Service sorilearn status changed: unhealthy
+[2025-10-21 17:56:24] INFO: [ROUTING] Service sorihealth status changed: unhealthy
+[2025-10-21 17:56:24] INFO: [ROUTING] Service soriaccess status changed: unhealthy
+[2025-10-21 17:58:24] DEBUG: 📊 Métriques collectées: GET /api/v1/system/health 200 3ms
+[2025-10-21 17:58:24] DEBUG: 📊 Métriques collectées: GET /api/v1/system/health 200 0ms
+[2025-10-21 17:58:36] INFO: [API_KEY] Accès autorisé - API Key: System API Key - IP: ::1 - URL: /api/v1/auth/register
+[2025-10-21 17:58:36] WARN: 📤 POST /api/v1/auth/register - 400 - 21ms - ::1
+[2025-10-21 17:58:36] DEBUG: 📊 Métriques collectées: POST /register 400 20ms
+[2025-10-21 17:58:45] INFO: [API_KEY] Accès autorisé - API Key: System API Key - IP: ::1 - URL: /api/v1/auth/register
+[2025-10-21 17:58:45] WARN: 📤 POST /api/v1/auth/register - 400 - 3ms - ::1
+[2025-10-21 17:58:45] DEBUG: 📊 Métriques collectées: POST /register 400 3ms
+[2025-10-21 17:58:55] INFO: [API_KEY] Accès autorisé - API Key: System API Key - IP: ::1 - URL: /api/v1/auth/register
+[2025-10-21 17:58:57] INFO: Email envoyé avec succès à awarrisw@gmail.com. Message ID: <84779edf-5fd4-dbbf-66b1-4a393375ce0c@sorikama.com>
+[2025-10-21 17:58:57] WARN: ⚡ ATTENTION - Temps de réponse ÉLEVÉ
+[2025-10-21 17:58:57] WARN: 🐌 Requête lente détectée
+[2025-10-21 17:58:57] DEBUG: 📊 Métriques collectées: POST /register 200 2174ms
+[2025-10-21 17:59:11] INFO: [API_KEY] Accès autorisé - API Key: System API Key - IP: ::1 - URL: /api/v1/auth/verify
+[2025-10-21 17:59:12] DEBUG: 📊 Métriques collectées: POST /verify 201 143ms
+[2025-10-21 17:59:18] DEBUG: 📊 Métriques collectées: GET /api/v1/system/health 200 0ms
+[2025-10-21 17:59:18] DEBUG: 📊 Métriques collectées: GET /api/v1/system/health 200 2ms
+[2025-10-21 17:59:32] DEBUG: 📊 Métriques collectées: GET /api/v1/system/health 200 1ms
+[2025-10-21 17:59:32] DEBUG: 📊 Métriques collectées: GET /api/v1/system/health 200 1ms
