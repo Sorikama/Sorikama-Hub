@@ -1,17 +1,22 @@
+/**
+ * Composant Loader - Indicateur de chargement
+ * 
+ * Affiche un spinner animé pendant les opérations asynchrones
+ * Utilisé pendant l'authentification, les requêtes API, etc.
+ */
+
 import React from 'react';
 
-const Loader = () => {
+export default function Loader({ message = 'Chargement...' }) {
   return (
-    <div className="fixed inset-0 bg-background flex items-center justify-center z-50">
-      <div className="flex flex-col items-center space-y-4">
-        <div className="relative">
-          <div className="w-12 h-12 border-4 border-muted rounded-full"></div>
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
-        </div>
-        <p className="text-muted-foreground">Chargement...</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        {/* Spinner animé */}
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+        
+        {/* Message de chargement */}
+        <p className="mt-4 text-gray-600 text-sm">{message}</p>
       </div>
     </div>
   );
-};
-
-export default Loader;
+}

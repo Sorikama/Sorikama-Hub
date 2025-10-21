@@ -1,83 +1,100 @@
+/**
+ * Composant Navbar - Barre de navigation principale
+ * 
+ * Affiche la navigation principale de l'application avec :
+ * - Logo et nom de l'application
+ * - Menu différent selon l'état d'authentification
+ * - Informations utilisateur si connecté
+ * - Boutons de connexion/inscription si non connecté
+ */
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import { useSecureAuth } from '../hooks/useSecureAuth';
 
-const Navbar = () => {
-  const { logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const { user, isSecure, hasApiKey } = useSecureAuth();
+export default function Navbar() {
+  const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
-  const getThemeIcon = () => {
-    switch (theme) {
-      case 'light': return '☀️';
-      case 'dark': return '🌙';
-      case 'system': return '💻';
-      default: return '☀️';
+  /**
+   * Gérer la déconnexion utilisateur
+   */
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/'); // Rediriger vers l'accueil après déconnexion
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
     }
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+    <nav className="bg-white shadow-lg border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link to="/" className="text-xl font-bold text-primary">
-            Sorikama Hub
-          </Link>
+        <div className="flex justify-between h-16">
+          
+          {/* Logo et nom de l'application */}
+          <div className="flex items-center">
+            <Link to="/" className="flex-shrink-0 flex items-center">
+              <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                <span className="text-white font-bold text-sm">S</span>
+              </div>
+              <h1 className="text-xl font-bold text-gray-900">
+                Sorikama Hub
+              </h1>
+            </Link>
+          </div>
 
+          {/* Menu de navigation */}
           <div className="flex items-center space-x-4">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
-              title={`Mode: ${theme}`}
-            >
-              {getThemeIcon()}
-            </button>
-
-            {user ? (
+            {isAuthenticated ? (
+              // Menu utilisateur connecté
               <>
-                <div className="flex items-center space-x-2">
-                  {isSecure && hasApiKey && (
-                    <div className="w-2 h-2 bg-green-500 rounded-full" title="Connexion sécurisée"></div>
-                  )}
-                  <Link
-                    to="/services"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Services
-                  </Link>
+                {/* Informations utilisateur */}
+                <div className="flex items-center space-x-3">
+                  <div className="hidden sm:block">
+                    <span className="text-sm text-gray-700">
+                      Bonjour, <span className="font-medium">{user?.firstName}</span>
+                    </span>
+                  </div>
+                  
+                  {/* Avatar utilisateur */}
+                  <div className="h-8 w-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                    <span className="text-indigo-600 font-medium text-sm">
+                      {user?.firstName?.charAt(0)?.toUpperCase()}
+                    </span>
+                  </div>
                 </div>
+
+                {/* Liens de navigation */}
                 <Link
                   to="/profile"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
-                  Profil
+                  Mon Profil
                 </Link>
+
+                {/* Bouton de déconnexion */}
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors duration-200"
                 >
                   Déconnexion
                 </button>
               </>
             ) : (
+              // Menu utilisateur non connecté
               <>
                 <Link
                   to="/login"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
                   Connexion
                 </Link>
+                
                 <Link
                   to="/signup"
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors duration-200"
                 >
                   Inscription
                 </Link>
@@ -88,6 +105,4 @@ const Navbar = () => {
       </div>
     </nav>
   );
-};
-
-export default Navbar;
+}

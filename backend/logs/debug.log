@@ -1750,3 +1750,101 @@ Raison�: Il n'existe aucune instance en cours de cette t�che.
 [2025-10-20 22:20:16] INFO: 🔍 Démarrage du monitoring (intervalle: 5min)
 [2025-10-20 22:20:16] INFO: ⚙️ Système: Serveur HTTP démarré sur le port 7000
 [2025-10-20 22:20:16] INFO: 📊 Health check terminé: 0/0 services opérationnels
+[2025-10-21 17:55:52] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-21 17:55:52] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-21 17:55:54] INFO: [ROUTING] 6 routes initialisées
+[2025-10-21 17:55:55] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-21 17:55:55] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-21 17:55:55] ERROR: ❌ Redis Cache - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:55] ERROR: ❌ Redis Métriques - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:55] WARN: 🔄 Redis Métriques - Tentative 1/10 dans 50ms
+[2025-10-21 17:55:55] WARN: ⚠️ Redis Métriques - Connexion fermée
+[2025-10-21 17:55:55] INFO: 🔄 Redis Métriques - Reconnexion dans 50ms (tentative 2)
+[2025-10-21 17:55:55] WARN: 🔄 Redis Cache - Tentative 1/10 dans 50ms
+[2025-10-21 17:55:55] WARN: ⚠️ Redis Cache - Connexion fermée
+[2025-10-21 17:55:55] INFO: 🔄 Redis Cache - Reconnexion dans 50ms (tentative 2)
+[2025-10-21 17:55:55] ERROR: ❌ Redis Métriques - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:55] WARN: 🔄 Redis Métriques - Tentative 2/10 dans 100ms
+[2025-10-21 17:55:55] WARN: ⚠️ Redis Métriques - Connexion fermée
+[2025-10-21 17:55:55] INFO: 🔄 Redis Métriques - Reconnexion dans 100ms (tentative 3)
+[2025-10-21 17:55:55] ERROR: ❌ Redis Cache - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:55] WARN: 🔄 Redis Cache - Tentative 2/10 dans 100ms
+[2025-10-21 17:55:55] WARN: ⚠️ Redis Cache - Connexion fermée
+[2025-10-21 17:55:55] INFO: 🔄 Redis Cache - Reconnexion dans 100ms (tentative 3)
+[2025-10-21 17:55:55] ERROR: ❌ Redis Métriques - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:55] WARN: 🔄 Redis Métriques - Tentative 3/10 dans 150ms
+[2025-10-21 17:55:55] WARN: ⚠️ Redis Métriques - Connexion fermée
+[2025-10-21 17:55:55] INFO: 🔄 Redis Métriques - Reconnexion dans 150ms (tentative 4)
+[2025-10-21 17:55:55] ERROR: ❌ Redis Cache - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:55] WARN: 🔄 Redis Cache - Tentative 3/10 dans 150ms
+[2025-10-21 17:55:55] WARN: ⚠️ Redis Cache - Connexion fermée
+[2025-10-21 17:55:55] INFO: 🔄 Redis Cache - Reconnexion dans 150ms (tentative 4)
+[2025-10-21 17:55:55] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$GrrFDXW3tKE/H/i/zff8k.9q1zXORpBnIY.C7cEriWbo5NEcxEona
+[2025-10-21 17:55:55] ERROR: ❌ Redis Métriques - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:55] WARN: 🔄 Redis Métriques - Tentative 4/10 dans 200ms
+[2025-10-21 17:55:55] WARN: ⚠️ Redis Métriques - Connexion fermée
+[2025-10-21 17:55:55] INFO: 🔄 Redis Métriques - Reconnexion dans 200ms (tentative 5)
+[2025-10-21 17:55:55] ERROR: ❌ Redis Cache - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:55] WARN: 🔄 Redis Cache - Tentative 4/10 dans 200ms
+[2025-10-21 17:55:55] WARN: ⚠️ Redis Cache - Connexion fermée
+[2025-10-21 17:55:55] INFO: 🔄 Redis Cache - Reconnexion dans 200ms (tentative 5)
+[2025-10-21 17:55:56] ERROR: ❌ Redis Métriques - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:56] ERROR: ❌ Redis Cache - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:56] WARN: 🔄 Redis Cache - Tentative 5/10 dans 250ms
+[2025-10-21 17:55:56] WARN: ⚠️ Redis Cache - Connexion fermée
+[2025-10-21 17:55:56] INFO: 🔄 Redis Cache - Reconnexion dans 250ms (tentative 6)
+[2025-10-21 17:55:56] WARN: 🔄 Redis Métriques - Tentative 5/10 dans 250ms
+[2025-10-21 17:55:56] WARN: ⚠️ Redis Métriques - Connexion fermée
+[2025-10-21 17:55:56] INFO: 🔄 Redis Métriques - Reconnexion dans 250ms (tentative 6)
+[2025-10-21 17:55:56] ERROR: ❌ Redis Cache - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:56] WARN: 🔄 Redis Cache - Tentative 6/10 dans 300ms
+[2025-10-21 17:55:56] WARN: ⚠️ Redis Cache - Connexion fermée
+[2025-10-21 17:55:56] INFO: 🔄 Redis Cache - Reconnexion dans 300ms (tentative 7)
+[2025-10-21 17:55:56] ERROR: ❌ Redis Métriques - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:56] WARN: 🔄 Redis Métriques - Tentative 6/10 dans 300ms
+[2025-10-21 17:55:56] WARN: ⚠️ Redis Métriques - Connexion fermée
+[2025-10-21 17:55:56] INFO: 🔄 Redis Métriques - Reconnexion dans 300ms (tentative 7)
+[2025-10-21 17:55:56] ERROR: ❌ Redis Cache - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:56] WARN: 🔄 Redis Cache - Tentative 7/10 dans 350ms
+[2025-10-21 17:55:56] WARN: ⚠️ Redis Cache - Connexion fermée
+[2025-10-21 17:55:56] INFO: 🔄 Redis Cache - Reconnexion dans 350ms (tentative 8)
+[2025-10-21 17:55:56] ERROR: ❌ Redis Métriques - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:56] WARN: 🔄 Redis Métriques - Tentative 7/10 dans 350ms
+[2025-10-21 17:55:56] WARN: ⚠️ Redis Métriques - Connexion fermée
+[2025-10-21 17:55:56] INFO: 🔄 Redis Métriques - Reconnexion dans 350ms (tentative 8)
+[2025-10-21 17:55:57] ERROR: ❌ Redis Cache - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:57] WARN: 🔄 Redis Cache - Tentative 8/10 dans 400ms
+[2025-10-21 17:55:57] WARN: ⚠️ Redis Cache - Connexion fermée
+[2025-10-21 17:55:57] INFO: 🔄 Redis Cache - Reconnexion dans 400ms (tentative 9)
+[2025-10-21 17:55:57] ERROR: ❌ Redis Métriques - Erreur: connect ECONNREFUSED 127.0.0.1:6379
+[2025-10-21 17:55:57] WARN: 🔄 Redis Métriques - Tentative 8/10 dans 400ms
+[2025-10-21 17:55:57] WARN: ⚠️ Redis Métriques - Connexion fermée
+[2025-10-21 17:55:57] INFO: 🔄 Redis Métriques - Reconnexion dans 400ms (tentative 9)
+[2025-10-21 17:55:57] INFO: 🔍 Vérification du port 7000...
+[2025-10-21 17:55:57] INFO: ✅ Port 7000 disponible
+[2025-10-21 17:55:57] INFO: 🔍 Vérification de Redis...
+[2025-10-21 17:55:57] INFO: 🚀 Démarrage automatique de Redis...
+[2025-10-21 17:55:57] INFO: 🔄 Redis - Initialisation en cours...
+[2025-10-21 17:55:57] INFO: ⚙️ Redis - Serveur initialisé
+[2025-10-21 17:55:57] INFO: ✅ Redis démarré avec succès sur le port 6379
+[2025-10-21 17:55:57] INFO: Connexion à MongoDB réussie.
+[2025-10-21 17:55:57] INFO: 🌱 Démarrage des seeders...
+[2025-10-21 17:55:57] INFO: [SEEDER] Début du seeding des permissions...
+[2025-10-21 17:55:57] INFO: 📊 Statut Redis - Cache: connecting, Métriques: connecting
+[2025-10-21 17:55:57] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-21 17:55:57] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-21 17:55:57] INFO: ✅ Redis Métriques connecté avec succès après 8 tentatives
+[2025-10-21 17:55:57] INFO: ✅ Redis Cache connecté avec succès après 8 tentatives
+[2025-10-21 17:55:57] INFO: [SEEDER] 43 permissions créées/mises à jour avec succès
+[2025-10-21 17:55:57] INFO: [SEEDER] Début du seeding des rôles...
+[2025-10-21 17:55:57] WARN: [SEEDER] Permission non trouvée: manage:role
+[2025-10-21 17:55:57] WARN: [SEEDER] Permission non trouvée: manage:permission
+[2025-10-21 17:55:58] INFO: [SEEDER] 6 rôles créés/mis à jour avec succès
+[2025-10-21 17:55:58] INFO: 👨‍💼 Seeding admin...
+[2025-10-21 17:55:58] INFO: ✅ Utilisateur admin créé avec succès
+[2025-10-21 17:55:58] INFO: ✅ Nouvelle API key admin générée
+[2025-10-21 17:55:58] INFO: 🔑 API Key Admin: sk_3400c5f3fd87cb3db8b5eeec60277f89754445ff58c9438b5126225fd296d401
+[2025-10-21 17:55:58] INFO: [SEEDER] Début du seeding des API keys...
+[2025-10-21 17:55:58] WARN: [SEEDER] Utilisateur admin non trouvé, skip du seeding des API keys
+[2025-10-21 17:55:58] INFO: [SEEDER] Début du seeding des Simple API keys...
+[2025-10-21 17:55:58] INFO: [SEEDER] Clé système créée: sk_59105e8b548140fe11e8bad8db2572f174a6266fe4b3c4ab

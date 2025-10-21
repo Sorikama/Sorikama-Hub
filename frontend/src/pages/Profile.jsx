@@ -1,245 +1,175 @@
+// src/pages/Profile.jsx
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import SecurityInfo from '../components/SecurityInfo';
-import TokenStatus from '../components/TokenStatus';
-import SessionInfo from '../components/SessionInfo';
 
-const Profile = () => {
-  const { user, updateProfile, regenerateApiKey, loading } = useAuth();
-  const [editing, setEditing] = useState(false);
-  const [showApiKey, setShowApiKey] = useState(false);
-  const [regenerating, setRegenerating] = useState(false);
-  const [formData, setFormData] = useState({
+export default function Profile() {
+  const { user, updateProfile, regenerateApiKey, logout, isLoading, error } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileData, setProfileData] = useState({
     firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    bio: user?.bio || ''
+    lastName: user?.lastName || ''
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      await updateProfile(formData);
-      setEditing(false);
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour:', error);
-    }
+  const handleInputChange = (e) => {
+    setProfileData({
+      ...profileData,
+      [e.target.name]: e.target.value
+    });
   };
 
-  const handleCancel = () => {
-    setFormData({
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      email: user?.email || '',
-      phone: user?.phone || '',
-      bio: user?.bio || ''
-    });
-    setEditing(false);
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    try {
+      await updateProfile(profileData);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Erreur mise à jour:', error);
+    }
   };
 
   const handleRegenerateApiKey = async () => {
-    if (!confirm('Êtes-vous sûr de vouloir régénérer votre clé API ? L\'ancienne clé ne fonctionnera plus.')) {
-      return;
-    }
-
-    setRegenerating(true);
-    try {
-      await regenerateApiKey();
-      alert('Nouvelle clé API générée avec succès !');
-    } catch (error) {
-      console.error('Erreur lors de la régénération:', error);
-    } finally {
-      setRegenerating(false);
+    if (confirm('Êtes-vous sûr de vouloir régénérer votre API Key ? L\'ancienne ne fonctionnera plus.')) {
+      try {
+        await regenerateApiKey();
+        alert('API Key régénérée avec succès !');
+      } catch (error) {
+        console.error('Erreur régénération:', error);
+      }
     }
   };
 
-  const copyApiKey = () => {
-    if (user?.apiKey) {
-      navigator.clipboard.writeText(user.apiKey);
-      alert('Clé API copiée dans le presse-papiers !');
+  const handleLogout = async () => {
+    if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+      await logout();
     }
   };
 
-  const maskApiKey = (key) => {
-    if (!key) return 'Non disponible';
-    return key.substring(0, 8) + '...' + key.substring(key.length - 8);
-  };
+  if (!user) {
+    return <div>Chargement...</div>;
+  }
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-card border border-border rounded-lg p-8">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-2xl font-bold">Mon Profil</h1>
-            {!editing && (
-              <button
-                onClick={() => setEditing(true)}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                Modifier
-              </button>
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Mon Profil</h1>
+            
+            {error && (
+              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                {error}
+              </div>
             )}
-          </div>
 
-          {editing ? (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Prénom</label>
-                  <input
-                    type="text"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Nom</label>
-                  <input
-                    type="text"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Téléphone</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Bio</label>
-                <textarea
-                  rows={3}
-                  value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                  className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2"
-                  placeholder="Parlez-nous de vous..."
-                />
-              </div>
-
-              <div className="flex space-x-4">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                >
-                  {loading ? 'Enregistrement...' : 'Enregistrer'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="px-6 py-2 border border-border rounded-lg hover:bg-muted transition-colors"
-                >
-                  Annuler
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-1">Prénom</label>
-                  <p className="text-lg">{user?.firstName || 'Non renseigné'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-1">Nom</label>
-                  <p className="text-lg">{user?.lastName || 'Non renseigné'}</p>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Email</label>
-                <p className="text-lg">{user?.email}</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Téléphone</label>
-                <p className="text-lg">{user?.phone || 'Non renseigné'}</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Bio</label>
-                <p className="text-lg">{user?.bio || 'Aucune bio renseignée'}</p>
-              </div>
-
-              <div className="pt-6 border-t border-border space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-1">Membre depuis</label>
-                  <p className="text-lg">
-                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : 'Non disponible'}
-                  </p>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-muted-foreground">Clé API personnelle</label>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => setShowApiKey(!showApiKey)}
-                        className="text-xs text-primary hover:underline"
-                      >
-                        {showApiKey ? 'Masquer' : 'Afficher'}
-                      </button>
-                      <button
-                        onClick={copyApiKey}
-                        className="text-xs text-primary hover:underline"
-                        disabled={!user?.apiKey}
-                      >
-                        Copier
-                      </button>
-                    </div>
+            {/* Informations personnelles */}
+            <div className="mb-8">
+              <h2 className="text-lg font-medium text-gray-900 mb-4">Informations personnelles</h2>
+              
+              {!isEditing ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Prénom</label>
+                    <p className="mt-1 text-sm text-gray-900">{user.firstName}</p>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <code className="flex-1 px-3 py-2 bg-muted rounded text-sm font-mono">
-                      {showApiKey ? user?.apiKey || 'Non disponible' : maskApiKey(user?.apiKey)}
-                    </code>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Nom</label>
+                    <p className="mt-1 text-sm text-gray-900">{user.lastName}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <p className="mt-1 text-sm text-gray-900">{user.email}</p>
+                  </div>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+                  >
+                    Modifier
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
+                  <div>
+                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                      Prénom
+                    </label>
+                    <input
+                      type="text"
+                      id="firstName"
+                      name="firstName"
+                      value={profileData.firstName}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                      Nom
+                    </label>
+                    <input
+                      type="text"
+                      id="lastName"
+                      name="lastName"
+                      value={profileData.lastName}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                  </div>
+                  <div className="flex space-x-4">
                     <button
-                      onClick={handleRegenerateApiKey}
-                      disabled={regenerating}
-                      className="px-3 py-2 text-xs bg-destructive text-destructive-foreground rounded hover:bg-destructive/90 transition-colors disabled:opacity-50"
+                      type="submit"
+                      disabled={isLoading}
+                      className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
-                      {regenerating ? 'Génération...' : 'Régénérer'}
+                      {isLoading ? 'Sauvegarde...' : 'Sauvegarder'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(false)}
+                      className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+                    >
+                      Annuler
                     </button>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Cette clé vous permet d'accéder aux services Sorikama. Ne la partagez jamais.
-                  </p>
+                </form>
+              )}
+            </div>
+
+            {/* API Key */}
+            <div className="mb-8">
+              <h2 className="text-lg font-medium text-gray-900 mb-4">API Key personnelle</h2>
+              <div className="bg-gray-50 p-4 rounded-md">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Votre API Key</label>
+                    <code className="mt-1 block text-sm font-mono text-gray-900 bg-white px-2 py-1 rounded border">
+                      {user.apiKey}
+                    </code>
+                    <p className="mt-2 text-xs text-gray-500">
+                      Utilisez cette clé pour accéder aux services Sorikama depuis vos applications.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleRegenerateApiKey}
+                    className="ml-4 bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700"
+                  >
+                    Régénérer
+                  </button>
                 </div>
               </div>
             </div>
-          )}
-        </div>
-        
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SecurityInfo />
-            <TokenStatus />
+
+            {/* Actions */}
+            <div className="border-t pt-6">
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+              >
+                Se déconnecter
+              </button>
+            </div>
           </div>
-          <SessionInfo />
         </div>
       </div>
     </div>
   );
-};
-
-export default Profile;
+}

@@ -1,60 +1,68 @@
-// Configuration des endpoints backend
-export const API_ENDPOINTS = {
-  // Authentification
+/**
+ * Configuration de l'API Gateway Sorikama Hub
+ * 
+ * Ce fichier centralise toute la configuration pour communiquer avec le backend.
+ * Il définit les URLs, les endpoints et les routes selon le système d'authentification à 2 niveaux.
+ */
+
+// Configuration principale de l'API
+export const API_CONFIG = {
+  // URL de base de l'API Gateway (port 7000 forcé côté backend)
+  BASE_URL: import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:7000/api/v1',
+  
+  // API Key système fournie par l'admin (préfixe sk_)
+  SYSTEM_API_KEY: import.meta.env.VITE_API_KEY || 'sk_59105e8b548140fe11e8bad8db2572f174a6266fe4b3c4ab',
+  
+  // Timeout des requêtes HTTP (10 secondes)
+  TIMEOUT: 10000
+};
+
+// Définition de tous les endpoints de l'API
+export const ENDPOINTS = {
+  // Routes d'authentification
   AUTH: {
-    LOGIN: '/auth/login',
-    REGISTER: '/auth/register', 
-    VERIFY: '/auth/verify',
-    LOGOUT: '/auth/logout',
-    ME: '/auth/me',
-    UPDATE_PROFILE: '/auth/update-me',
-    REGENERATE_API_KEY: '/auth/regenerate-api-key',
-    FORGOT_PASSWORD: '/auth/forgot-password',
-    RESET_PASSWORD: '/auth/reset-password'
+    LOGIN: '/auth/login',                    // Connexion utilisateur
+    REGISTER: '/auth/register',              // Étape 1 : Demande d'inscription
+    VERIFY: '/auth/verify',                  // Étape 2 : Validation du code email
+    LOGOUT: '/auth/logout',                  // Déconnexion
+    REFRESH: '/auth/refresh-token',          // Renouvellement des tokens
+    ME: '/auth/me',                          // Profil utilisateur actuel
+    UPDATE_ME: '/auth/update-me',            // Mise à jour du profil
+    REGENERATE_API_KEY: '/auth/regenerate-api-key'  // Régénération API Key personnelle
   },
   
-  // Système
+  // Routes système
   SYSTEM: {
-    HEALTH: '/system/health',
-    SERVICES: '/system/services'
-  },
-  
-  // Services externes (proxy)
-  SERVICES: {
-    SORISTORE: '/soristore',
-    SORIPAY: '/soripay', 
-    SORIWALLET: '/soriwallet',
-    SORILEARN: '/sorilearn',
-    SORIHEALTH: '/sorihealth',
-    SORIACCESS: '/soriaccess'
+    HEALTH: '/system/health'                 // État de santé du système
   }
 };
 
-// Configuration de sécurité
-export const SECURITY_CONFIG = {
-  TOKEN_STORAGE_KEY: 'token',
-  API_KEY_STORAGE_KEY: 'userApiKey',
-  USER_STORAGE_KEY: 'user',
-  
-  // Routes publiques (n'ont pas besoin de JWT)
-  PUBLIC_ROUTES: [
-    API_ENDPOINTS.AUTH.LOGIN,
-    API_ENDPOINTS.AUTH.REGISTER,
-    API_ENDPOINTS.AUTH.VERIFY,
-    API_ENDPOINTS.AUTH.FORGOT_PASSWORD,
-    API_ENDPOINTS.AUTH.RESET_PASSWORD
-  ],
-  
-  // Routes système (utilisent la clé système)
-  SYSTEM_ROUTES: [
-    API_ENDPOINTS.SYSTEM.HEALTH,
-    API_ENDPOINTS.SYSTEM.SERVICES
-  ]
-};
+/**
+ * Routes publiques - Nécessitent seulement l'API Key système
+ * Ces routes n'ont pas besoin de JWT Token
+ */
+export const PUBLIC_ROUTES = [
+  ENDPOINTS.AUTH.LOGIN,
+  ENDPOINTS.AUTH.REGISTER,
+  ENDPOINTS.AUTH.VERIFY,
+  ENDPOINTS.SYSTEM.HEALTH
+];
 
-// Validation des données
-export const VALIDATION = {
-  PASSWORD_MIN_LENGTH: 6,
-  API_KEY_PREFIX: 'sk_',
-  EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+/**
+ * Routes protégées - Nécessitent API Key + JWT Token
+ * Ces routes accèdent aux données personnelles de l'utilisateur
+ */
+export const PROTECTED_ROUTES = [
+  ENDPOINTS.AUTH.LOGOUT,
+  ENDPOINTS.AUTH.ME,
+  ENDPOINTS.AUTH.UPDATE_ME,
+  ENDPOINTS.AUTH.REGENERATE_API_KEY
+];
+
+// Clés de stockage local
+export const STORAGE_KEYS = {
+  ACCESS_TOKEN: 'sorikama_access_token',
+  REFRESH_TOKEN: 'sorikama_refresh_token',
+  USER_DATA: 'sorikama_user',
+  USER_API_KEY: 'sorikama_user_api_key'
 };
