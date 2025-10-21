@@ -1,189 +1,109 @@
 /**
- * Composant Toast - Notifications utilisateur
- * 
- * Affiche des messages de notification (succès, erreur, info, warning)
- * avec animation d'apparition/disparition automatique
+ * Composant Toast individuel
+ * Affiche un message avec une icône et une animation
  */
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useToast } from '../context/ToastContext';
 
-/**
- * Types de toast disponibles
- */
-const TOAST_TYPES = {
-  SUCCESS: 'success',
-  ERROR: 'error',
-  INFO: 'info',
-  WARNING: 'warning'
-};
+export default function Toast({ id, message, type, duration }) {
+  const { removeToast } = useToast();
+  const [isExiting, setIsExiting] = useState(false);
 
-/**
- * Styles pour chaque type de toast
- */
-const TOAST_STYLES = {
-  [TOAST_TYPES.SUCCESS]: {
-    bg: 'bg-green-50',
-    border: 'border-green-200',
-    text: 'text-green-800',
-    icon: '✅'
-  },
-  [TOAST_TYPES.ERROR]: {
-    bg: 'bg-red-50',
-    border: 'border-red-200',
-    text: 'text-red-800',
-    icon: '❌'
-  },
-  [TOAST_TYPES.INFO]: {
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
-    text: 'text-blue-800',
-    icon: 'ℹ️'
-  },
-  [TOAST_TYPES.WARNING]: {
-    bg: 'bg-yellow-50',
-    border: 'border-yellow-200',
-    text: 'text-yellow-800',
-    icon: '⚠️'
-  }
-};
-
-/**
- * Composant Toast
- * 
- * @param {Object} props - Props du composant
- * @param {string} props.message - Message à afficher
- * @param {string} props.type - Type de toast (success, error, info, warning)
- * @param {number} props.duration - Durée d'affichage en ms (défaut: 5000)
- * @param {Function} props.onClose - Callback appelé à la fermeture
- * @returns {React.ReactElement|null} Composant toast ou null
- */
-export default function Toast({ 
-  message, 
-  type = TOAST_TYPES.INFO, 
-  duration = 5000, 
-  onClose 
-}) {
-  const [isVisible, setIsVisible] = useState(true);
-
-  // Fermeture automatique après la durée spécifiée
-  useEffect(() => {
-    if (duration > 0) {
-      const timer = setTimeout(() => {
-        handleClose();
-      }, duration);
-
-      return () => clearTimeout(timer);
-    }
-  }, [duration]);
-
-  /**
-   * Gérer la fermeture du toast
-   */
+  // Gestion de la fermeture
   const handleClose = () => {
-    setIsVisible(false);
-    // Délai pour l'animation de sortie
-    setTimeout(() => {
-      if (onClose) onClose();
-    }, 300);
-  };
-
-  // Ne pas afficher si pas visible
-  if (!isVisible) return null;
-
-  const styles = TOAST_STYLES[type] || TOAST_STYLES[TOAST_TYPES.INFO];
-
-  return (
-    <div className="fixed top-4 right-4 z-50 max-w-sm w-full">
-      <div className={`
-        ${styles.bg} ${styles.border} ${styles.text}
-        border rounded-lg p-4 shadow-lg
-        transform transition-all duration-300 ease-in-out
-        ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
-      `}>
-        <div className="flex items-start">
-          {/* Icône du type de toast */}
-          <div className="flex-shrink-0 mr-3">
-            <span className="text-lg">{styles.icon}</span>
-          </div>
-          
-          {/* Message */}
-          <div className="flex-1">
-            <p className="text-sm font-medium">{message}</p>
-          </div>
-          
-          {/* Bouton de fermeture */}
-          <button
-            onClick={handleClose}
-            className="flex-shrink-0 ml-3 text-gray-400 hover:text-gray-600 transition-colors duration-200"
-          >
-            <span className="sr-only">Fermer</span>
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Hook personnalisé pour gérer les toasts
- * 
- * @returns {Object} Fonctions pour afficher différents types de toasts
- */
-export function useToast() {
-  const [toasts, setToasts] = useState([]);
-
-  /**
-   * Ajouter un nouveau toast
-   */
-  const addToast = (message, type = TOAST_TYPES.INFO, duration = 5000) => {
-    const id = Date.now();
-    const newToast = { id, message, type, duration };
-    
-    setToasts(prev => [...prev, newToast]);
-    
-    // Supprimer automatiquement après la durée
+    setIsExiting(true);
     setTimeout(() => {
       removeToast(id);
-    }, duration + 300); // +300ms pour l'animation
+    }, 300); // Durée de l'animation de sortie
   };
 
-  /**
-   * Supprimer un toast
-   */
-  const removeToast = (id) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+  // Configuration par type
+  const config = {
+    success: {
+      bgColor: 'bg-gradient-to-r from-green-500 to-emerald-500',
+      icon: (
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    error: {
+      bgColor: 'bg-gradient-to-r from-red-500 to-rose-500',
+      icon: (
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    warning: {
+      bgColor: 'bg-gradient-to-r from-yellow-500 to-orange-500',
+      icon: (
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      ),
+    },
+    info: {
+      bgColor: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+      icon: (
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
   };
 
-  return {
-    toasts,
-    success: (message, duration) => addToast(message, TOAST_TYPES.SUCCESS, duration),
-    error: (message, duration) => addToast(message, TOAST_TYPES.ERROR, duration),
-    info: (message, duration) => addToast(message, TOAST_TYPES.INFO, duration),
-    warning: (message, duration) => addToast(message, TOAST_TYPES.WARNING, duration),
-    removeToast
-  };
-}
-
-/**
- * Conteneur pour afficher tous les toasts actifs
- */
-export function ToastContainer() {
-  const { toasts, removeToast } = useToast();
+  const { bgColor, icon } = config[type] || config.info;
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
-      {toasts.map(toast => (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          duration={0} // Géré par le hook
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
+    <div
+      className={`
+        ${bgColor}
+        min-w-[320px] max-w-md
+        rounded-2xl shadow-2xl
+        p-4 pr-12
+        flex items-center gap-4
+        pointer-events-auto
+        transform transition-all duration-300 ease-out
+        ${isExiting 
+          ? 'translate-x-[400px] opacity-0' 
+          : 'translate-x-0 opacity-100 animate-slide-in-up'
+        }
+      `}
+    >
+      {/* Icône */}
+      <div className="flex-shrink-0 animate-float">
+        {icon}
+      </div>
+
+      {/* Message */}
+      <p className="text-white font-medium text-sm leading-relaxed flex-1">
+        {message}
+      </p>
+
+      {/* Bouton de fermeture */}
+      <button
+        onClick={handleClose}
+        className="absolute top-3 right-3 text-white/80 hover:text-white transition-colors duration-200"
+        aria-label="Fermer"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      {/* Barre de progression (si durée définie) */}
+      {duration > 0 && (
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 rounded-b-2xl overflow-hidden">
+          <div
+            className="h-full bg-white/40 animate-progress"
+            style={{
+              animation: `progress ${duration}ms linear forwards`,
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

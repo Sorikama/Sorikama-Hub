@@ -33,8 +33,9 @@ export const authenticateApiKey = async (req: Request, res: Response, next: Next
     }
     
     // Vérification du format de l'API key
-    if (!apiKey.startsWith('sk_')) {
-      logger.warn(`[API_KEY] Format d'API key invalide - IP: ${req.ip}`);
+    // Accepter les clés système (sk_) et les clés utilisateur (uk_)
+    if (!apiKey.startsWith('sk_') && !apiKey.startsWith('uk_')) {
+      logger.warn(`[API_KEY] Format d'API key invalide - IP: ${req.ip} - Key: ${apiKey.substring(0, 5)}...`);
       return next(new AppError('Format d\'API key invalide', StatusCodes.UNAUTHORIZED));
     }
     
