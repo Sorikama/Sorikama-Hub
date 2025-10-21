@@ -28,6 +28,7 @@ export const ENDPOINTS = {
     REFRESH: '/auth/refresh-token',          // Renouvellement des tokens
     ME: '/auth/me',                          // Profil utilisateur actuel
     UPDATE_ME: '/auth/update-me',            // Mise à jour du profil
+    UPDATE_PASSWORD: '/auth/update-password', // Mise à jour du mot de passe
     REGENERATE_API_KEY: '/auth/regenerate-api-key'  // Régénération API Key personnelle
   },
 
@@ -56,6 +57,7 @@ export const PROTECTED_ROUTES = [
   ENDPOINTS.AUTH.LOGOUT,
   ENDPOINTS.AUTH.ME,
   ENDPOINTS.AUTH.UPDATE_ME,
+  ENDPOINTS.AUTH.UPDATE_PASSWORD,
   ENDPOINTS.AUTH.REGENERATE_API_KEY
 ];
 

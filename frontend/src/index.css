@@ -34,33 +34,44 @@ body {
 
 /* Animations personnalisées avancées */
 @keyframes blob {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0px, 0px) scale(1) rotate(0deg);
   }
+
   25% {
     transform: translate(30px, -50px) scale(1.1) rotate(90deg);
   }
+
   50% {
     transform: translate(-20px, 20px) scale(0.9) rotate(180deg);
   }
+
   75% {
     transform: translate(-30px, -30px) scale(1.05) rotate(270deg);
   }
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-20px);
   }
 }
 
 @keyframes glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
   }
+
   50% {
     box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
   }
@@ -71,6 +82,7 @@ body {
     opacity: 0;
     transform: translateY(50px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -82,6 +94,7 @@ body {
     opacity: 0;
     transform: scale(0.8);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -89,19 +102,25 @@ body {
 }
 
 @keyframes textGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
   }
+
   50% {
     text-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
   }
 }
 
 @keyframes borderGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     border-color: rgba(6, 182, 212, 0.3);
     box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
   }
+
   50% {
     border-color: rgba(139, 92, 246, 0.6);
     box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
@@ -138,13 +157,33 @@ body {
 }
 
 /* Délais d'animation */
-.animation-delay-200 { animation-delay: 0.2s; }
-.animation-delay-400 { animation-delay: 0.4s; }
-.animation-delay-600 { animation-delay: 0.6s; }
-.animation-delay-800 { animation-delay: 0.8s; }
-.animation-delay-1000 { animation-delay: 1s; }
-.animation-delay-2000 { animation-delay: 2s; }
-.animation-delay-4000 { animation-delay: 4s; }
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+
+.animation-delay-600 {
+  animation-delay: 0.6s;
+}
+
+.animation-delay-800 {
+  animation-delay: 0.8s;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
 
 /* Effets de glassmorphism */
 .glass {
@@ -161,7 +200,7 @@ body {
 
 /* Effets de néon */
 .neon-cyan {
-  box-shadow: 
+  box-shadow:
     0 0 5px #06b6d4,
     0 0 10px #06b6d4,
     0 0 15px #06b6d4,
@@ -169,7 +208,7 @@ body {
 }
 
 .neon-purple {
-  box-shadow: 
+  box-shadow:
     0 0 5px #8b5cf6,
     0 0 10px #8b5cf6,
     0 0 15px #8b5cf6,
@@ -187,8 +226,15 @@ body {
 }
 
 @keyframes holographic {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 /* Effets de particules */
@@ -206,12 +252,15 @@ body {
     transform: translateY(100vh) rotate(0deg);
     opacity: 0;
   }
+
   10% {
     opacity: 1;
   }
+
   90% {
     opacity: 1;
   }
+
   100% {
     transform: translateY(-100px) rotate(360deg);
     opacity: 0;
@@ -282,9 +331,17 @@ body {
 }
 
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Styles pour les bordures animées */
@@ -304,22 +361,37 @@ body {
   z-index: -1;
 }
 
-/* Scrollbar personnalisée */
+/* Scrollbar personnalisée - Gris élégant qui marie avec le site */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: #f8fafc;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #06b6d4, #8b5cf6);
-  border-radius: 4px;
+  background: #cbd5e1;
+  border-radius: 10px;
+  border: 2px solid #f8fafc;
+  transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #0891b2, #7c3aed);
+  background: #94a3b8;
+  box-shadow: 0 0 8px rgba(148, 163, 184, 0.3);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #64748b;
+}
+
+/* Scrollbar pour Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
 }
 
 /* Styles pour les formulaires futuristes */
@@ -367,7 +439,9 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Styles pour les tooltips futuristes */
@@ -401,11 +475,11 @@ body {
   .holographic-text {
     font-size: 2.5rem;
   }
-  
+
   .card-3d:hover {
     transform: none;
   }
-  
+
   .hover-lift:hover {
     transform: translateY(-4px) scale(1.01);
   }
@@ -459,6 +533,7 @@ body {
   from {
     width: 100%;
   }
+
   to {
     width: 0%;
   }

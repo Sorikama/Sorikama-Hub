@@ -1,32 +1,14 @@
 /**
- * Dashboard utilisateur - Page d'accueil après connexion
- * Affiche un aperçu des services et informations de l'utilisateur
+ * Dashboard utilisateur - Design moderne et fun
  */
 
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  // Mise à jour de l'heure toutes les secondes
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // Obtenir le message de salutation selon l'heure
-  const getGreeting = () => {
-    const hour = currentTime.getHours();
-    if (hour < 12) return 'Bonjour';
-    if (hour < 18) return 'Bon après-midi';
-    return 'Bonsoir';
-  };
+  const [hoveredService, setHoveredService] = useState(null);
 
   // Services Sorikama
   const services = [
@@ -35,226 +17,214 @@ export default function Dashboard() {
       icon: '🛍️',
       description: 'Marketplace e-commerce',
       color: 'from-blue-500 to-cyan-500',
-      status: 'Actif',
-      link: '#'
+      bgColor: 'from-blue-50 to-cyan-50',
+      link: '#',
+      stats: '2.5k produits'
     },
     {
       name: 'SoriPay',
       icon: '💳',
       description: 'Solution de paiement',
       color: 'from-purple-500 to-pink-500',
-      status: 'Actif',
-      link: '#'
+      bgColor: 'from-purple-50 to-pink-50',
+      link: '#',
+      stats: 'Sécurisé'
     },
     {
       name: 'SoriWallet',
       icon: '💰',
       description: 'Portefeuille numérique',
       color: 'from-pink-500 to-rose-500',
-      status: 'Actif',
-      link: '#'
+      bgColor: 'from-pink-50 to-rose-50',
+      link: '#',
+      stats: 'Multi-devises'
     },
     {
       name: 'SoriLearn',
       icon: '📚',
       description: 'Plateforme d\'apprentissage',
       color: 'from-yellow-500 to-orange-500',
-      status: 'Actif',
-      link: '#'
+      bgColor: 'from-yellow-50 to-orange-50',
+      link: '#',
+      stats: '150+ cours'
     },
     {
       name: 'SoriHealth',
       icon: '🏥',
       description: 'Gestion de santé',
       color: 'from-green-500 to-emerald-500',
-      status: 'Actif',
-      link: '#'
+      bgColor: 'from-green-50 to-emerald-50',
+      link: '#',
+      stats: '24/7 disponible'
     },
     {
       name: 'SoriAccess',
       icon: '♿',
       description: 'Solutions d\'accessibilité',
       color: 'from-indigo-500 to-blue-500',
-      status: 'Actif',
-      link: '#'
+      bgColor: 'from-indigo-50 to-blue-50',
+      link: '#',
+      stats: 'Inclusif'
     }
   ];
 
-  // Statistiques rapides
-  const stats = [
-    { label: 'Services actifs', value: '6', icon: '🎯', color: 'from-blue-500 to-cyan-500' },
-    { label: 'Compte vérifié', value: '✓', icon: '✅', color: 'from-green-500 to-emerald-500' },
-    { label: 'Membre depuis', value: new Date(user?.createdAt || Date.now()).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' }), icon: '📅', color: 'from-purple-500 to-pink-500' }
+  const quickActions = [
+    {
+      name: 'Mon Profil',
+      icon: '👤',
+      color: 'from-blue-500 to-cyan-500',
+      link: '/profile'
+    },
+    {
+      name: 'Paramètres',
+      icon: '⚙️',
+      color: 'from-purple-500 to-pink-500',
+      link: '#'
+    },
+    {
+      name: 'Notifications',
+      icon: '🔔',
+      color: 'from-green-500 to-emerald-500',
+      link: '#',
+      badge: '3'
+    }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 px-4">
-      
-      {/* Formes décoratives animées */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full opacity-20 animate-blob"></div>
-        <div className="absolute bottom-20 left-20 w-72 h-72 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full opacity-20 animate-blob animation-delay-2000"></div>
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         
-        {/* En-tête de bienvenue */}
-        <div className="mb-12 animate-fade-in-scale">
-          <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12 border border-gray-100">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              
-              {/* Avatar et salutation */}
-              <div className="flex items-center gap-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-2xl animate-float">
-                  <span className="text-3xl font-bold text-white">
-                    {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
-                  </span>
-                </div>
-                
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">
-                    {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{user?.firstName}</span> !
-                  </h1>
-                  <p className="text-gray-600 text-lg">
-                    Bienvenue sur votre tableau de bord Sorikama
-                  </p>
-                </div>
+        {/* En-tête avec avatar */}
+        <div className="mb-8 bg-white rounded-3xl shadow-lg border border-gray-200 p-8 relative overflow-hidden">
+          {/* Décoration */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full -mr-32 -mt-32 opacity-50"></div>
+          
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-2xl font-bold text-white">
+                  {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                </span>
               </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-1">
+                  Bonjour, {user?.firstName} 👋
+                </h1>
+                <p className="text-gray-600">
+                  Bienvenue sur votre espace Sorikama
+                </p>
+              </div>
+            </div>
 
-              {/* Heure actuelle */}
-              <div className="text-center md:text-right">
-                <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  {currentTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                </div>
-                <div className="text-gray-600 text-sm mt-1">
-                  {currentTime.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                </div>
-              </div>
+            {/* Actions rapides */}
+            <div className="hidden md:flex items-center gap-3">
+              {quickActions.map((action) => (
+                <Link
+                  key={action.name}
+                  to={action.link}
+                  className="relative group"
+                  title={action.name}
+                >
+                  <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-110 transition-all`}>
+                    <span className="text-xl">{action.icon}</span>
+                  </div>
+                  {action.badge && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                      {action.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Statistiques rapides */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {stats.map((stat, index) => (
-            <div
-              key={stat.label}
-              className="bg-white rounded-3xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition-all duration-300 animate-fade-in-scale"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-semibold mb-2">{stat.label}</p>
-                  <p className="text-3xl font-black text-gray-900">{stat.value}</p>
-                </div>
-                <div className={`w-16 h-16 bg-gradient-to-br ${stat.color} rounded-2xl flex items-center justify-center shadow-lg`}>
-                  <span className="text-3xl">{stat.icon}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Actions rapides */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Actions rapides</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            
-            <Link
-              to="/profile"
-              className="bg-white rounded-3xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">Mon Profil</h3>
-              </div>
-              <p className="text-gray-600 text-sm">
-                Gérer vos informations personnelles et paramètres
-              </p>
-            </Link>
-
-            <button
-              className="bg-white rounded-3xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group text-left"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">API Key</h3>
-              </div>
-              <p className="text-gray-600 text-sm">
-                Gérer votre clé API personnelle
-              </p>
-            </button>
-
-            <button
-              className="bg-white rounded-3xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group text-left"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">Documentation</h3>
-              </div>
-              <p className="text-gray-600 text-sm">
-                Consulter la documentation des services
-              </p>
-            </button>
-          </div>
-        </div>
-
-        {/* Services Sorikama */}
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Vos Services</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Section Services */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <span className="text-3xl">🚀</span>
+            Vos Services
+          </h2>
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, index) => (
               <a
                 key={service.name}
                 href={service.link}
-                className="bg-white rounded-3xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group animate-fade-in-scale"
-                style={{ animationDelay: `${index * 100}ms` }}
+                onMouseEnter={() => setHoveredService(index)}
+                onMouseLeave={() => setHoveredService(null)}
+                className="bg-white rounded-3xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group relative overflow-hidden"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${service.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                    <span className="text-3xl">{service.icon}</span>
+                {/* Fond coloré au hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${service.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
+                
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`w-16 h-16 bg-gradient-to-br ${service.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+                      <span className="text-3xl">{service.icon}</span>
+                    </div>
+                    <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full group-hover:bg-white transition-colors">
+                      {service.stats}
+                    </span>
                   </div>
-                  <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
-                    {service.status}
-                  </span>
-                </div>
-                
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{service.name}</h3>
-                <p className="text-gray-600 text-sm mb-4">{service.description}</p>
-                
-                <div className="flex items-center text-blue-600 font-semibold text-sm group-hover:gap-2 transition-all duration-300">
-                  Accéder
-                  <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-blue-600 group-hover:to-purple-600 transition-all">
+                    {service.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">{service.description}</p>
+                  
+                  <div className="flex items-center text-blue-600 font-semibold text-sm group-hover:gap-2 transition-all">
+                    Ouvrir
+                    <svg className="w-4 h-4 ml-1 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
                 </div>
               </a>
             ))}
           </div>
         </div>
 
-        {/* Section d'aide */}
-        <div className="mt-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl shadow-2xl p-8 md:p-12 text-white">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        {/* Actions rapides mobile */}
+        <div className="md:hidden mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Actions rapides</h2>
+          <div className="grid grid-cols-3 gap-4">
+            {quickActions.map((action) => (
+              <Link
+                key={action.name}
+                to={action.link}
+                className="relative bg-white rounded-2xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-all"
+              >
+                <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center mx-auto mb-2`}>
+                  <span className="text-2xl">{action.icon}</span>
+                </div>
+                <p className="text-xs font-semibold text-gray-900 text-center">{action.name}</p>
+                {action.badge && (
+                  <span className="absolute top-2 right-2 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                    {action.badge}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Carte d'aide */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl shadow-xl p-8 text-white relative overflow-hidden">
+          {/* Décoration */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32 opacity-10"></div>
+          
+          <div className="relative flex flex-col sm:flex-row items-center justify-between gap-6">
             <div>
-              <h2 className="text-3xl font-bold mb-3">Besoin d'aide ?</h2>
+              <h2 className="text-3xl font-bold mb-2 flex items-center gap-2">
+                <span>💬</span>
+                Besoin d'aide ?
+              </h2>
               <p className="text-blue-100 text-lg">
-                Notre équipe support est disponible 24/7 pour vous accompagner
+                Notre équipe support est disponible 24/7
               </p>
             </div>
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 whitespace-nowrap">
+            <button className="bg-white text-blue-600 px-8 py-4 rounded-2xl font-bold shadow-lg hover:shadow-2xl hover:scale-105 transition-all whitespace-nowrap">
               Contacter le support
             </button>
           </div>

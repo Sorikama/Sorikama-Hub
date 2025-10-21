@@ -330,6 +330,24 @@ export const authService = {
   },
 
   /**
+   * Mettre à jour le mot de passe de l'utilisateur
+   * 
+   * @param {Object} passwordData - Ancien et nouveau mot de passe
+   * @returns {Promise} Confirmation de mise à jour
+   */
+  async updatePassword(passwordData) {
+    try {
+      console.log('🔒 Mise à jour du mot de passe...');
+      const response = await api.patch(ENDPOINTS.AUTH.UPDATE_PASSWORD, passwordData);
+      console.log('✅ Mot de passe mis à jour');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur mise à jour mot de passe:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Régénérer l'API Key personnelle de l'utilisateur
    * L'ancienne clé devient invalide
    * 
