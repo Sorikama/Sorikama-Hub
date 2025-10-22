@@ -63,26 +63,30 @@ export default function Signup() {
       
       console.log('Inscription reussie');
       
-      // Verifier s'il y a une URL d'autorisation sauvegardee
-      const savedAuthorizeUrl = localStorage.getItem('sorikama_authorize_url');
-      console.log('URL authorize sauvegardee:', savedAuthorizeUrl);
+      // Vérifier s'il y a un paramètre redirect dans l'URL (priorité 1)
+      const searchParams = new URLSearchParams(location.search);
+      const redirectUrl = searchParams.get('redirect');
       
-      if (savedAuthorizeUrl) {
-        console.log('Redirection vers URL sauvegardee:', savedAuthorizeUrl);
-        navigate(savedAuthorizeUrl, { replace: true });
-      } else {
-        const searchParams = new URLSearchParams(location.search);
-        const redirectUrl = searchParams.get('redirect');
-        
-        if (redirectUrl) {
-          const decodedUrl = decodeURIComponent(redirectUrl);
-          console.log('Redirection vers redirect param:', decodedUrl);
-          navigate(decodedUrl, { replace: true });
-        } else {
-          console.log('Redirection vers dashboard');
-          navigate('/dashboard');
-        }
+      if (redirectUrl) {
+        const decodedUrl = decodeURIComponent(redirectUrl);
+        console.log('Redirection vers:', decodedUrl);
+        navigate(decodedUrl, { replace: true });
+        return;
       }
+      
+      // Vérifier s'il y a un state.from (priorité 2)
+      if (location.state?.from) {
+        const from = typeof location.state.from === 'string' 
+          ? location.state.from 
+          : location.state.from.pathname + (location.state.from.search || '');
+        console.log('Redirection vers page protégée:', from);
+        navigate(from, { replace: true });
+        return;
+      }
+      
+      // Par défaut, rediriger vers le dashboard
+      console.log('Redirection vers dashboard');
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       console.error('Erreur vérification:', error);
     }
