@@ -31,30 +31,35 @@ export default function Login() {
     try {
       await login(credentials);
       
-      // Vérifier s'il y a un paramètre redirect dans l'URL
+      console.log('✅ Connexion réussie');
+      
+      // Vérifier s'il y a un paramètre redirect dans l'URL (priorité 1)
       const searchParams = new URLSearchParams(location.search);
       const redirectUrl = searchParams.get('redirect');
       
-      console.log('Connexion reussie');
-      
-      // Verifier s'il y a une URL d'autorisation sauvegardee
-      const savedAuthorizeUrl = localStorage.getItem('sorikama_authorize_url');
-      console.log('URL authorize sauvegardee:', savedAuthorizeUrl);
-      
-      if (savedAuthorizeUrl) {
-        console.log('Redirection vers URL sauvegardee:', savedAuthorizeUrl);
-        navigate(savedAuthorizeUrl, { replace: true });
-      } else if (redirectUrl) {
+      if (redirectUrl) {
         const decodedUrl = decodeURIComponent(redirectUrl);
-        console.log('Redirection vers redirect param:', decodedUrl);
+        console.log('🔄 Redirection vers:', decodedUrl);
         navigate(decodedUrl, { replace: true });
-      } else {
-        console.log('Redirection vers dashboard');
-        const from = location.state?.from?.pathname || '/dashboard';
-        navigate(from, { replace: true });
+        return;
       }
+      
+      // Vérifier s'il y a un state.from (priorité 2)
+      if (location.state?.from) {
+        const from = typeof location.state.from === 'string' 
+          ? location.state.from 
+          : location.state.from.pathname + (location.state.from.search || '');
+        console.log('🔄 Redirection vers page protégée:', from);
+        navigate(from, { replace: true });
+        return;
+      }
+      
+      // Par défaut, rediriger vers le dashboard
+      console.log('🔄 Redirection vers dashboard');
+      navigate('/dashboard', { replace: true });
+      
     } catch (error) {
-      console.error('Erreur connexion:', error);
+      console.error('❌ Erreur connexion:', error);
     }
   };
 

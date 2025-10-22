@@ -1,6 +1,6 @@
-﻿/**
+/**
  * Page d'autorisation SSO - Connexion d'applications tierces
- * Design moderne et stylÃ©
+ * Design moderne et stylé
  */
 
 import { useState, useEffect } from 'react';
@@ -14,22 +14,22 @@ export default function Authorize() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // RÃ©cupÃ©rer les paramÃ¨tres de l'URL
+  // Récupérer les paramètres de l'URL
   const serviceId = searchParams.get('service_id') || searchParams.get('client_id');
   const redirectUrl = searchParams.get('redirect_url') || searchParams.get('redirect_uri');
   const scope = searchParams.get('scope') || 'profile email';
 
-  // Informations de l'application qui demande l'accÃ¨s
+  // Informations de l'application qui demande l'accès
   const [appInfo, setAppInfo] = useState({
     name: 'Application Tierce',
-    logo: 'ðŸ”—',
-    description: 'Cette application souhaite accÃ©der Ã  votre compte Sorikama',
+    logo: '🔗',
+    description: 'Cette application souhaite accéder à votre compte Sorikama',
     website: 'https://example.com',
     color: 'from-blue-500 to-purple-500'
   });
 
   useEffect(() => {
-    console.log('ðŸ” Authorize - ParamÃ¨tres reÃ§us:', {
+    console.log('🔍 Authorize - Paramètres reçus:', {
       serviceId,
       redirectUrl,
       scope,
@@ -37,50 +37,54 @@ export default function Authorize() {
       allParams: searchParams.toString()
     });
 
-    // Rediriger vers login si non authentifiÃ©
+    // Rediriger vers login si non authentifié
     if (!isAuthenticated) {
-      // Construire l'URL complÃ¨te avec tous les paramÃ¨tres
-      const fullAuthorizeUrl = `${window.location.pathname}?${searchParams.toString()}`;
-      console.log('ðŸ” Non authentifiÃ©, redirection vers login avec:', fullAuthorizeUrl);
-      navigate('/login');
+      console.log('🔒 Non authentifié, redirection vers login avec paramètres dans l\'URL');
+
+      // Construire l'URL de login avec le redirect en paramètre
+      const fullAuthorizeUrl = window.location.pathname + window.location.search;
+      const loginUrl = `/login?redirect=${encodeURIComponent(fullAuthorizeUrl)}`;
+
+      console.log('� Redisrection vers:', loginUrl);
+      navigate(loginUrl);
       return;
     }
 
-    // VÃ©rifier que les paramÃ¨tres requis sont prÃ©sents
+    // Vérifier que les paramètres requis sont présents
     if (!serviceId) {
-      console.error('âŒ service_id manquant');
-      setError('ParamÃ¨tre service_id manquant');
+      console.error('❌ service_id manquant');
+      setError('Paramètre service_id manquant');
       return;
     }
 
-    console.log('âœ… Utilisateur authentifiÃ© avec service_id:', serviceId);
+    console.log('✅ Utilisateur authentifié avec service_id:', serviceId);
 
-    // RÃ©cupÃ©rer le nom de l'app depuis les paramÃ¨tres URL (pour les apps tierces)
+    // Récupérer le nom de l'app depuis les paramètres URL (pour les apps tierces)
     const appName = searchParams.get('app_name');
     const appLogo = searchParams.get('app_logo');
     const appDescription = searchParams.get('app_description');
     const appWebsite = searchParams.get('app_website');
 
-    // Informations des services Sorikama prÃ©dÃ©finis
+    // Informations des services Sorikama prédéfinis
     const services = {
       'soristore': {
         name: 'SoriStore',
-        logo: 'ðŸ›ï¸',
-        description: 'Marketplace e-commerce de l\'Ã©cosystÃ¨me Sorikama',
+        logo: '🛍️',
+        description: 'Marketplace e-commerce de l\'écosystème Sorikama',
         website: 'https://soristore.sorikama.com',
         color: 'from-blue-500 to-cyan-500'
       },
       'soripay': {
         name: 'SoriPay',
-        logo: 'ðŸ’³',
-        description: 'Solution de paiement sÃ©curisÃ©e et rapide',
+        logo: '💳',
+        description: 'Solution de paiement sécurisée et rapide',
         website: 'https://soripay.sorikama.com',
         color: 'from-purple-500 to-pink-500'
       },
       'soriwallet': {
         name: 'SoriWallet',
-        logo: 'ï¿½',
-        description: 'Portefeuille numÃ©rique multi-devises',
+        logo: '💰',
+        description: 'Portefeuille numérique multi-devises',
         website: 'https://soriwallet.sorikama.com',
         color: 'from-pink-500 to-rose-500'
       },
@@ -93,15 +97,15 @@ export default function Authorize() {
       },
       'sorihealth': {
         name: 'SoriHealth',
-        logo: 'ðŸ¥',
-        description: 'Gestion de santÃ© et bien-Ãªtre',
+        logo: '🏥',
+        description: 'Gestion de santé et bien-être',
         website: 'https://sorihealth.sorikama.com',
         color: 'from-green-500 to-emerald-500'
       },
       'soriaccess': {
         name: 'SoriAccess',
-        logo: 'â™¿',
-        description: 'Solutions d\'accessibilitÃ© inclusives',
+        logo: '♿',
+        description: 'Solutions d\'accessibilité inclusives',
         website: 'https://soriaccess.sorikama.com',
         color: 'from-indigo-500 to-blue-500'
       }
@@ -117,8 +121,8 @@ export default function Authorize() {
     else if (appName) {
       setAppInfo({
         name: appName,
-        logo: appLogo || 'ðŸ”—',
-        description: appDescription || 'Cette application souhaite accÃ©der Ã  votre compte Sorikama',
+        logo: appLogo || '🔗',
+        description: appDescription || 'Cette application souhaite accéder à votre compte Sorikama',
         website: appWebsite || 'https://example.com',
         color: 'from-blue-500 to-purple-500'
       });
@@ -127,48 +131,48 @@ export default function Authorize() {
     else {
       setAppInfo({
         name: serviceId,
-        logo: 'ðŸ”—',
-        description: 'Cette application souhaite accÃ©der Ã  votre compte Sorikama',
+        logo: '🔗',
+        description: 'Cette application souhaite accéder à votre compte Sorikama',
         website: 'https://example.com',
         color: 'from-blue-500 to-purple-500'
       });
     }
   }, [isAuthenticated, navigate, searchParams, serviceId]);
 
-  // Permissions demandÃ©es
+  // Permissions demandées
   const requestedScopes = scope.split(' ').map(s => {
     const scopeInfo = {
       'profile': {
-        icon: 'ðŸ‘¤',
+        icon: '👤',
         title: 'Informations de profil',
-        description: 'Nom, prÃ©nom et identifiant'
+        description: 'Nom, prénom et identifiant'
       },
       'email': {
-        icon: 'ðŸ“§',
+        icon: '📧',
         title: 'Adresse email',
         description: 'Votre adresse email principale'
       },
       'services': {
-        icon: 'ðŸ”—',
-        title: 'Services connectÃ©s',
+        icon: '🔗',
+        title: 'Services connectés',
         description: 'Liste de vos services Sorikama actifs'
       },
       'transactions': {
-        icon: 'ðŸ’°',
+        icon: '💰',
         title: 'Historique des transactions',
-        description: 'AccÃ¨s Ã  vos transactions et paiements'
+        description: 'Accès à vos transactions et paiements'
       },
       'apikey': {
-        icon: 'ðŸ”‘',
-        title: 'ClÃ© API',
-        description: 'Votre clÃ© API personnelle pour les requÃªtes'
+        icon: '🔑',
+        title: 'Clé API',
+        description: 'Votre clé API personnelle pour les requêtes'
       }
     };
 
     return scopeInfo[s] || {
-      icon: 'ðŸ”’',
+      icon: '🔒',
       title: s,
-      description: 'Permission personnalisÃ©e'
+      description: 'Permission personnalisée'
     };
   });
 
@@ -177,7 +181,7 @@ export default function Authorize() {
     setError('');
 
     try {
-      console.log('âœ… Autorisation accordÃ©e pour:', serviceId);
+      console.log('✅ Autorisation accordée pour:', serviceId);
 
       // Construire l'URL de redirection SSO vers le backend
       const apiUrl = import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:7000/api/v1';
@@ -191,20 +195,20 @@ export default function Authorize() {
 
       const fullUrl = params.toString() ? `${ssoAuthUrl}?${params.toString()}` : ssoAuthUrl;
 
-      console.log('ðŸš€ Redirection vers:', fullUrl);
+      console.log('🚀 Redirection vers:', fullUrl);
 
-      // Rediriger vers le backend SSO qui gÃ©nÃ©rera le token et redirigera vers le service
+      // Rediriger vers le backend SSO qui générera le token et redirigera vers le service
       window.location.href = fullUrl;
 
     } catch (error) {
-      console.error('âŒ Erreur autorisation:', error);
+      console.error('❌ Erreur autorisation:', error);
       setError('Une erreur est survenue lors de l\'autorisation');
       setIsLoading(false);
     }
   };
 
   const handleDeny = () => {
-    console.log('âŒ Autorisation refusÃ©e');
+    console.log('❌ Autorisation refusée');
     // Rediriger vers le dashboard avec un message
     navigate('/dashboard?auth_denied=true');
   };
@@ -225,7 +229,7 @@ export default function Authorize() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">âš ï¸</span>
+            <span className="text-3xl">⚠️</span>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Erreur</h2>
           <p className="text-gray-600 mb-6">{error}</p>
@@ -247,9 +251,9 @@ export default function Authorize() {
         {/* Carte principale */}
         <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden transform hover:scale-[1.02] transition-transform duration-300">
 
-          {/* En-tÃªte avec logo de l'app */}
+          {/* En-tête avec logo de l'app */}
           <div className={`bg-gradient-to-r ${appInfo.color} p-10 text-center relative overflow-hidden`}>
-            {/* DÃ©coration animÃ©e */}
+            {/* Décoration animée */}
             <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -mr-20 -mt-20 opacity-10 animate-pulse"></div>
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full -ml-16 -mb-16 opacity-10 animate-pulse" style={{ animationDelay: '1s' }}></div>
 
@@ -261,7 +265,7 @@ export default function Authorize() {
                 {appInfo.name}
               </h1>
               <p className="text-white/90 text-sm font-medium">
-                souhaite se connecter Ã  votre compte
+                souhaite se connecter à votre compte
               </p>
             </div>
           </div>
@@ -283,11 +287,11 @@ export default function Authorize() {
             </div>
           </div>
 
-          {/* Permissions demandÃ©es */}
+          {/* Permissions demandées */}
           <div className="p-8">
             <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <span className="text-2xl">ðŸ”</span>
-              Autorisations demandÃ©es
+              <span className="text-2xl">🔐</span>
+              Autorisations demandées
             </h2>
 
             <div className="space-y-3 mb-6">
@@ -314,13 +318,13 @@ export default function Authorize() {
                 </div>
                 <div>
                   <p className="text-sm text-blue-900 font-bold mb-1">
-                    Ã€ propos de {appInfo.name}
+                    À propos de {appInfo.name}
                   </p>
                   <p className="text-sm text-blue-800 mb-2">
                     {appInfo.description}
                   </p>
                   <a href={appInfo.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline font-medium">
-                    {appInfo.website} â†’
+                    {appInfo.website} →
                   </a>
                 </div>
               </div>
@@ -335,7 +339,7 @@ export default function Authorize() {
                   </svg>
                 </div>
                 <p className="text-sm text-yellow-900 font-medium">
-                  En autorisant cette application, vous lui donnez accÃ¨s aux informations listÃ©es ci-dessus. Vous pouvez rÃ©voquer cet accÃ¨s Ã  tout moment depuis vos paramÃ¨tres.
+                  En autorisant cette application, vous lui donnez accès aux informations listées ci-dessus. Vous pouvez révoquer cet accès à tout moment depuis vos paramètres.
                 </p>
               </div>
             </div>
@@ -388,4 +392,3 @@ export default function Authorize() {
     </div>
   );
 }
-
