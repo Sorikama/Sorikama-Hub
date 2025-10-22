@@ -184,21 +184,43 @@ export default function Authorize() {
       console.log('✅ Autorisation accordée pour:', serviceId);
 
       // Construire l'URL de redirection SSO vers le backend
-      const apiUrl = import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:7000/api/v1';
-      const ssoAuthUrl = `${apiUrl}/sso/auth/${serviceId}`;
-
-      // Ajouter le redirect_url si fourni
+      // On utilise une requête GET avec axios pour envoyer les headers d'authentification
       const params = new URLSearchParams();
       if (redirectUrl) {
         params.append('redirect_url', redirectUrl);
       }
 
-      const fullUrl = params.toString() ? `${ssoAuthUrl}?${params.toString()}` : ssoAuthUrl;
+      const ssoAuthUrl = `/sso/auth/${serviceId}${params.toString() ? '?' + params.toString() : ''}`;
 
-      console.log('🚀 Redirection vers:', fullUrl);
+      console.log('🚀 Appel API SSO:', ssoAuthUrl);
 
-      // Rediriger vers le backend SSO qui générera le token et redirigera vers le service
-      window.location.href = fullUrl;
+      // Faire une requête avec axios qui inclut automatiquement les headers JWT
+      // Le backend va rediriger, donc on suit la redirection
+      const response = await fetch(
+        `${import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:7000/api/v1'}${ssoAuthUrl}`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('sorikama_access_token')}`,
+            'X-API-Key': localStorage.getItem('sorikama_user_api_key')
+          },
+          redirect: 'follow'
+        }
+      );
+
+      // Si la réponse est une redirection, suivre l'URL
+      if (response.redirected) {
+        console.log('🔄 Redirection vers:', response.url);
+        window.location.href = response.url;
+      } else {
+        // Sinon, lire la réponse
+        const data = await response.json();
+        if (data.redirectUrl) {
+          window.location.href = data.redirectUrl;
+        } else {
+          throw new Error('Pas d\'URL de redirection reçue');
+        }
+      }
 
     } catch (error) {
       console.error('❌ Erreur autorisation:', error);
