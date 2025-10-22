@@ -3,13 +3,15 @@ import { Router, Request, Response } from 'express';
 import { ServiceManager } from '../services/serviceManager.service';
 import { logger } from '../utils/logger';
 import { authenticateApiKey } from '../middlewares/apiKey.middleware';
+import { requireApiKeyAndJWT } from '../middlewares/dualAuth.middleware';
 
 const router = Router();
 
 /**
  * GET /sso/auth/:serviceId - Initier l'authentification SSO vers un service
+ * Nécessite : API Key + JWT Token (double authentification)
  */
-router.get('/auth/:serviceId', authenticateApiKey, async (req: any, res: Response) => {
+router.get('/auth/:serviceId', requireApiKeyAndJWT, async (req: any, res: Response) => {
   try {
     const { serviceId } = req.params;
     const { redirect_url } = req.query;
@@ -71,21 +73,152 @@ router.get('/callback', async (req: Request, res: Response) => {
       sessionId: result.sessionId
     });
 
-    // Redirection vers l'URL finale ou dashboard
-    const finalRedirectUrl = redirect_url as string || result.redirectUrl || '/dashboard';
-    
-    res.redirect(finalRedirectUrl + `?sso_success=true&service=${service_id}`);
+    // Si redirect_url est fourni, rediriger vers cette URL
+    if (redirect_url && redirect_url !== '') {
+      const finalRedirectUrl = redirect_url as string;
+      const separator = finalRedirectUrl.includes('?') ? '&' : '?';
+      res.redirect(finalRedirectUrl + `${separator}sso_success=true&service=${service_id}&token=${token}`);
+      return;
+    }
+
+    // Sinon, afficher une page de succès avec les détails
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>SSO Callback - Sorikama Hub</title>
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+          }
+          .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+          }
+          h1 { color: #667eea; margin-top: 0; }
+          .success { color: #10b981; font-size: 48px; }
+          .info { background: #f3f4f6; padding: 20px; border-radius: 10px; margin: 20px 0; }
+          .token { 
+            background: #1f2937; 
+            color: #10b981; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            word-break: break-all;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+          }
+          .label { font-weight: bold; color: #6b7280; margin-top: 15px; }
+          .value { color: #1f2937; margin-bottom: 10px; }
+          .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: background 0.3s;
+          }
+          .button:hover { background: #5568d3; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="success">✅</div>
+          <h1>Authentification SSO Réussie !</h1>
+          
+          <div class="info">
+            <div class="label">Service ID:</div>
+            <div class="value">${service_id}</div>
+            
+            <div class="label">User ID:</div>
+            <div class="value">${result.userId}</div>
+            
+            <div class="label">Session ID:</div>
+            <div class="value">${result.sessionId}</div>
+            
+            <div class="label">User Info:</div>
+            <div class="value">${JSON.stringify(result.userInfo, null, 2)}</div>
+          </div>
+
+          <div class="label">Token SSO:</div>
+          <div class="token">${token}</div>
+
+          <p style="color: #6b7280; margin-top: 20px;">
+            Ce token peut être utilisé pour faire des requêtes à l'API Gateway au nom de l'utilisateur.
+            Il expire dans 1 heure.
+          </p>
+
+          <a href="http://localhost:5173/dashboard" class="button">Retour au Dashboard</a>
+        </div>
+      </body>
+      </html>
+    `);
 
   } catch (error: any) {
     logger.error('Erreur SSO callback:', error);
-    res.redirect('/dashboard?sso_error=' + encodeURIComponent(error.message));
+    
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Erreur SSO - Sorikama Hub</title>
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+          }
+          .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+          }
+          .error { color: #ef4444; font-size: 48px; }
+          h1 { color: #ef4444; }
+          .button {
+            display: inline-block;
+            background: #ef4444;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 20px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="error">❌</div>
+          <h1>Erreur SSO</h1>
+          <p>${error.message}</p>
+          <a href="http://localhost:5173/dashboard" class="button">Retour au Dashboard</a>
+        </div>
+      </body>
+      </html>
+    `);
   }
 });
 
 /**
  * POST /sso/revoke/:sessionId - Révoquer une session SSO
+ * Nécessite : API Key + JWT Token (double authentification)
  */
-router.post('/revoke/:sessionId', authenticateApiKey, async (req: any, res: Response) => {
+router.post('/revoke/:sessionId', requireApiKeyAndJWT, async (req: any, res: Response) => {
   try {
     const { sessionId } = req.params;
     const userId = req.user?.id;
@@ -116,8 +249,9 @@ router.post('/revoke/:sessionId', authenticateApiKey, async (req: any, res: Resp
 
 /**
  * GET /sso/sessions - Obtenir les sessions SSO actives de l'utilisateur
+ * Nécessite : API Key + JWT Token (double authentification)
  */
-router.get('/sessions', authenticateApiKey, async (req: any, res: Response) => {
+router.get('/sessions', requireApiKeyAndJWT, async (req: any, res: Response) => {
   try {
     const userId = req.user?.id;
 
@@ -145,9 +279,47 @@ router.get('/sessions', authenticateApiKey, async (req: any, res: Response) => {
 });
 
 /**
- * POST /sso/cleanup - Nettoyer les sessions expirées (admin)
+ * POST /sso/refresh - Rafraîchir un token SSO expiré
+ * Route publique - Le service externe envoie son token SSO expiré
  */
-router.post('/cleanup', authenticateApiKey, async (req: any, res: Response) => {
+router.post('/refresh', async (req: Request, res: Response) => {
+  try {
+    const { sessionId, serviceId } = req.body;
+
+    if (!sessionId || !serviceId) {
+      return res.status(400).json({
+        success: false,
+        message: 'sessionId et serviceId requis'
+      });
+    }
+
+    const newToken = await ServiceManager.refreshSSOToken(sessionId, serviceId);
+
+    logger.info(`🔄 Token SSO rafraîchi`, { sessionId, serviceId });
+
+    res.json({
+      success: true,
+      data: {
+        accessToken: newToken.accessToken,
+        expiresAt: newToken.expiresAt,
+        sessionId: newToken.sessionId
+      }
+    });
+
+  } catch (error: any) {
+    logger.error('Erreur refresh SSO:', error);
+    res.status(401).json({
+      success: false,
+      message: error.message || 'Impossible de rafraîchir le token'
+    });
+  }
+});
+
+/**
+ * POST /sso/cleanup - Nettoyer les sessions expirées (admin)
+ * Nécessite : API Key + JWT Token (double authentification)
+ */
+router.post('/cleanup', requireApiKeyAndJWT, async (req: any, res: Response) => {
   try {
     const cleanedCount = await ServiceManager.cleanupExpiredSessions();
 

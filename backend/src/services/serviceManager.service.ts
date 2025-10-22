@@ -373,28 +373,61 @@ export class ServiceManager {
       }
     });
 
-    // Construire l'URL d'authentification
-    const authUrl = new URL(service.url + (service.authEndpoint || '/auth/sorikama'));
-    authUrl.searchParams.set('token', token);
-    authUrl.searchParams.set('state', state);
-    authUrl.searchParams.set('redirect_uri', redirectUrl || `http://localhost:${process.env.PORT || 7000}/sso/callback`);
-    authUrl.searchParams.set('client_id', 'sorikama-hub');
-    
-    if (service.scopes && service.scopes.length > 0) {
-      authUrl.searchParams.set('scope', service.scopes.join(' '));
+    // Vérifier si le service externe est accessible
+    let serviceAvailable = false;
+    try {
+      const axios = require('axios');
+      const healthUrl = service.healthCheckUrl || service.url;
+      await axios.get(healthUrl, { timeout: 2000 });
+      serviceAvailable = true;
+      logger.info(`✅ Service ${service.name} accessible`, { url: healthUrl });
+    } catch (error) {
+      logger.warn(`⚠️ Service ${service.name} non accessible, redirection vers callback Hub`, { 
+        url: service.url,
+        error: (error as any).message 
+      });
     }
 
-    logger.info(`🔐 URL SSO générée pour ${service.name}`, {
-      serviceId,
-      userId,
-      sessionId,
-      redirectUrl
-    });
+    let finalUrl: string;
+
+    if (serviceAvailable) {
+      // Service externe accessible - redirection normale
+      const authUrl = new URL(service.url + (service.authEndpoint || '/auth/sorikama'));
+      authUrl.searchParams.set('token', token);
+      authUrl.searchParams.set('state', state);
+      authUrl.searchParams.set('redirect_uri', redirectUrl || `http://localhost:${process.env.PORT || 7000}/api/v1/sso/callback`);
+      authUrl.searchParams.set('client_id', 'sorikama-hub');
+      
+      if (service.scopes && service.scopes.length > 0) {
+        authUrl.searchParams.set('scope', service.scopes.join(' '));
+      }
+
+      finalUrl = authUrl.toString();
+      logger.info(`🔐 Redirection vers service externe: ${service.name}`, {
+        serviceId,
+        userId,
+        sessionId
+      });
+    } else {
+      // Service non accessible - redirection directe vers callback Hub
+      const callbackUrl = new URL(`http://localhost:${process.env.PORT || 7000}/api/v1/sso/callback`);
+      callbackUrl.searchParams.set('token', token);
+      callbackUrl.searchParams.set('state', state);
+      callbackUrl.searchParams.set('service_id', serviceId);
+      callbackUrl.searchParams.set('redirect_url', redirectUrl || '');
+
+      finalUrl = callbackUrl.toString();
+      logger.info(`🔐 Redirection directe vers callback Hub (service non disponible)`, {
+        serviceId,
+        userId,
+        sessionId
+      });
+    }
 
     // Logger l'événement SSO
     logSSOEvent('url_generated', serviceId, userId, true);
 
-    return authUrl.toString();
+    return finalUrl;
   }
 
   // Valider un token SSO de retour
@@ -438,6 +471,76 @@ export class ServiceManager {
   static async revokeSSOSession(sessionId: string): Promise<boolean> {
     const result = await SSOSessionModel.deleteOne({ sessionId });
     return result.deletedCount > 0;
+  }
+
+  // Rafraîchir un token SSO expiré ou proche de l'expiration
+  static async refreshSSOToken(sessionId: string, serviceId: string): Promise<any> {
+    // Récupérer la session (même si expirée, on garde une fenêtre de 24h)
+    const session = await SSOSessionModel.findOne({
+      sessionId,
+      serviceId,
+      // Permettre le refresh jusqu'à 24h après expiration
+      expiresAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+    });
+
+    if (!session) {
+      throw new Error('Session SSO introuvable ou trop ancienne');
+    }
+
+    // Vérifier que le service existe toujours
+    const service = await ServiceModel.findOne({ id: serviceId, status: 'active' });
+    if (!service || !service.ssoEnabled) {
+      throw new Error('Service non disponible ou SSO désactivé');
+    }
+
+    // Récupérer l'utilisateur
+    const user = await UserModel.findById(session.userId);
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    // Générer un nouveau token avec une nouvelle expiration
+    const newPayload = {
+      userId: user._id,
+      username: (user as any).username,
+      email: (user as any).email,
+      serviceId,
+      sessionId, // Garder le même sessionId
+      state: session.state,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + (60 * 60) // 1 heure
+    };
+
+    const newToken = jwt.sign(newPayload, process.env.JWT_SECRET || 'sorikama-secret');
+    const newExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    // Mettre à jour la session en BDD
+    await SSOSessionModel.updateOne(
+      { sessionId },
+      {
+        $set: {
+          accessToken: newToken,
+          expiresAt: newExpiresAt,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    logger.info(`🔄 Token SSO rafraîchi`, {
+      sessionId,
+      serviceId,
+      userId: user._id,
+      newExpiresAt
+    });
+
+    // Logger l'événement
+    logSSOEvent('token_refreshed', serviceId, user._id.toString(), true);
+
+    return {
+      accessToken: newToken,
+      expiresAt: newExpiresAt,
+      sessionId
+    };
   }
 
   // Obtenir les sessions actives d'un utilisateur
