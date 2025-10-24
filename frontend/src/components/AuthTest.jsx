@@ -5,7 +5,7 @@ import api from '../services/api';
 
 const AuthTest = () => {
   const { user, login, signup, logout } = useAuth();
-  const { isSecure, hasApiKey, hasValidToken } = useSecureAuth();
+  const { isSecure, hasValidToken } = useSecureAuth();
 
   const testLogin = async () => {
     try {
@@ -57,12 +57,7 @@ const AuthTest = () => {
           </span>
         </div>
         
-        <div className="flex justify-between">
-          <span>API Key:</span>
-          <span className={hasApiKey ? 'text-green-600' : 'text-red-600'}>
-            {hasApiKey ? '✅' : '❌'}
-          </span>
-        </div>
+
         
         <div className="flex justify-between">
           <span>Sécurisé:</span>
@@ -107,7 +102,6 @@ const AuthTest = () => {
       {user && (
         <div className="mt-2 text-xs">
           <p><strong>User ID:</strong> {user.id || user._id}</p>
-          <p><strong>API Key:</strong> {user.apiKey?.substring(0, 12)}...</p>
         </div>
       )}
     </div>

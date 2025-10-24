@@ -29,9 +29,10 @@ export default function Login() {
     e.preventDefault();
     
     try {
-      await login(credentials);
+      const response = await login(credentials);
+      const userData = response?.data?.user;
       
-      console.log('✅ Connexion réussie');
+      console.log('✅ Connexion réussie', { role: userData?.role });
       
       // Vérifier s'il y a un paramètre redirect dans l'URL (priorité 1)
       const searchParams = new URLSearchParams(location.search);
@@ -54,8 +55,15 @@ export default function Login() {
         return;
       }
       
-      // Par défaut, rediriger vers le dashboard
-      console.log('🔄 Redirection vers dashboard');
+      // Rediriger selon le rôle de l'utilisateur (priorité 3)
+      if (userData?.role === 'admin') {
+        console.log('👑 Admin détecté - Redirection vers espace admin');
+        navigate('/admin/dashboard', { replace: true });
+        return;
+      }
+      
+      // Par défaut, rediriger vers le dashboard utilisateur
+      console.log('🔄 Redirection vers dashboard utilisateur');
       navigate('/dashboard', { replace: true });
       
     } catch (error) {

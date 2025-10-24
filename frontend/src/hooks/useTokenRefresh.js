@@ -33,7 +33,6 @@ export const useTokenRefresh = () => {
               
               // Mettre à jour les tokens
               localStorage.setItem('token', tokens.accessToken);
-              localStorage.setItem('userApiKey', updatedUser.apiKey);
               localStorage.setItem('refreshToken', tokens.refreshToken);
               localStorage.setItem('user', JSON.stringify(updatedUser));
               

@@ -10,9 +10,6 @@ export const API_CONFIG = {
   // URL de base de l'API Gateway (port 7000 forcé côté backend)
   BASE_URL: import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:7000/api/v1',
 
-  // API Key système fournie par l'admin (préfixe sk_)
-  SYSTEM_API_KEY: import.meta.env.VITE_API_KEY || 'sk_59105e8b548140fe11e8bad8db2572f174a6266fe4b3c4ab',
-
   // Timeout des requêtes HTTP (10 secondes)
   TIMEOUT: 10000
 };
@@ -28,8 +25,7 @@ export const ENDPOINTS = {
     REFRESH: '/auth/refresh-token',          // Renouvellement des tokens
     ME: '/auth/me',                          // Profil utilisateur actuel
     UPDATE_ME: '/auth/update-me',            // Mise à jour du profil
-    UPDATE_PASSWORD: '/auth/update-password', // Mise à jour du mot de passe
-    REGENERATE_API_KEY: '/auth/regenerate-api-key'  // Régénération API Key personnelle
+    UPDATE_PASSWORD: '/auth/update-password' // Mise à jour du mot de passe
   },
 
   // Routes système
@@ -57,14 +53,12 @@ export const PROTECTED_ROUTES = [
   ENDPOINTS.AUTH.LOGOUT,
   ENDPOINTS.AUTH.ME,
   ENDPOINTS.AUTH.UPDATE_ME,
-  ENDPOINTS.AUTH.UPDATE_PASSWORD,
-  ENDPOINTS.AUTH.REGENERATE_API_KEY
+  ENDPOINTS.AUTH.UPDATE_PASSWORD
 ];
 
 // Clés de stockage local
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'sorikama_access_token',
   REFRESH_TOKEN: 'sorikama_refresh_token',
-  USER_DATA: 'sorikama_user',
-  USER_API_KEY: 'sorikama_user_api_key'
+  USER_DATA: 'sorikama_user'
 };

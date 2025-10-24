@@ -280,23 +280,6 @@ router.patch('/update-me', validateBody(schemas.updateMeSchema), authController.
 // Valide l'ancien et le nouveau mot de passe avant la mise à jour
 router.patch('/update-password', validateBody(schemas.updatePasswordSchema), authController.updatePassword);
 
-/**
- * @swagger
- * /auth/regenerate-api-key:
- *   post:
- *     summary: Régénérer l'API Key de l'utilisateur
- *     tags: [Gestion de Compte]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       '200':
- *         description: API Key régénérée avec succès.
- *       '401':
- *         description: Non autorisé.
- */
-router.post('/regenerate-api-key', authController.regenerateApiKey);
-
-
 export default router;
 
 // ===================================================================================

@@ -16,8 +16,13 @@ export interface IUser extends Document {
     password?: string;
     isVerified: boolean;
     isActive: boolean;
-    roles: string[] | IRole[];
-    apiKey?: string; // Clé API personnelle de l'utilisateur
+    isBlocked: boolean; // Utilisateur bloqué par l'admin
+    blockedAt?: Date; // Date du blocage
+    blockedReason?: string; // Raison du blocage
+    lastActivity?: Date; // Dernière activité de l'utilisateur
+    loginCount: number; // Nombre de connexions
+    role: 'user' | 'admin'; // Rôle de l'utilisateur (user ou admin)
+    roles: string[] | IRole[]; // Rôles multiples (pour évolution future)
     comparePassword(password: string): Promise<boolean>;
     passwordResetToken?: string;
     passwordResetExpires?: Date;
@@ -77,6 +82,35 @@ const userSchema = new Schema<IUser>({
         type: Boolean,
         default: true,
     },
+    // Utilisateur bloqué par l'admin
+    isBlocked: {
+        type: Boolean,
+        default: false,
+    },
+    // Date du blocage
+    blockedAt: {
+        type: Date,
+    },
+    // Raison du blocage
+    blockedReason: {
+        type: String,
+    },
+    // Dernière activité de l'utilisateur
+    lastActivity: {
+        type: Date,
+        default: Date.now,
+    },
+    // Nombre de connexions
+    loginCount: {
+        type: Number,
+        default: 0,
+    },
+    // Rôle principal de l'utilisateur (user ou admin)
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user',
+    },
     passwordResetToken: {
         type: String,
         select: false,
@@ -85,13 +119,7 @@ const userSchema = new Schema<IUser>({
         type: Date,
         select: false,
     },
-    // Clé API personnelle de l'utilisateur
-    apiKey: {
-        type: String,
-        unique: true,
-        sparse: true // Permet les valeurs null/undefined
-    },
-    // Références vers les rôles de l'utilisateur
+    // Références vers les rôles de l'utilisateur (pour évolution future)
     roles: [{
         type: String,
         ref: 'Role',
@@ -105,9 +133,9 @@ const userSchema = new Schema<IUser>({
     toObject: { getters: true },
 });
 
-// Hook pour mettre à jour automatiquement le emailHash si l'email est modifié
+// Hook pour mettre à jour automatiquement le emailHash si l'email est modifié ou nouveau
 userSchema.pre<IUser>('save', function (next) {
-    if (this.isModified('email')) {
+    if (this.isModified('email') || this.isNew) {
         this.emailHash = createBlindIndex(this.email);
     }
     next();

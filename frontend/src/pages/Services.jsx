@@ -76,7 +76,6 @@ const Services = () => {
     // Redirection avec token JWT et API Key utilisateur
     const params = new URLSearchParams({
       token: user.token,
-      apiKey: user.apiKey,
       userId: user.id || user._id,
       redirect: window.location.origin
     });

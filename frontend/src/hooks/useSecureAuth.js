@@ -6,7 +6,7 @@ export const useSecureAuth = () => {
   const [isSecure, setIsSecure] = useState(false);
 
   useEffect(() => {
-    if (user && user.token && user.apiKey) {
+    if (user && user.token) {
       // Vérifier que le token n'est pas expiré
       try {
         const tokenPayload = JSON.parse(atob(user.token.split('.')[1]));
@@ -31,7 +31,6 @@ export const useSecureAuth = () => {
     loading,
     error,
     isSecure,
-    hasApiKey: !!user?.apiKey,
     hasValidToken: !!user?.token && isSecure
   };
 };
@@ -40,13 +39,12 @@ export const useApiCall = () => {
   const { user } = useAuth();
 
   const makeSecureCall = async (endpoint, options = {}) => {
-    if (!user?.token || !user?.apiKey) {
+    if (!user?.token) {
       throw new Error('Authentification incomplète');
     }
 
     const headers = {
       'Authorization': `Bearer ${user.token}`,
-      'X-API-Key': user.apiKey,
       'Content-Type': 'application/json',
       ...options.headers
     };

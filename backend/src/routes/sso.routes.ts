@@ -2,7 +2,6 @@
 import { Router, Request, Response } from 'express';
 import { ServiceManager } from '../services/serviceManager.service';
 import { logger } from '../utils/logger';
-import { authenticateApiKey } from '../middlewares/apiKey.middleware';
 import { requireApiKeyAndJWT } from '../middlewares/dualAuth.middleware';
 
 const router = Router();
