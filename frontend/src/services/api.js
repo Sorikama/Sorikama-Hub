@@ -39,12 +39,12 @@ api.interceptors.request.use(
     const userApiKey = localStorage.getItem(STORAGE_KEYS.USER_API_KEY);
     const systemApiKey = API_CONFIG.SYSTEM_API_KEY;
     const isPublicRoute = PUBLIC_ROUTES.some(route => config.url?.includes(route));
-    
+
     // Pour les utilisateurs connectés : TOUJOURS utiliser leur API Key
     if (userApiKey && userApiKey !== 'null' && userApiKey !== 'undefined') {
       config.headers['X-API-Key'] = userApiKey;
       console.log('🔑 Utilisation de l\'API Key utilisateur');
-    } 
+    }
     // Pour les routes publiques (login, register, etc.) : utiliser l'API Key système
     else if (isPublicRoute) {
       config.headers['X-API-Key'] = systemApiKey;
@@ -55,7 +55,7 @@ api.interceptors.request.use(
       console.error('❌ Aucune API Key utilisateur disponible pour une route protégée');
       config.headers['X-API-Key'] = systemApiKey; // Fallback pour éviter l'erreur
     }
-    
+
     // === NIVEAU 2 : JWT TOKEN (routes protégées seulement) ===
     if (!isPublicRoute) {
       const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
@@ -63,14 +63,14 @@ api.interceptors.request.use(
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
     }
-    
+
     // Log pour debug (masquer les clés sensibles)
     console.log(`📡 ${config.method?.toUpperCase()} ${config.url}`, {
       apiKey: config.headers['X-API-Key']?.substring(0, 10) + '...',
       hasJWT: !!config.headers.Authorization,
       isPublic: isPublicRoute
     });
-    
+
     return config;
   },
   (error) => {
@@ -92,46 +92,42 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    
-    // Ne pas tenter de refresh si c'est une requête de logout ou si on est en train de se déconnecter
+
+    // Ne pas tenter de refresh si c'est une requête de logout ou de refresh
     const isLogoutRequest = originalRequest.url?.includes('/auth/logout');
-    
-    // Si on est en train de se déconnecter, ignorer les erreurs 401
-    if (isLoggingOut) {
-      console.log('⚠️ Erreur ignorée pendant la déconnexion');
-      return Promise.reject(error);
-    }
-    
-    // Si erreur 401 et qu'on n'a pas déjà tenté le refresh et que ce n'est pas un logout
-    if (error.response?.status === 401 && !originalRequest._retry && !isLogoutRequest) {
+    const isRefreshRequest = originalRequest.url?.includes('/auth/refresh');
+
+    // Si erreur 401 et qu'on n'a pas déjà tenté le refresh
+    // ET que ce n'est pas une requête de logout ou refresh
+    if (error.response?.status === 401 && !originalRequest._retry && !isLogoutRequest && !isRefreshRequest) {
       originalRequest._retry = true;
-      
+
       const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
-      
+
       if (refreshToken) {
         try {
           console.log('🔄 Tentative de renouvellement du token...');
-          
+
           // Appeler l'endpoint de refresh (avec API Key mais sans JWT)
           const response = await api.post(ENDPOINTS.AUTH.REFRESH, {
             refreshToken
           });
-          
+
           const { accessToken, refreshToken: newRefreshToken } = response.data.data.tokens;
-          
+
           // Sauvegarder les nouveaux tokens
           localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
           localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
-          
+
           console.log('✅ Token renouvelé avec succès');
-          
+
           // Retry la requête originale avec le nouveau token
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return api(originalRequest);
-          
+
         } catch (refreshError) {
           console.error('❌ Échec du renouvellement du token:', refreshError);
-          
+
           // Refresh échoué - déconnecter l'utilisateur
           authUtils.clearStorage();
           window.location.href = '/login';
@@ -143,7 +139,7 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -183,12 +179,12 @@ export const authService = {
     try {
       console.log('🔍 Vérification du code...');
       const response = await api.post(ENDPOINTS.AUTH.VERIFY, verificationData);
-      
+
       const { user, tokens } = response.data.data;
-      
+
       // Sauvegarder toutes les données d'authentification
       authUtils.saveAuthData(user, tokens);
-      
+
       console.log('✅ Compte créé et utilisateur connecté');
       return response.data;
     } catch (error) {
@@ -208,12 +204,12 @@ export const authService = {
     try {
       console.log('🚪 Tentative de connexion pour:', credentials.email);
       const response = await api.post(ENDPOINTS.AUTH.LOGIN, credentials);
-      
+
       const { user, tokens } = response.data.data;
-      
+
       // Sauvegarder les données d'authentification
       authUtils.saveAuthData(user, tokens);
-      
+
       console.log('✅ Connexion réussie');
       return response.data;
     } catch (error) {
@@ -225,64 +221,76 @@ export const authService = {
   /**
    * Déconnexion utilisateur
    * Invalide le refresh token côté serveur et nettoie le stockage local
-   * IMPORTANT : Le localStorage n'est nettoyé QUE si le backend répond OK
+   * Gère manuellement le refresh token si nécessaire (car l'intercepteur ignore les requêtes de logout)
    */
   async logout() {
     const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
-    
+
     // Vérifier qu'on a bien un refresh token
     if (!refreshToken || refreshToken === 'null' || refreshToken === 'undefined') {
       console.warn('⚠️ Pas de refresh token - déconnexion locale uniquement');
       authUtils.clearStorage();
-      isLoggingOut = false;
-      return;
+      return { success: true };
     }
-    
-    // Activer le flag de déconnexion
-    isLoggingOut = true;
-    
+
     try {
       console.log('🚪 Envoi de la requête de déconnexion au serveur...');
-      
-      // Envoyer la requête de logout au serveur avec l'API Key utilisateur
+
+      // Envoyer la requête de logout au serveur
       const response = await api.post(ENDPOINTS.AUTH.LOGOUT, { refreshToken });
-      
-      console.log('✅ Réponse du serveur reçue:', response.status);
-      
-      // Vérifier que le serveur a bien répondu OK (200-299)
-      if (response.status >= 200 && response.status < 300) {
-        console.log('✅ Déconnexion validée par le serveur');
-        
-        // SEULEMENT MAINTENANT on nettoie le localStorage
-        authUtils.clearStorage();
-        console.log('✅ Stockage local nettoyé');
-        
-        // Désactiver le flag
-        isLoggingOut = false;
-        
-        return { success: true };
-      } else {
-        throw new Error(`Réponse inattendue du serveur: ${response.status}`);
-      }
-      
+
+      console.log('✅ Déconnexion validée par le serveur');
+
+      // Nettoyer le localStorage
+      authUtils.clearStorage();
+      console.log('✅ Stockage local nettoyé');
+
+      return { success: true };
+
     } catch (error) {
       console.error('❌ Erreur lors de la déconnexion:', error);
-      
-      // Désactiver le flag
-      isLoggingOut = false;
-      
-      // Si c'est une erreur réseau ou serveur, on peut quand même déconnecter localement
+
+      // Si erreur 401 (token invalide), demander un nouveau token et réessayer UNE FOIS
+      if (error.response?.status === 401) {
+        console.log('🔄 Token invalide, tentative de renouvellement...');
+
+        try {
+          // Demander un nouveau token
+          const refreshResponse = await api.post(ENDPOINTS.AUTH.REFRESH, { refreshToken });
+          const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data.data.tokens;
+
+          // Sauvegarder les nouveaux tokens
+          localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+          localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
+
+          console.log('✅ Token renouvelé, nouvelle tentative de déconnexion...');
+
+          // Réessayer le logout avec le nouveau token (DERNIÈRE TENTATIVE)
+          const retryResponse = await api.post(ENDPOINTS.AUTH.LOGOUT, { refreshToken: newRefreshToken });
+
+          console.log('✅ Déconnexion réussie après renouvellement du token');
+          authUtils.clearStorage();
+          return { success: true };
+
+        } catch (refreshError) {
+          console.error('❌ Échec du renouvellement ou deuxième tentative de déconnexion:', refreshError);
+
+          // Si on a un 401 une DEUXIÈME fois, ou si le refresh échoue, déconnecter localement
+          console.warn('⚠️ Impossible de se déconnecter proprement - déconnexion locale forcée');
+          authUtils.clearStorage();
+          return { success: true, warning: 'Session expirée, déconnexion locale effectuée' };
+        }
+      }
+
+      // Si c'est une erreur réseau ou serveur, déconnecter localement
       if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || error.response?.status >= 500) {
         console.warn('⚠️ Erreur serveur - déconnexion locale forcée');
         authUtils.clearStorage();
         return { success: true, warning: 'Déconnexion locale effectuée (serveur injoignable)' };
       }
-      
-      // Pour les autres erreurs (401, 403, etc.), on ne déconnecte PAS
+
+      // Pour les autres erreurs, propager le message
       const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de la déconnexion';
-      console.error('❌ Déconnexion refusée:', errorMessage);
-      
-      // Retourner l'erreur pour que le composant puisse l'afficher
       throw new Error(errorMessage);
     }
   },
@@ -315,12 +323,12 @@ export const authService = {
     try {
       console.log('✏️ Mise à jour du profil...');
       const response = await api.patch(ENDPOINTS.AUTH.UPDATE_ME, profileData);
-      
+
       const updatedUser = response.data.data.user;
-      
+
       // Mettre à jour les données utilisateur en local
       localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(updatedUser));
-      
+
       console.log('✅ Profil mis à jour');
       return response.data;
     } catch (error) {
@@ -357,19 +365,19 @@ export const authService = {
     try {
       console.log('🔄 Régénération de l\'API Key...');
       const response = await api.post(ENDPOINTS.AUTH.REGENERATE_API_KEY);
-      
+
       const newApiKey = response.data.data.apiKey;
-      
+
       // Sauvegarder la nouvelle API Key
       localStorage.setItem(STORAGE_KEYS.USER_API_KEY, newApiKey);
-      
+
       // Mettre à jour les données utilisateur
       const user = authUtils.getUser();
       if (user) {
         user.apiKey = newApiKey;
         localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
       }
-      
+
       console.log('✅ API Key régénérée');
       return response.data;
     } catch (error) {
