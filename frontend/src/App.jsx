@@ -1,69 +1,70 @@
-import React from "react";
-import {
-  Routes,
-  Route,
-} from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
-import { ThemeProvider } from "./context/ThemeContext";
+// src/App.jsx
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 
-import ProtectedRoute from "./components/ProtectedRoute";
-import Layout from "./components/Layout";
+// Pages
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Profile from './pages/Profile';
+import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
+import Authorize from './pages/Authorize';
 
-// Importation des pages
-import Home from "./pages/Home";
-import About from "./pages/About";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import VerifyCode from "./pages/VerifyCode";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
-import NotFound from "./pages/NotFound";
+// Components
+import ProtectedRoute from './components/ProtectedRoute';
+import Navbar from './components/Navbar';
+import ToastContainer from './components/ToastContainer';
 
-const App = () => {
+function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Routes>
-          {/* Routes publiques avec Header/Footer */}
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="about" element={<About />} />
-          </Route>
-
-          {/* Routes d'authentification sans Header/Footer */}
+        <div className="App">
+          <Navbar />
+          <Routes>
+          {/* Routes publiques */}
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/verify" element={<VerifyCode />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-
+          
           {/* Routes protégées */}
-          <Route
-            path="/dashboard"
+          <Route 
+            path="/dashboard" 
             element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
-            }
+            } 
           />
-          <Route
-            path="/profile"
+          <Route 
+            path="/profile" 
             element={
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
-            }
+            } 
           />
-
-          {/* Page 404 */}
-          <Route path="*" element={<NotFound />} />
+          <Route 
+            path="/authorize" 
+            element={
+              <ProtectedRoute>
+                <Authorize />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Redirection par défaut */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </AuthProvider>
-    </ThemeProvider>
+        
+        {/* Conteneur des toasts - Affiché globalement */}
+        <ToastContainer />
+      </div>
+    </AuthProvider>
+  </ThemeProvider>
   );
-};
+}
 
 export default App;
-

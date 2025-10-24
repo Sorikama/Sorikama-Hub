@@ -1,0 +1,429 @@
+/* === SORIKAMA SWAGGER CUSTOM THEME === */
+
+/* Variables CSS pour la cohérence */
+:root {
+  --sorikama-primary: #3b82f6;
+  --sorikama-secondary: #8b5cf6;
+  --sorikama-success: #10b981;
+  --sorikama-warning: #f59e0b;
+  --sorikama-danger: #ef4444;
+  --sorikama-info: #06b6d4;
+  --sorikama-dark: #1e293b;
+  --sorikama-light: #f8fafc;
+  --sorikama-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4, #10b981);
+}
+
+/* === ANIMATIONS PERSONNALISÉES === */
+@keyframes sorikama-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes sorikama-slide-in {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes sorikama-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); }
+}
+
+/* === HEADER PERSONNALISÉ === */
+.swagger-ui .topbar {
+  background: var(--sorikama-gradient) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.swagger-ui .topbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: sorikama-shine 3s infinite;
+}
+
+@keyframes sorikama-shine {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* === LOGO SORIKAMA === */
+.swagger-ui .topbar::after {
+  content: '🌟 Sorikama Hub API Gateway';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 24px;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+
+/* === SECTION INFO AMÉLIORÉE === */
+.swagger-ui .info {
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  animation: sorikama-slide-in 0.8s ease-out;
+}
+
+.swagger-ui .info::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: var(--sorikama-gradient);
+  border-radius: inherit;
+  z-index: -1;
+}
+
+/* === BADGES DE STATUT === */
+.sorikama-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 10px 5px;
+  animation: sorikama-pulse 2s infinite;
+}
+
+.sorikama-status-badge.operational {
+  background: linear-gradient(135deg, var(--sorikama-success), #059669);
+  color: white;
+}
+
+.sorikama-status-badge.maintenance {
+  background: linear-gradient(135deg, var(--sorikama-warning), #d97706);
+  color: white;
+}
+
+/* === BOUTONS AMÉLIORÉS === */
+.swagger-ui .btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.swagger-ui .btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.swagger-ui .btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.swagger-ui .btn.authorize {
+  background: var(--sorikama-gradient);
+  border: none;
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.swagger-ui .btn.authorize:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+.swagger-ui .btn.execute {
+  background: linear-gradient(135deg, var(--sorikama-success), #059669);
+  border: none;
+  color: white;
+  font-weight: 600;
+}
+
+.swagger-ui .btn.execute:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+/* === OPÉRATIONS API STYLISÉES === */
+.swagger-ui .opblock {
+  border: 2px solid transparent;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.swagger-ui .opblock::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--sorikama-gradient);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.swagger-ui .opblock:hover::before {
+  transform: scaleX(1);
+}
+
+.swagger-ui .opblock:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Couleurs spécifiques par méthode HTTP */
+.swagger-ui .opblock.opblock-get {
+  border-color: var(--sorikama-success);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.02));
+}
+
+.swagger-ui .opblock.opblock-post {
+  border-color: var(--sorikama-primary);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.02));
+}
+
+.swagger-ui .opblock.opblock-put {
+  border-color: var(--sorikama-warning);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(245, 158, 11, 0.02));
+}
+
+.swagger-ui .opblock.opblock-delete {
+  border-color: var(--sorikama-danger);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(239, 68, 68, 0.02));
+}
+
+.swagger-ui .opblock.opblock-patch {
+  border-color: var(--sorikama-secondary);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(139, 92, 246, 0.02));
+}
+
+/* === TAGS AMÉLIORÉS === */
+.swagger-ui .opblock-tag {
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.swagger-ui .opblock-tag-section h3 {
+  background: var(--sorikama-gradient);
+  color: white;
+  margin: 0;
+  padding: 20px 24px;
+  font-weight: 700;
+  font-size: 18px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* === SCHÉMAS ET MODÈLES === */
+.swagger-ui .model-box {
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  transition: all 0.3s ease;
+}
+
+.swagger-ui .model-box:hover {
+  border-color: var(--sorikama-primary);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* === RÉPONSES === */
+.swagger-ui .responses-inner {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.swagger-ui .response.default {
+  border-left: 4px solid var(--sorikama-success);
+}
+
+.swagger-ui .response.default .response-col_status {
+  color: var(--sorikama-success);
+  font-weight: 600;
+}
+
+/* === AUTHENTIFICATION === */
+.swagger-ui .scheme-container {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  border: 2px solid var(--sorikama-primary);
+  border-radius: 16px;
+  position: relative;
+  padding: 30px;
+  margin: 30px 0;
+}
+
+.swagger-ui .scheme-container::before {
+  content: '🔐 Authentification';
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  background: var(--sorikama-primary);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* === SCROLLBAR PERSONNALISÉE === */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sorikama-gradient);
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+}
+
+/* === LOADING STATES === */
+.swagger-ui .loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.sorikama-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid var(--sorikama-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .swagger-ui .wrapper {
+    padding: 20px 10px;
+  }
+  
+  .swagger-ui .info {
+    padding: 20px;
+  }
+  
+  .swagger-ui .info .title {
+    font-size: 24px;
+  }
+  
+  .swagger-ui .topbar::after {
+    font-size: 18px;
+  }
+}
+
+/* === DARK MODE SUPPORT === */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sorikama-dark: #f8fafc;
+    --sorikama-light: #1e293b;
+  }
+  
+  body {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  }
+  
+  .swagger-ui .wrapper {
+    background: rgba(30, 41, 59, 0.95);
+    color: #f8fafc;
+  }
+  
+  .swagger-ui .info {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: #f8fafc;
+  }
+}
+
+/* === ANIMATIONS D'ENTRÉE === */
+.swagger-ui .opblock {
+  animation: sorikama-slide-in 0.5s ease-out;
+}
+
+.swagger-ui .opblock:nth-child(1) { animation-delay: 0.1s; }
+.swagger-ui .opblock:nth-child(2) { animation-delay: 0.2s; }
+.swagger-ui .opblock:nth-child(3) { animation-delay: 0.3s; }
+.swagger-ui .opblock:nth-child(4) { animation-delay: 0.4s; }
+.swagger-ui .opblock:nth-child(5) { animation-delay: 0.5s; }
+
+/* === FOCUS STATES === */
+.swagger-ui .btn:focus,
+.swagger-ui input:focus,
+.swagger-ui textarea:focus,
+.swagger-ui select:focus {
+  outline: 2px solid var(--sorikama-primary);
+  outline-offset: 2px;
+  animation: sorikama-glow 1s ease-in-out;
+}
+
+/* === TOOLTIPS === */
+.sorikama-tooltip {
+  position: relative;
+  cursor: help;
+}
+
+.sorikama-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--sorikama-dark);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 1000;
+}
+
+.sorikama-tooltip:hover::after {
+  opacity: 1;
+}

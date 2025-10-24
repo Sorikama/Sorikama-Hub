@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Health - Sorikama Hub</title>
+    <meta name="description" content="Sorikama Hub System Health Monitor">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .theme-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glass {
+            backdrop-filter: blur(16px) saturate(180%);
+            background-color: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(209, 213, 219, 0.3);
+        }
+        .dark .glass {
+            background-color: rgba(17, 25, 40, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.125);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .dark .card-hover:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        .status-online { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="theme-transition bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen">
+    <!-- Header -->
+    <header class="glass sticky top-0 z-50 theme-transition border-b border-gray-200 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-cube text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Sorikama Hub</h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">System Health Monitor</p>
+                    </div>
+                </div>
+                
+                <!-- User Info & Controls -->
+                <div class="flex items-center space-x-4">
+                    
+                    <!-- Theme Switcher -->
+                    <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                        <button id="theme-light" class="p-2 rounded-md transition-colors" title="Light mode">
+                            <i class="fas fa-sun text-sm"></i>
+                        </button>
+                        <button id="theme-dark" class="p-2 rounded-md transition-colors" title="Dark mode">
+                            <i class="fas fa-moon text-sm"></i>
+                        </button>
+                        <button id="theme-system" class="p-2 rounded-md transition-colors" title="System mode">
+                            <i class="fas fa-desktop text-sm"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full status-online"></div>
+                        <span class="text-sm text-green-600 dark:text-green-400 font-medium hidden sm:block" id="systemStatus">Healthy</span>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <button onclick="refreshData()" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-sync-alt mr-1"></i>
+                        <span class="hidden sm:inline">Refresh</span>
+                    </button>
+                    
+                    <a href="/api" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        <span class="hidden sm:inline">Back</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">System Health Monitor</h2>
+            <p class="text-gray-600 dark:text-gray-400">Real-time system performance and health monitoring.</p>
+        </div>
+        
+        <!-- Health Status -->
+        <div class="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-2xl p-6 mb-8 border border-green-200 dark:border-green-800">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-green-800 dark:text-green-200 mb-2">
+                        <i class="fas fa-heartbeat mr-2"></i>System Health Status
+                    </h3>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-green-500 rounded-full status-online"></div>
+                            <span class="text-green-700 dark:text-green-300 font-medium" id="overallStatus">System Healthy</span>
+                        </div>
+                        <div class="text-sm text-green-600 dark:text-green-400" id="healthChecks">All checks passed</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-green-700 dark:text-green-300" id="healthScore">100%</div>
+                    <div class="text-sm text-green-600 dark:text-green-400">Health Score</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                
+            <!-- CPU -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">CPU Usage</p>
+                        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="cpuUsage">--%</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400" id="cpuCores">-- Cores</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-microchip text-blue-600 dark:text-blue-400 text-xl"></i>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div class="bg-blue-500 h-2 rounded-full transition-all duration-500" id="cpuBar" style="width: 0%"></div>
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-2" id="cpuLoad">Load: --</div>
+            </div>
+                
+            <!-- Memory -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Memory Usage</p>
+                        <p class="text-2xl font-bold text-green-600 dark:text-green-400" id="memoryUsed">--MB</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400" id="memoryTotal">of --MB</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-memory text-green-600 dark:text-green-400 text-xl"></i>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div class="bg-green-500 h-2 rounded-full transition-all duration-500" id="memoryBar" style="width: 0%"></div>
+                </div>
+            </div>
+                
+            <!-- Uptime -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">System Uptime</p>
+                        <p class="text-2xl font-bold text-purple-600 dark:text-purple-400" id="uptimeHours">--h</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400" id="uptimeDetails">--m --s</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-clock text-purple-600 dark:text-purple-400 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+                
+            <!-- Node.js -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Node.js</p>
+                        <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400" id="nodeVersion">--</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400" id="platformInfo">-- --</p>
+                    </div>
+                    <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-xl flex items-center justify-center">
+                        <i class="fab fa-node-js text-yellow-600 dark:text-yellow-400 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Detailed Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+            <!-- Process Memory -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <i class="fas fa-chart-pie text-green-600 dark:text-green-400 mr-3"></i>
+                    Process Memory
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">RSS (Resident Set Size)</span>
+                        <span class="text-green-600 dark:text-green-400 font-bold" id="processRss">-- MB</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Heap Total</span>
+                        <span class="text-blue-600 dark:text-blue-400 font-bold" id="processHeapTotal">-- MB</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Heap Used</span>
+                        <span class="text-purple-600 dark:text-purple-400 font-bold" id="processHeapUsed">-- MB</span>
+                    </div>
+                    <div class="mt-4" style="height: 250px;">
+                        <canvas id="memoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+                
+            <!-- System Info -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <i class="fas fa-server text-blue-600 dark:text-blue-400 mr-3"></i>
+                    System Information
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Hostname</span>
+                        <span class="text-gray-900 dark:text-white font-mono text-sm" id="hostname">--</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Platform</span>
+                        <span class="text-blue-600 dark:text-blue-400 font-bold" id="platform">--</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Architecture</span>
+                        <span class="text-purple-600 dark:text-purple-400 font-bold" id="arch">--</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Free Memory</span>
+                        <span class="text-green-600 dark:text-green-400 font-bold" id="memoryFree">-- MB</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Load Average</span>
+                        <span class="text-yellow-600 dark:text-yellow-400 font-bold" id="loadAverage">--</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Last Update</span>
+                        <span class="text-gray-500 dark:text-gray-400 text-sm" id="lastUpdate">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // Theme Management
+        class ThemeManager {
+            constructor() {
+                this.theme = localStorage.getItem('theme') || 'system';
+                this.init();
+            }
+            
+            init() {
+                this.applyTheme();
+                this.setupEventListeners();
+                this.updateButtons();
+            }
+            
+            applyTheme() {
+                const root = document.documentElement;
+                
+                if (this.theme === 'system') {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    root.classList.toggle('dark', prefersDark);
+                } else {
+                    root.classList.toggle('dark', this.theme === 'dark');
+                }
+            }
+            
+            setTheme(newTheme) {
+                this.theme = newTheme;
+                localStorage.setItem('theme', newTheme);
+                this.applyTheme();
+                this.updateButtons();
+            }
+            
+            updateButtons() {
+                const buttons = {
+                    light: document.getElementById('theme-light'),
+                    dark: document.getElementById('theme-dark'),
+                    system: document.getElementById('theme-system')
+                };
+                
+                Object.keys(buttons).forEach(key => {
+                    const button = buttons[key];
+                    if (button) {
+                        button.classList.toggle('bg-primary-100', key === this.theme);
+                        button.classList.toggle('text-primary-600', key === this.theme);
+                        button.classList.toggle('dark:bg-primary-900', key === this.theme);
+                        button.classList.toggle('dark:text-primary-400', key === this.theme);
+                    }
+                });
+            }
+            
+            setupEventListeners() {
+                document.getElementById('theme-light')?.addEventListener('click', () => this.setTheme('light'));
+                document.getElementById('theme-dark')?.addEventListener('click', () => this.setTheme('dark'));
+                document.getElementById('theme-system')?.addEventListener('click', () => this.setTheme('system'));
+                
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    if (this.theme === 'system') {
+                        this.applyTheme();
+                    }
+                });
+            }
+        }
+
+        let memoryChart;
+        
+        async function loadSystemHealth() {
+            try {
+                const response = await fetch('/system/health-data');
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateUI(data.data);
+                    const healthScore = calculateHealthScore(data.data);
+                    document.getElementById('systemStatus').textContent = healthScore > 80 ? 'Healthy' : healthScore > 60 ? 'Warning' : 'Critical';
+                } else {
+                    document.getElementById('systemStatus').textContent = 'Error';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('systemStatus').textContent = 'Offline';
+            }
+        }
+        
+        function updateUI(systemInfo) {
+            // Health Status
+            const healthScore = calculateHealthScore(systemInfo);
+            document.getElementById('healthScore').textContent = healthScore + '%';
+            document.getElementById('overallStatus').textContent = healthScore > 80 ? 'System Healthy' : healthScore > 60 ? 'System Warning' : 'System Critical';
+            document.getElementById('healthChecks').textContent = getHealthSummary(systemInfo.health.checks);
+            
+            // CPU
+            document.getElementById('cpuUsage').textContent = systemInfo.cpu.usage + '%';
+            document.getElementById('cpuCores').textContent = systemInfo.cpu.cores + ' Cores';
+            document.getElementById('cpuLoad').textContent = 'Load: ' + systemInfo.cpu.load[0].toFixed(2);
+            document.getElementById('cpuBar').style.width = systemInfo.cpu.usage + '%';
+            
+            // Memory
+            document.getElementById('memoryUsed').textContent = systemInfo.memory.used + ' MB';
+            document.getElementById('memoryTotal').textContent = 'of ' + systemInfo.memory.total + ' MB';
+            document.getElementById('memoryBar').style.width = systemInfo.memory.usagePercent + '%';
+            
+            // Uptime
+            const hours = Math.floor(systemInfo.system.uptime / 3600);
+            const minutes = Math.floor((systemInfo.system.uptime % 3600) / 60);
+            const seconds = systemInfo.system.uptime % 60;
+            document.getElementById('uptimeHours').textContent = hours + 'h';
+            document.getElementById('uptimeDetails').textContent = minutes + 'm ' + seconds + 's';
+            
+            // Node
+            document.getElementById('nodeVersion').textContent = systemInfo.system.nodeVersion;
+            document.getElementById('platformInfo').textContent = systemInfo.system.platform + ' ' + systemInfo.system.arch;
+            
+            // Process Memory
+            document.getElementById('processRss').textContent = systemInfo.memory.process.rss + ' MB';
+            document.getElementById('processHeapTotal').textContent = systemInfo.memory.process.heapTotal + ' MB';
+            document.getElementById('processHeapUsed').textContent = systemInfo.memory.process.heapUsed + ' MB';
+            
+            // System Info
+            document.getElementById('hostname').textContent = systemInfo.system.hostname;
+            document.getElementById('platform').textContent = systemInfo.system.osType + ' ' + systemInfo.system.osRelease;
+            document.getElementById('arch').textContent = systemInfo.system.arch;
+            document.getElementById('memoryFree').textContent = systemInfo.memory.free + ' MB';
+            document.getElementById('loadAverage').textContent = systemInfo.cpu.load.map(l => l.toFixed(2)).join(', ');
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+            
+            // Update Chart
+            updateMemoryChart(systemInfo.memory.process);
+        }
+        
+        function calculateHealthScore(systemInfo) {
+            let score = 100;
+            
+            // Pénalités basées sur l'utilisation
+            if (systemInfo.memory.usagePercent > 90) score -= 30;
+            else if (systemInfo.memory.usagePercent > 80) score -= 15;
+            else if (systemInfo.memory.usagePercent > 70) score -= 5;
+            
+            if (systemInfo.cpu.usage > 90) score -= 25;
+            else if (systemInfo.cpu.usage > 80) score -= 10;
+            else if (systemInfo.cpu.usage > 70) score -= 5;
+            
+            if (systemInfo.cpu.load[0] > 2) score -= 10;
+            
+            return Math.max(0, score);
+        }
+        
+        function getHealthSummary(checks) {
+            const okCount = Object.values(checks).filter(check => check === 'ok').length;
+            const totalChecks = Object.keys(checks).length;
+            return okCount + '/' + totalChecks + ' checks passed';
+        }
+        
+        function updateMemoryChart(processMemory) {
+            const ctx = document.getElementById('memoryChart').getContext('2d');
+            
+            if (memoryChart) {
+                memoryChart.destroy();
+            }
+            
+            const heapFree = Math.max(0, processMemory.heapTotal - processMemory.heapUsed);
+            const external = Math.max(0, processMemory.rss - processMemory.heapTotal);
+            
+            memoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Heap Used (' + processMemory.heapUsed + ' MB)', 'Heap Free (' + heapFree + ' MB)', 'External (' + external + ' MB)'],
+                    datasets: [{
+                        data: [
+                            processMemory.heapUsed,
+                            heapFree,
+                            external
+                        ],
+                        backgroundColor: ['#8b5cf6', '#3b82f6', '#10b981'],
+                        borderWidth: 2,
+                        borderColor: document.documentElement.classList.contains('dark') ? '#374151' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            labels: { 
+                                color: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151',
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed + ' MB';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function refreshData() {
+            loadSystemHealth();
+        }
+        
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            new ThemeManager();
+            loadSystemHealth();
+            
+            // Auto refresh every 10 seconds
+            setInterval(loadSystemHealth, 10000);
+        });
+    </script>
+</body>
+</html>

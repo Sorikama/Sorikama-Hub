@@ -1,43 +1,82 @@
-import { useContext, useState, useEffect } from "react";
-import { ThemeContext } from "../context/ThemeContext";
-import { FiSun, FiMoon } from "react-icons/fi";
-import "../styles/ThemeToggle.css";
+/**
+ * Composant ThemeToggle - Sélecteur de thème
+ * 
+ * Permet de basculer entre les modes clair, sombre et système
+ */
 
-const ThemeToggle = () => {
-  const { darkMode, toggleTheme } = useContext(ThemeContext);
-  const [animate, setAnimate] = useState(false);
+import React, { useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
 
-  // Déclencher l'animation à chaque changement de thème
-  const handleToggle = () => {
-    setAnimate(true);
-    toggleTheme();
-  };
+export default function ThemeToggle() {
+  const { theme, setLightTheme, setDarkTheme, setSystemTheme } = useTheme();
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Réinitialiser l'animation après qu'elle soit terminée
-  useEffect(() => {
-    if (animate) {
-      const timer = setTimeout(() => {
-        setAnimate(false);
-      }, 500); // Durée de l'animation
-      return () => clearTimeout(timer);
+  const themes = [
+    {
+      key: 'light',
+      label: 'Clair',
+      icon: '☀️',
+      action: setLightTheme
+    },
+    {
+      key: 'dark', 
+      label: 'Sombre',
+      icon: '🌙',
+      action: setDarkTheme
+    },
+    {
+      key: 'system',
+      label: 'Système',
+      icon: '💻',
+      action: setSystemTheme
     }
-  }, [animate]);
+  ];
+
+  const currentTheme = themes.find(t => t.key === theme);
 
   return (
-    <button
-      onClick={handleToggle}
-      className="theme-toggle-btn"
-      aria-label={darkMode ? "Passer au mode clair" : "Passer au mode sombre"}
-    >
-      <div className={`theme-toggle-icon ${animate ? 'animate-theme' : ''}`}>
-        {darkMode ? (
-          <FiSun className="text-white text-xl" />
-        ) : (
-          <FiMoon className="text-n-8 text-xl" />
-        )}
-      </div>
-    </button>
-  );
-};
+    <div className="relative">
+      {/* Bouton principal */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+        title="Changer le thème"
+      >
+        <span className="text-lg">{currentTheme?.icon}</span>
+      </button>
 
-export default ThemeToggle;
+      {/* Menu déroulant */}
+      {isOpen && (
+        <>
+          {/* Overlay pour fermer */}
+          <div 
+            className="fixed inset-0 z-10" 
+            onClick={() => setIsOpen(false)}
+          />
+          
+          {/* Menu */}
+          <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20">
+            {themes.map((themeOption) => (
+              <button
+                key={themeOption.key}
+                onClick={() => {
+                  themeOption.action();
+                  setIsOpen(false);
+                }}
+                className={`w-full px-4 py-3 text-left flex items-center space-x-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg ${
+                  theme === themeOption.key ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                <span className="text-lg">{themeOption.icon}</span>
+                <span className="text-sm font-medium">{themeOption.label}</span>
+                {theme === themeOption.key && (
+                  <span className="ml-auto text-indigo-600 dark:text-indigo-400">✓</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
