@@ -6,11 +6,12 @@ export interface IService extends Document {
   name: string;
   description: string;
   url: string;
+  frontendUrl?: string;
   icon: string;
   color: string;
   status: 'active' | 'inactive' | 'maintenance';
-  version: string;
-  endpoints: string[];
+  version?: string;
+  endpoints?: string[];
   apiKey?: string;
   lastCheck?: Date;
   responseTime?: number;
@@ -34,16 +35,17 @@ export interface IService extends Document {
 const ServiceSchema = new Schema<IService>({
   id: { type: String, required: true, unique: true },
   name: { type: String, required: true },
-  description: { type: String, required: true },
+  description: { type: String },
   url: { type: String, required: true },
-  icon: { type: String, required: true },
-  color: { type: String, required: true },
+  frontendUrl: { type: String },
+  icon: { type: String, default: '🔗' },
+  color: { type: String, default: 'blue' },
   status: { 
     type: String, 
     enum: ['active', 'inactive', 'maintenance'], 
     default: 'active' 
   },
-  version: { type: String, required: true },
+  version: { type: String },
   endpoints: [{ type: String }],
   apiKey: { type: String },
   lastCheck: { type: Date },
@@ -52,10 +54,10 @@ const ServiceSchema = new Schema<IService>({
   requestCount: { type: Number, default: 0 },
   errorCount: { type: Number, default: 0 },
   lastError: { type: String },
-  healthCheckUrl: { type: String },
+  healthCheckUrl: { type: String, default: '/health' },
   redirectUrls: [{ type: String }],
   ssoEnabled: { type: Boolean, default: true },
-  authEndpoint: { type: String },
+  authEndpoint: { type: String, default: '/auth/sorikama' },
   tokenEndpoint: { type: String },
   userInfoEndpoint: { type: String },
   clientId: { type: String },

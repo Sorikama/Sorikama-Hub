@@ -2,7 +2,6 @@
 import { Router } from 'express';
 // import { requirePermissions } from '../middlewares/authorization.middleware';
 import { UserModel } from '../database/models/user.model';
-import { ApiKeyModel } from '../database/models/apiKey.model';
 import { RoleModel } from '../database/models/role.model';
 import { MetricsService, CacheService } from '../config/redis';
 import * as si from 'systeminformation';
@@ -33,11 +32,6 @@ router.get('/stats', async (req, res) => {
           total: await UserModel.countDocuments(),
           active: await UserModel.countDocuments({ isActive: true }),
           verified: await UserModel.countDocuments({ isVerified: true })
-        },
-        apiKeys: {
-          total: await ApiKeyModel.countDocuments(),
-          active: await ApiKeyModel.countDocuments({ isActive: true }),
-          expired: await ApiKeyModel.countDocuments({ expiresAt: { $lt: new Date() } })
         }
       };
       
@@ -215,20 +209,6 @@ router.get('/users/:id', async (req, res) => {
   }
 });
 
-// Liste des API Keys
-router.get('/api-keys', async (req, res) => {
-  try {
-    const apiKeys = await ApiKeyModel.find()
-      .populate('userId', 'firstName lastName email')
-      .select('-keyHash')
-      .sort({ createdAt: -1 });
-    
-    res.json({ success: true, data: apiKeys });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
-  }
-});
-
 // Désactiver un utilisateur
 router.patch('/users/:id/deactivate', async (req, res) => {
   try {
@@ -243,25 +223,6 @@ router.patch('/users/:id/deactivate', async (req, res) => {
     }
     
     res.json({ success: true, data: user });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
-  }
-});
-
-// Révoquer une API Key
-router.patch('/api-keys/:id/revoke', async (req, res) => {
-  try {
-    const apiKey = await ApiKeyModel.findByIdAndUpdate(
-      req.params.id,
-      { isActive: false, revokedAt: new Date() },
-      { new: true }
-    );
-    
-    if (!apiKey) {
-      return res.status(404).json({ success: false, message: 'API Key non trouvée' });
-    }
-    
-    res.json({ success: true, data: apiKey });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Erreur serveur' });
   }

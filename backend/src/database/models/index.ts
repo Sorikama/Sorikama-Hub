@@ -5,7 +5,6 @@ import './permission.model';
 import './role.model';
 import './user.model';
 import './refreshToken.model';
-import './apiKey.model';
 import './service.model';
 import './serviceRequest.model';
 import './ssoSession.model';

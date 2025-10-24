@@ -42,6 +42,7 @@ import { httpLoggingMiddleware } from './utils/applicationLogger';
 import { BrowserLauncher } from './utils/browserLauncher';
 
 import './database/models';
+import { seedAdmin } from './database/seeders/admin.seeder';
 
 const app: Application = express();
 const server = http.createServer(app);
@@ -50,26 +51,31 @@ const startServer = async () => {
   try {
     // Affichage du banner
     await Banner.displayBanner();
-    
+
     // Étape 0: Préparation du port
     Banner.displayStartupStep('Préparation du port', 'loading');
     await PortManager.preparePort(7000);
     Banner.displayStartupStep('Port prêt', 'success', `Port 7000`);
-    
+
     // Étape 1: Démarrage de Redis
     Banner.displayStartupStep('Démarrage de Redis', 'loading');
     const redisStarted = await RedisManager.startRedis();
-    
+
     if (redisStarted) {
       Banner.displayStartupStep('Redis démarré avec succès', 'success', 'Port 6379');
     } else {
       Banner.displayStartupStep('Redis non disponible', 'error', 'Mode dégradé activé');
     }
-    
+
     // Étape 2: Connexion à la base de données
     Banner.displayStartupStep('Connexion à MongoDB', 'loading');
     await connectDB();
     Banner.displayStartupStep('MongoDB connecté', 'success');
+
+    // Étape 2.5: Initialisation du compte admin
+    Banner.displayStartupStep('Initialisation du compte admin', 'loading');
+    await seedAdmin();
+    Banner.displayStartupStep('Compte admin initialisé', 'success', 'admin@admin.fr');
 
     app.use(
       helmet({
@@ -101,29 +107,28 @@ const startServer = async () => {
     };
     app.use(cors(corsOptions));
     app.use(cookieParser());
-    
+
     // Middlewares de sécurité
     app.use(securityHeaders);
     app.use(requestSizeLimit);
     app.use(validateUserAgent);
     app.use(detectInjection);
     app.use(timingAttackProtection);
-    
+
     app.use(express.json({ limit: '1mb' }));
     app.use(express.urlencoded({ extended: true, limit: '1mb' }));
     app.use('/api', rateLimiter);
-    
+
     // Redis sera géré par RedisManager
-    
+
     // Middlewares de logging et métriques
     app.use(httpRequestLogger); // VRAI logging des requêtes
     app.use(httpLoggingMiddleware);
     app.use(responseTimeMiddleware);
     app.use(slowRequestTimeoutMiddleware(30000)); // 30 secondes timeout
-    
-    const { metricsMiddleware, apiKeyMetricsMiddleware } = require('./middlewares/metrics.middleware');
+
+    const { metricsMiddleware } = require('./middlewares/metrics.middleware');
     app.use(metricsMiddleware);
-    app.use(apiKeyMetricsMiddleware);
 
     app.use(express.static(path.join(__dirname, '../public')));
 
@@ -132,153 +137,139 @@ const startServer = async () => {
     const { runSeeders, createSeederRoutes } = require('./database/seeders/index');
     await runSeeders();
     Banner.displayStartupStep('Données initialisées', 'success');
-    
+
     // Route pour relancer les seeders manuellement
     createSeederRoutes(app);
-    
+
     // Configuration Swagger
     // if (NODE_ENV === 'development') {
 
-      try {
-        // Supprimez ou commentez la ligne suivante car on utilise l'import d'en haut
-        // const yaml = require('yaml');
+    try {
+      // Supprimez ou commentez la ligne suivante car on utilise l'import d'en haut
+      // const yaml = require('yaml');
 
-        const swaggerPath = path.join(__dirname, '../openapi.yaml');
+      const swaggerPath = path.join(__dirname, '../openapi.yaml');
 
-        console.log('🔍 Chemin du fichier YAML:', swaggerPath);
-        console.log('🔍 Fichier existe?', fs.existsSync(swaggerPath));
+      console.log('🔍 Chemin du fichier YAML:', swaggerPath);
+      console.log('🔍 Fichier existe?', fs.existsSync(swaggerPath));
 
-        let swaggerSpec;
-        if (fs.existsSync(swaggerPath)) {
-          console.log('📝 Lecture du fichier YAML...');
-          const yamlContent = fs.readFileSync(swaggerPath, 'utf8');
-          console.log('📝 Taille du contenu YAML:', yamlContent.length, 'caractères');
-          console.log('📝 Début du contenu:', yamlContent.substring(0, 100));
+      let swaggerSpec;
+      if (fs.existsSync(swaggerPath)) {
+        console.log('📝 Lecture du fichier YAML...');
+        const yamlContent = fs.readFileSync(swaggerPath, 'utf8');
+        console.log('📝 Taille du contenu YAML:', yamlContent.length, 'caractères');
+        console.log('📝 Début du contenu:', yamlContent.substring(0, 100));
 
-          swaggerSpec = YAML.load(yamlContent) as any;
-          console.log('📝 Parsing YAML terminé');
+        swaggerSpec = YAML.load(yamlContent) as any;
+        console.log('📝 Parsing YAML terminé');
 
-          console.log('📝 Contenu YAML chargé:', Object.keys(swaggerSpec));
-          console.log('📝 Paths trouvés:', Object.keys(swaggerSpec.paths || {}));
+        console.log('📝 Contenu YAML chargé:', Object.keys(swaggerSpec));
+        console.log('📝 Paths trouvés:', Object.keys(swaggerSpec.paths || {}));
 
-          // Améliorer la spec existante
-          if (!swaggerSpec.components) swaggerSpec.components = {};
-          if (!swaggerSpec.components.securitySchemes) swaggerSpec.components.securitySchemes = {};
+        // Améliorer la spec existante
+        if (!swaggerSpec.components) swaggerSpec.components = {};
+        if (!swaggerSpec.components.securitySchemes) swaggerSpec.components.securitySchemes = {};
 
 
 
-          swaggerSpec.components.securitySchemes.ApiKeyAuth = {
-            type: 'apiKey',
-            in: 'header',
-            name: 'X-API-Key',
-            description: 'API Key d\'authentification'
-          };
-
-          swaggerSpec.servers = [
-            { 
-              url: `http://localhost:${PORT}/api/v1`,
-              description: 'Serveur de développement local'
-            }
-          ];
-          swaggerSpec.security = [{ ApiKeyAuth: [] }, { bearerAuth: [] }];
-          
-          // Ajouter des tags si pas présents
-          if (!swaggerSpec.tags) {
-            swaggerSpec.tags = [
-              { name: 'Authentication', description: '🔐 Authentification' },
-              { name: 'System', description: '⚙️ Système' },
-              { name: 'Services', description: '🔗 Services' }
-            ];
+        swaggerSpec.servers = [
+          {
+            url: `http://localhost:${PORT}/api/v1`,
+            description: 'Serveur de développement local'
           }
+        ];
+        swaggerSpec.security = [{ bearerAuth: [] }];
 
-          console.log('✅ Fichier OpenAPI YAML chargé avec succès');
-        } else {
-          console.log('⚠️ Fichier OpenAPI YAML non trouvé, utilisation du schéma par défaut');
-          swaggerSpec = {
-            openapi: '3.0.0',
-            info: {
-              title: 'Sorikama API Gateway',
-              version: '1.0.0',
-              description: 'API Gateway centralisée pour l\'écosystème Sorikama.'
-            },
-            servers: [{ url: `http://localhost:${PORT}/api/v1` }],
-            components: {
-              securitySchemes: {
-                ApiKeyAuth: {
-                  type: 'apiKey',
-                  in: 'header',
-                  name: 'X-API-Key',
-                  description: 'API Key pour l\'authentification'
-                },
-                bearerAuth: {
-                  type: 'http',
-                  scheme: 'bearer',
-                  bearerFormat: 'JWT'
-                }
-              }
-            },
-            security: [{ ApiKeyAuth: [] }, { bearerAuth: [] }],
-            paths: {}
-          };
-          console.log('⚠️ Fichier OpenAPI YAML non trouvé, utilisation du schéma par défaut');
+        // Ajouter des tags si pas présents
+        if (!swaggerSpec.tags) {
+          swaggerSpec.tags = [
+            { name: 'Authentication', description: '🔐 Authentification' },
+            { name: 'System', description: '⚙️ Système' },
+            { name: 'Services', description: '🔗 Services' }
+          ];
         }
 
-        console.log('📝 Spec finale - Titre:', swaggerSpec.info?.title);
-        console.log('📝 Spec finale - Paths:', Object.keys(swaggerSpec.paths || {}));
-        console.log('📝 Spec finale - Components:', Object.keys(swaggerSpec.components || {}));
-
-        app.use('/api-docs', verifyPortalSession, (req, res, next) => {
-          res.removeHeader('Content-Security-Policy');
-          next();
-        });
-
-        app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-          explorer: false,
-          swaggerOptions: {
-            defaultModelsExpandDepth: 1,
-            defaultModelExpandDepth: 1,
-            docExpansion: 'none'
-          }
-        }));
-
-        // Route protégée pour la documentation déjà définie ci-dessus
-
-        logger.info('API Key Admin générée automatiquement');
-      } catch (e) {
-        logger.error('❌ Erreur de chargement de la documentation Swagger:', e);
+        console.log('✅ Fichier OpenAPI YAML chargé avec succès');
+      } else {
+        console.log('⚠️ Fichier OpenAPI YAML non trouvé, utilisation du schéma par défaut');
+        swaggerSpec = {
+          openapi: '3.0.0',
+          info: {
+            title: 'Sorikama API Gateway',
+            version: '1.0.0',
+            description: 'API Gateway centralisée pour l\'écosystème Sorikama.'
+          },
+          servers: [{ url: `http://localhost:${PORT}/api/v1` }],
+          components: {
+            securitySchemes: {
+              bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT'
+              }
+            }
+          },
+          security: [{ bearerAuth: [] }],
+          paths: {}
+        };
+        console.log('⚠️ Fichier OpenAPI YAML non trouvé, utilisation du schéma par défaut');
       }
+
+      console.log('📝 Spec finale - Titre:', swaggerSpec.info?.title);
+      console.log('📝 Spec finale - Paths:', Object.keys(swaggerSpec.paths || {}));
+      console.log('📝 Spec finale - Components:', Object.keys(swaggerSpec.components || {}));
+
+      app.use('/api-docs', verifyPortalSession, (req, res, next) => {
+        res.removeHeader('Content-Security-Policy');
+        next();
+      });
+
+      app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+        explorer: false,
+        swaggerOptions: {
+          defaultModelsExpandDepth: 1,
+          defaultModelExpandDepth: 1,
+          docExpansion: 'none'
+        }
+      }));
+
+      // Route protégée pour la documentation déjà définie ci-dessus
+
+      logger.info('API Key Admin générée automatiquement');
+    } catch (e) {
+      logger.error('❌ Erreur de chargement de la documentation Swagger:', e);
+    }
     // }
 
     // Route principale - redirige selon l'état de connexion
     app.get('/', (req, res) => {
       const sessionToken = req.cookies.sorikama_session;
-      
+
       if (sessionToken) {
         const { portalSessions } = require('./routes/auth-portal.routes');
         const session = portalSessions?.get(sessionToken);
-        
+
         if (session && session.expires > Date.now()) {
           return res.redirect('/api');
         }
       }
-      
+
       res.redirect('/portal/login');
     });
-    
+
     // Route API - dashboard connecté
     app.get('/api', verifyPortalSession, (req: any, res) => {
       const user = req.portalUser;
       const { portalSessions } = require('./routes/auth-portal.routes');
       const session = portalSessions.get(user.sessionToken);
-      
+
       // Lire le fichier HTML et injecter les données
       const fs = require('fs');
       let dashboardHTML = fs.readFileSync(path.join(__dirname, '../public/views/dashboard.html'), 'utf8');
-      
+
       // Injecter les données dans le HTML
       const sessionData = {
         username: user.username,
-        apiKey: user.apiKey,
         sessionToken: user.sessionToken.substring(0, 8) + '...',
         expiresAt: session?.expires || Date.now() + 86400000,
         createdAt: session?.createdAt || Date.now(),
@@ -287,7 +278,7 @@ const startServer = async () => {
         baseUrl: `http://localhost:${PORT}/api/v1`,
         uptime: Math.floor(process.uptime())
       };
-      
+
       // Injecter les données JavaScript
       const scriptInjection = `
         <script>
@@ -297,7 +288,6 @@ const startServer = async () => {
           // Populate data on load
           document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('username').textContent = '${sessionData.username}';
-            document.getElementById('apiKey').textContent = '${sessionData.apiKey}';
             document.getElementById('sessionId').textContent = '${sessionData.sessionToken}';
             document.getElementById('sessionExpires').textContent = new Date(${sessionData.expiresAt}).toLocaleString();
             document.getElementById('environment').textContent = '${sessionData.environment}';
@@ -307,10 +297,10 @@ const startServer = async () => {
           });
         </script>
       `;
-      
+
       // Injecter le script avant la fermeture du body
       dashboardHTML = dashboardHTML.replace('</body>', scriptInjection + '</body>');
-      
+
       res.send(dashboardHTML);
     });
 
@@ -318,18 +308,16 @@ const startServer = async () => {
     app.use('/docs', docsRoutes);
     app.use('/dashboard', verifyPortalSession, dashboardRoutes);
     app.use('/portal', authPortalRoutes);
-    
+
     // Nouvelles routes
     const dependenciesRoutes = require('./routes/dependencies.routes').default;
     const systemHealthRoutes = require('./routes/system-health.routes').default;
-    const apiKeysManagerRoutes = require('./routes/api-keys-manager.routes').default;
     const logsViewerRoutes = require('./routes/logs-viewer.routes').default;
-    
+
     app.use('/dependencies', verifyPortalSession, dependenciesRoutes);
     app.use('/system', verifyPortalSession, systemHealthRoutes);
-    app.use('/api-keys', verifyPortalSession, apiKeysManagerRoutes);
     app.use('/logs', verifyPortalSession, logsViewerRoutes);
-    
+
     const servicesManagerRoutes = require('./routes/services-manager.routes').default;
     const monitoringRoutes = require('./routes/monitoring.routes').default;
     app.use('/services', verifyPortalSession, servicesManagerRoutes);
@@ -349,83 +337,25 @@ const startServer = async () => {
       });
     });
 
-    // Middleware d'authentification API Key obligatoire pour toutes les routes API
-    const { authenticateApiKey } = require('./middlewares/apiKey.middleware');
-    
-    // Routes qui ne nécessitent PAS d'API key
-    const publicRoutes = [
-      '/api/v1/system/health',
-      '/api/v1/system/seed',
-      '/portal/login',
-      '/portal/authenticate',
-      '/portal/logout'
-    ];
-    
-    // API Key OBLIGATOIRE pour toutes les routes /api/v1
-    app.use('/api/v1', (req: Request, res: Response, next: NextFunction) => {
-      // Routes publiques (exceptions)
-      const publicApiRoutes = [
-        '/api/v1/system/health',
-        '/api/v1/auth/login',
-        '/api/v1/auth/register',
-        '/api/v1/auth/refresh-token'
-      ];
-      
-      const isPublicApiRoute = publicApiRoutes.some(route => req.path === route);
-      
-      if (isPublicApiRoute) {
-        console.log(`🔓 Route API publique: ${req.path}`);
-        return next();
-      }
-      
-      // Toutes les autres routes API nécessitent une API Key
-      console.log(`🔑 API Key requise pour: ${req.path}`);
-      authenticateApiKey(req, res, next);
-    });
-    
-    // Routes portail (pas d'API key)
-    app.use((req: Request, res: Response, next: NextFunction) => {
-      const portalRoutes = [
-        '/dependencies',
-        '/system',
-        '/api-keys', 
-        '/logs',
-        '/services',
-        '/admin',
-        '/performance',
-        '/api-docs',
-        '/dashboard',
-        '/api',
-        '/portal'
-      ];
-      
-      const isPortalRoute = portalRoutes.some(route => req.path.startsWith(route));
-      
-      if (isPortalRoute) {
-        console.log(`🏠 Route portail: ${req.path}`);
-        return next();
-      }
-      
-      next();
-    });
-    
-    // Routes admin (avec API key)
+    // Routes API - Authentification JWT uniquement
+
+    // Routes admin
     const adminRoutes = require('./routes/admin.routes').default;
     app.use('/api/v1/admin', adminRoutes);
-    
+
     // Routes de performance (protégées)
     const performanceRoutes = require('./routes/performance.routes').default;
     const performanceDashboardRoutes = require('./routes/performance-dashboard.routes').default;
     app.use('/performance', performanceRoutes);
     app.use('/performance', performanceDashboardRoutes);
-    
 
-    
+
+
     // Routes admin (protégées)
     const adminPublicRoutes = require('./routes/admin-public.routes').default;
     app.use('/admin', verifyPortalSession, adminPublicRoutes);
     app.use('/admin', adminControlRoutes);
-    
+
     app.use('/api/v1', apiRouter);
 
     app.all('*', (req: Request, res: Response, next: NextFunction) => {
@@ -441,25 +371,25 @@ const startServer = async () => {
     LogsGenerator.initialize();
     logSystemEvent('Système de logs initialisé', 'info');
     Banner.displayStartupStep('Logs initialisés', 'success');
-    
+
     // Étape 5: Démarrage du monitoring
     Banner.displayStartupStep('Démarrage du monitoring', 'loading');
     MonitoringService.startMonitoring(5); // Monitoring toutes les 5 minutes
     Banner.displayStartupStep('Monitoring démarré', 'success');
-    
+
     // Étape 5: Démarrage du serveur
     Banner.displayStartupStep('Démarrage du serveur HTTP', 'loading');
-    
+
     server.listen(7000, () => {
       Banner.displayStartupStep('Serveur HTTP démarré', 'success', `Port 7000`);
       logSystemEvent(`Serveur HTTP démarré sur le port 7000`, 'info');
-      
+
       // Attendre un peu pour les connexions Redis
       setTimeout(async () => {
         await Banner.displayStartupComplete(7000);
         logger.info(`🌐 Accès au portail: http://localhost:7000/portal/login`);
         logSystemEvent('Démarrage complet du système Sorikama Hub', 'info', { port: 7000 });
-        
+
         // Lancement automatique du navigateur
         setTimeout(() => {
           BrowserLauncher.autoLaunch(7000);
@@ -482,14 +412,14 @@ const gracefulShutdown = (signal: string) => {
 
     server.close(async () => {
       logger.info('🛑 Serveur HTTP fermé.');
-      
+
       // Nettoyage des ressources
       const { PerformanceOptimizer } = require('./utils/performanceOptimizer');
       PerformanceOptimizer.cleanup();
-      
+
       // Arrêt du monitoring
       MonitoringService.stopMonitoring();
-      
+
       await RedisManager.stopRedis();
       logger.info('🔌 Redis arrêté.');
       await mongoose.disconnect();

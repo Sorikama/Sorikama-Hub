@@ -11,120 +11,59 @@ import jwt from 'jsonwebtoken';
 
 export class ServiceManager {
   
-  // Initialiser les services par défaut
+  // Initialiser les services par défaut (vide maintenant - tout se fait via l'interface)
   static async initializeDefaultServices() {
-    const defaultServices = [
-      {
-        id: 'soristore',
-        name: 'SoriStore',
-        description: 'Plateforme e-commerce révolutionnaire',
-        url: process.env.SORISTORE_SERVICE_URL || 'http://localhost:3001',
-        icon: 'fas fa-store',
-        color: 'blue',
-        version: '2.1.0',
-        endpoints: ['/products', '/orders', '/inventory'],
-        healthCheckUrl: '/health',
-        redirectUrls: ['http://localhost:3000/auth/callback'],
-        ssoEnabled: true,
-        authEndpoint: '/auth/sorikama',
-        tokenEndpoint: '/auth/token',
-        userInfoEndpoint: '/auth/user',
-        scopes: ['read', 'write']
-      },
-      {
-        id: 'soripay',
-        name: 'SoriPay',
-        description: 'Solution de paiement sécurisée',
-        url: process.env.SORIPAY_SERVICE_URL || 'http://localhost:3002',
-        icon: 'fas fa-credit-card',
-        color: 'green',
-        version: '1.8.3',
-        endpoints: ['/payments', '/transactions', '/refunds'],
-        healthCheckUrl: '/health',
-        redirectUrls: ['http://localhost:3000/auth/callback'],
-        ssoEnabled: true,
-        authEndpoint: '/auth/sorikama',
-        tokenEndpoint: '/auth/token',
-        userInfoEndpoint: '/auth/user',
-        scopes: ['payments', 'transactions']
-      },
-      {
-        id: 'soriwallet',
-        name: 'SoriWallet',
-        description: 'Portefeuille numérique intelligent',
-        url: process.env.SORIWALLET_SERVICE_URL || 'http://localhost:3003',
-        icon: 'fas fa-wallet',
-        color: 'yellow',
-        version: '1.5.2',
-        endpoints: ['/balance', '/transfers', '/history'],
-        healthCheckUrl: '/health',
-        redirectUrls: ['http://localhost:3000/auth/callback'],
-        ssoEnabled: true,
-        authEndpoint: '/auth/sorikama',
-        tokenEndpoint: '/auth/token',
-        userInfoEndpoint: '/auth/user',
-        scopes: ['wallet', 'transfers']
-      },
-      {
-        id: 'sorilearn',
-        name: 'SoriLearn',
-        description: 'Plateforme d\'apprentissage adaptative',
-        url: process.env.SORILEARN_SERVICE_URL || 'http://localhost:3004',
-        icon: 'fas fa-graduation-cap',
-        color: 'purple',
-        version: '3.0.1',
-        endpoints: ['/courses', '/progress', '/certificates'],
-        healthCheckUrl: '/health',
-        redirectUrls: ['http://localhost:3000/auth/callback'],
-        ssoEnabled: true,
-        authEndpoint: '/auth/sorikama',
-        tokenEndpoint: '/auth/token',
-        userInfoEndpoint: '/auth/user',
-        scopes: ['learn', 'progress']
-      },
-      {
-        id: 'sorihealth',
-        name: 'SoriHealth',
-        description: 'Services de santé connectée',
-        url: process.env.SORIHEALTH_SERVICE_URL || 'http://localhost:3005',
-        icon: 'fas fa-heartbeat',
-        color: 'red',
-        version: '2.3.0',
-        endpoints: ['/appointments', '/records', '/monitoring'],
-        healthCheckUrl: '/health',
-        redirectUrls: ['http://localhost:3000/auth/callback'],
-        ssoEnabled: true,
-        authEndpoint: '/auth/sorikama',
-        tokenEndpoint: '/auth/token',
-        userInfoEndpoint: '/auth/user',
-        scopes: ['health', 'records']
-      },
-      {
-        id: 'soriaccess',
-        name: 'SoriAccess',
-        description: 'Solutions d\'accessibilité universelle',
-        url: process.env.SORIACCESS_SERVICE_URL || 'http://localhost:3006',
-        icon: 'fas fa-universal-access',
-        color: 'indigo',
-        version: '1.2.4',
-        endpoints: ['/accessibility', '/tools', '/support'],
-        healthCheckUrl: '/health',
-        redirectUrls: ['http://localhost:3000/auth/callback'],
-        ssoEnabled: true,
-        authEndpoint: '/auth/sorikama',
-        tokenEndpoint: '/auth/token',
-        userInfoEndpoint: '/auth/user',
-        scopes: ['accessibility', 'support']
-      }
-    ];
+    logger.info('✅ Système de services initialisé - Utilisez l\'interface d\'administration pour ajouter des services');
+  }
 
-    for (const serviceData of defaultServices) {
-      const existingService = await ServiceModel.findOne({ id: serviceData.id });
-      if (!existingService) {
-        await ServiceModel.create(serviceData);
-        logger.info(`Service ${serviceData.name} initialisé`);
-      }
+  // Créer un nouveau service externe
+  static async createService(serviceData: any): Promise<IService> {
+    // Vérifier que l'ID est unique
+    const existingService = await ServiceModel.findOne({ id: serviceData.id });
+    if (existingService) {
+      throw new Error('Un service avec cet ID existe déjà');
     }
+
+    // Créer le service
+    const service = await ServiceModel.create({
+      ...serviceData,
+      status: serviceData.status || 'active',
+      ssoEnabled: serviceData.ssoEnabled !== false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    logger.info(`✅ Service ${service.name} créé`, { serviceId: service.id });
+    return service;
+  }
+
+  // Mettre à jour un service existant
+  static async updateService(serviceId: string, updateData: any): Promise<IService | null> {
+    const service = await ServiceModel.findOneAndUpdate(
+      { id: serviceId },
+      { ...updateData, updatedAt: new Date() },
+      { new: true }
+    );
+
+    if (service) {
+      logger.info(`✅ Service ${service.name} mis à jour`, { serviceId });
+    }
+
+    return service;
+  }
+
+  // Supprimer un service
+  static async deleteService(serviceId: string): Promise<boolean> {
+    const result = await ServiceModel.deleteOne({ id: serviceId });
+    
+    if (result.deletedCount > 0) {
+      // Supprimer aussi les sessions SSO associées
+      await SSOSessionModel.deleteMany({ serviceId });
+      logger.info(`✅ Service supprimé`, { serviceId });
+      return true;
+    }
+
+    return false;
   }
 
   // Obtenir tous les services

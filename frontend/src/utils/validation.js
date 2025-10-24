@@ -25,13 +25,7 @@ export const validateRequired = (value, fieldName) => {
   return null;
 };
 
-export const validateApiKey = (apiKey) => {
-  if (!apiKey) return 'Clé API requise';
-  if (!apiKey.startsWith(VALIDATION.API_KEY_PREFIX)) {
-    return `La clé API doit commencer par ${VALIDATION.API_KEY_PREFIX}`;
-  }
-  return null;
-};
+
 
 export const validateForm = (formData, rules) => {
   const errors = {};
@@ -63,10 +57,7 @@ export const validateForm = (formData, rules) => {
       if (error) errors[field] = error;
     }
     
-    if (rule.type === 'apiKey') {
-      const error = validateApiKey(value);
-      if (error) errors[field] = error;
-    }
+
   });
   
   return {

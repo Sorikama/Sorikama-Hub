@@ -51,10 +51,7 @@ const SessionInfo = () => {
             <label className="text-sm font-medium text-muted-foreground">Utilisateur</label>
             <p className="font-mono text-sm">{sessionData.userId}</p>
           </div>
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">API Key</label>
-            <p className="font-mono text-sm">{user.apiKey?.substring(0, 12)}...</p>
-          </div>
+
         </div>
 
         {/* Tokens */}

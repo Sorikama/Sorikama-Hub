@@ -7,11 +7,9 @@ import crypto from 'crypto';
 // Imports des modèles et services
 import { UserModel } from '../database/models/user.model';
 import { RoleModel } from '../database/models/role.model';
-import { SimpleApiKeyModel } from '../database/models/simpleApiKey.model';
 import { generateTokens } from './auth.service';
 import { sendEmail } from '../utils/email';
 import { createBlindIndex, encrypt } from '../utils/crypto';
-import { generateUserApiKey } from '../utils/apiKeyGenerator';
 
 // Imports des utilitaires et de la configuration
 import AppError from '../utils/AppError';
@@ -104,9 +102,6 @@ export const verifyAndCreateAccount = async (req: Request, res: Response, next: 
         }
 
         const emailHash = createBlindIndex(email);
-
-        // Générer une API Key unique pour l'utilisateur
-        const userApiKey = await generateUserApiKey('temp_id', `${firstName} ${lastName}`);
         
         const newUser = await UserModel.create({
             firstName,
@@ -116,18 +111,7 @@ export const verifyAndCreateAccount = async (req: Request, res: Response, next: 
             password,
             roles: [userRole._id],
             isVerified: true,
-            apiKey: userApiKey,
         });
-        
-        // Mettre à jour l'API Key avec le vrai ID utilisateur
-        await SimpleApiKeyModel.findOneAndUpdate(
-            { keyId: userApiKey },
-            { 
-                userId: newUser._id,
-                name: `User API Key - ${firstName} ${lastName}`,
-                description: `Clé API personnelle pour ${firstName} ${lastName} (ID: ${newUser._id})`
-            }
-        );
 
         await newUser.populate<{
             roles: { permissions: any[] }[]
@@ -190,6 +174,24 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
             return next(new AppError('Ce compte a été désactivé.', StatusCodes.FORBIDDEN));
         }
 
+        // Vérifier si l'utilisateur est bloqué
+        if (user.isBlocked) {
+            logger.warn(`Tentative de connexion d'un compte bloqué`, {
+                userId: user._id,
+                email: user.email,
+                blockedReason: user.blockedReason
+            });
+            return next(new AppError(
+                `Ce compte a été bloqué. Raison: ${user.blockedReason || 'Non spécifiée'}`,
+                StatusCodes.FORBIDDEN
+            ));
+        }
+
+        // Mettre à jour lastActivity et loginCount
+        user.lastActivity = new Date();
+        user.loginCount = (user.loginCount || 0) + 1;
+        await user.save();
+
         const permissions = new Set<string>();
         (user.roles as any[]).forEach(role => {
             role.permissions.forEach((perm: any) => permissions.add(`${perm.action}:${perm.subject}`));
@@ -197,16 +199,28 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
         const payload = {
             id: user._id,
+            role: user.role, // Ajouter le rôle principal (user/admin)
             roles: (user.roles as any[]).map(r => r.name),
             permissions: Array.from(permissions),
         };
 
         const tokens = await generateTokens(payload);
 
+        // Retirer le mot de passe de la réponse
+        const userResponse = user.toObject();
+        delete userResponse.password;
+
+        logger.info(`✅ Connexion réussie`, {
+            userId: user._id,
+            email: user.email,
+            role: user.role,
+            loginCount: user.loginCount
+        });
+
         res.status(StatusCodes.OK).json({
             status: 'success',
             data: {
-                user: user,
+                user: userResponse,
                 tokens: tokens,
             },
         });
@@ -450,30 +464,3 @@ export const updateMe = async (req: Request, res: Response, next: NextFunction) 
     }
 };
 
-/**
- * Régénère l'API Key de l'utilisateur connecté.
- * @param {Request} req - L'objet de la requête Express authentifiée.
- * @param {Response} res - L'objet de la réponse Express.
- * @param {NextFunction} next - Le prochain middleware.
- */
-export const regenerateApiKey = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const user = req.user;
-        const { regenerateUserApiKey } = require('../utils/apiKeyGenerator');
-        
-        // Générer une nouvelle API Key
-        const newApiKey = await regenerateUserApiKey(user._id, `${user.firstName} ${user.lastName}`);
-        
-        // Mettre à jour l'utilisateur avec la nouvelle clé
-        await UserModel.findByIdAndUpdate(user._id, { apiKey: newApiKey });
-        
-        res.status(StatusCodes.OK).json({
-            status: 'success',
-            message: 'API Key régénérée avec succès.',
-            data: { apiKey: newApiKey },
-        });
-    } catch (error) {
-        logger.error('Erreur lors de la régénération de l\'API Key:', error);
-        next(error);
-    }
-};

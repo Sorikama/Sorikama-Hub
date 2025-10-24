@@ -59,84 +59,71 @@ export default function Authorize() {
 
     console.log('✅ Utilisateur authentifié avec service_id:', serviceId);
 
-    // Récupérer le nom de l'app depuis les paramètres URL (pour les apps tierces)
-    const appName = searchParams.get('app_name');
-    const appLogo = searchParams.get('app_logo');
-    const appDescription = searchParams.get('app_description');
-    const appWebsite = searchParams.get('app_website');
-
-    // Informations des services Sorikama prédéfinis
-    const services = {
-      'soristore': {
-        name: 'SoriStore',
-        logo: '🛍️',
-        description: 'Marketplace e-commerce de l\'écosystème Sorikama',
-        website: 'https://soristore.sorikama.com',
-        color: 'from-blue-500 to-cyan-500'
-      },
-      'soripay': {
-        name: 'SoriPay',
-        logo: '💳',
-        description: 'Solution de paiement sécurisée et rapide',
-        website: 'https://soripay.sorikama.com',
-        color: 'from-purple-500 to-pink-500'
-      },
-      'soriwallet': {
-        name: 'SoriWallet',
-        logo: '💰',
-        description: 'Portefeuille numérique multi-devises',
-        website: 'https://soriwallet.sorikama.com',
-        color: 'from-pink-500 to-rose-500'
-      },
-      'sorilearn': {
-        name: 'SoriLearn',
-        logo: '📚',
-        description: 'Plateforme d\'apprentissage en ligne',
-        website: 'https://sorilearn.sorikama.com',
-        color: 'from-yellow-500 to-orange-500'
-      },
-      'sorihealth': {
-        name: 'SoriHealth',
-        logo: '🏥',
-        description: 'Gestion de santé et bien-être',
-        website: 'https://sorihealth.sorikama.com',
-        color: 'from-green-500 to-emerald-500'
-      },
-      'soriaccess': {
-        name: 'SoriAccess',
-        logo: '♿',
-        description: 'Solutions d\'accessibilité inclusives',
-        website: 'https://soriaccess.sorikama.com',
-        color: 'from-indigo-500 to-blue-500'
+    // Charger les informations du service depuis l'API
+    const loadServiceInfo = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:7000/api/v1'}/services/${serviceId}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          const service = data.data;
+          
+          // Mapper les couleurs du backend vers les classes Tailwind
+          const colorMap = {
+            'blue': 'from-blue-500 to-cyan-500',
+            'purple': 'from-purple-500 to-pink-500',
+            'green': 'from-green-500 to-emerald-500',
+            'red': 'from-red-500 to-rose-500',
+            'yellow': 'from-yellow-500 to-orange-500',
+            'indigo': 'from-indigo-500 to-blue-500'
+          };
+          
+          setAppInfo({
+            name: service.name,
+            logo: service.icon || '🔗',
+            description: service.description || 'Cette application souhaite accéder à votre compte Sorikama',
+            website: service.frontendUrl || service.url,
+            color: colorMap[service.color] || 'from-blue-500 to-purple-500'
+          });
+        } else {
+          // Service non trouvé - utiliser les paramètres URL si fournis
+          const appName = searchParams.get('app_name');
+          const appLogo = searchParams.get('app_logo');
+          const appDescription = searchParams.get('app_description');
+          const appWebsite = searchParams.get('app_website');
+          
+          if (appName) {
+            setAppInfo({
+              name: appName,
+              logo: appLogo || '🔗',
+              description: appDescription || 'Cette application souhaite accéder à votre compte Sorikama',
+              website: appWebsite || 'https://example.com',
+              color: 'from-blue-500 to-purple-500'
+            });
+          } else {
+            setAppInfo({
+              name: serviceId,
+              logo: '🔗',
+              description: 'Cette application souhaite accéder à votre compte Sorikama',
+              website: 'https://example.com',
+              color: 'from-blue-500 to-purple-500'
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Erreur chargement service:', error);
+        // Fallback sur le service_id
+        setAppInfo({
+          name: serviceId,
+          logo: '🔗',
+          description: 'Cette application souhaite accéder à votre compte Sorikama',
+          website: 'https://example.com',
+          color: 'from-blue-500 to-purple-500'
+        });
       }
     };
 
-    const serviceKey = serviceId.toLowerCase().replace(/[_-]/g, '');
-
-    // Si c'est un service Sorikama connu, utiliser ses infos
-    if (services[serviceKey]) {
-      setAppInfo(services[serviceKey]);
-    }
-    // Sinon, utiliser les infos fournies dans l'URL (application tierce)
-    else if (appName) {
-      setAppInfo({
-        name: appName,
-        logo: appLogo || '🔗',
-        description: appDescription || 'Cette application souhaite accéder à votre compte Sorikama',
-        website: appWebsite || 'https://example.com',
-        color: 'from-blue-500 to-purple-500'
-      });
-    }
-    // Sinon, utiliser le service_id comme nom
-    else {
-      setAppInfo({
-        name: serviceId,
-        logo: '🔗',
-        description: 'Cette application souhaite accéder à votre compte Sorikama',
-        website: 'https://example.com',
-        color: 'from-blue-500 to-purple-500'
-      });
-    }
+    loadServiceInfo();
   }, [isAuthenticated, navigate, searchParams, serviceId]);
 
   // Permissions demandées
@@ -201,8 +188,7 @@ export default function Authorize() {
         {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('sorikama_access_token')}`,
-            'X-API-Key': localStorage.getItem('sorikama_user_api_key')
+            'Authorization': `Bearer ${localStorage.getItem('sorikama_access_token')}`
           },
           redirect: 'follow'
         }

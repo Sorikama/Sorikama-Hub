@@ -289,4 +289,157 @@ router.put('/:serviceId/status', async (req, res) => {
   }
 });
 
+/**
+ * POST /services - Créer un nouveau service externe
+ */
+router.post('/', async (req, res) => {
+  try {
+    const serviceData = req.body;
+
+    // Validation des champs requis
+    if (!serviceData.id || !serviceData.name || !serviceData.url) {
+      return res.status(400).json({
+        success: false,
+        message: 'Les champs id, name et url sont requis'
+      });
+    }
+
+    const service = await ServiceManager.createService(serviceData);
+
+    logger.info(`✅ Nouveau service créé: ${service.name}`, { serviceId: service.id });
+
+    res.status(201).json({
+      success: true,
+      message: `Service ${service.name} créé avec succès`,
+      data: service
+    });
+
+  } catch (error: any) {
+    logger.error('Erreur création service:', error);
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Erreur lors de la création du service'
+    });
+  }
+});
+
+/**
+ * PUT /services/:serviceId - Mettre à jour un service existant
+ */
+router.put('/:serviceId', async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+    const updateData = req.body;
+
+    // Ne pas permettre de changer l'ID
+    delete updateData.id;
+
+    const service = await ServiceManager.updateService(serviceId, updateData);
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service non trouvé'
+      });
+    }
+
+    logger.info(`✅ Service mis à jour: ${service.name}`, { serviceId });
+
+    res.json({
+      success: true,
+      message: `Service ${service.name} mis à jour avec succès`,
+      data: service
+    });
+
+  } catch (error: any) {
+    logger.error('Erreur mise à jour service:', error);
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Erreur lors de la mise à jour du service'
+    });
+  }
+});
+
+/**
+ * DELETE /services/:serviceId - Supprimer un service
+ */
+router.delete('/:serviceId', async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+
+    const deleted = await ServiceManager.deleteService(serviceId);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service non trouvé'
+      });
+    }
+
+    logger.info(`🗑️ Service supprimé`, { serviceId });
+
+    res.json({
+      success: true,
+      message: 'Service supprimé avec succès'
+    });
+
+  } catch (error: any) {
+    logger.error('Erreur suppression service:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la suppression du service'
+    });
+  }
+});
+
+/**
+ * GET /services - Récupérer tous les services (API JSON)
+ */
+router.get('/', async (req, res) => {
+  try {
+    const services = await ServiceManager.getAllServices();
+
+    res.json({
+      success: true,
+      data: services
+    });
+
+  } catch (error: any) {
+    logger.error('Erreur récupération services:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la récupération des services'
+    });
+  }
+});
+
+/**
+ * GET /services/:serviceId - Récupérer un service spécifique
+ */
+router.get('/:serviceId', async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+    const service = await ServiceManager.getServiceById(serviceId);
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service non trouvé'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: service
+    });
+
+  } catch (error: any) {
+    logger.error('Erreur récupération service:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la récupération du service'
+    });
+  }
+});
+
 export default router;

@@ -1,6 +1,7 @@
 // src/routes/system.routes.ts
 import { Router } from 'express';
-import { authenticateApiKey, requireApiKeyPermissions } from '../middlewares/apiKey.middleware';
+import { protect } from '../middlewares/auth.middleware';
+import { authorize } from '../middlewares/authorization.middleware';
 import {
   getRoles,
   getPermissions,
@@ -11,8 +12,8 @@ import {
 
 const router = Router();
 
-// Toutes les routes nécessitent une API key
-router.use(authenticateApiKey);
+// Toutes les routes nécessitent une authentification JWT
+router.use(protect);
 
 /**
  * @swagger
@@ -53,7 +54,7 @@ router.use(authenticateApiKey);
  *                           isEditable:
  *                             type: boolean
  */
-router.get('/roles', requireApiKeyPermissions(['read:role']), getRoles);
+router.get('/roles', authorize(['read:role']), getRoles);
 
 /**
  * @swagger
@@ -94,7 +95,7 @@ router.get('/roles', requireApiKeyPermissions(['read:role']), getRoles);
  *                             fullPermission:
  *                               type: string
  */
-router.get('/permissions', requireApiKeyPermissions(['read:permission']), getPermissions);
+router.get('/permissions', authorize(['read:permission']), getPermissions);
 
 /**
  * @swagger
@@ -150,7 +151,7 @@ router.get('/permissions', requireApiKeyPermissions(['read:permission']), getPer
  *                         unhealthy:
  *                           type: number
  */
-router.get('/services', requireApiKeyPermissions(['read:gateway']), getServices);
+router.get('/services', authorize(['read:gateway']), getServices);
 
 /**
  * @swagger
@@ -239,6 +240,6 @@ router.get('/health', getSystemHealth);
  *                       type: string
  *                       format: date-time
  */
-router.get('/metrics', requireApiKeyPermissions(['read:analytics']), getSystemMetrics);
+router.get('/metrics', authorize(['read:analytics']), getSystemMetrics);
 
 export default router;

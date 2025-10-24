@@ -3,11 +3,21 @@
  * Design minimaliste et accueillant
  */
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useEffect } from 'react';
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+
+  // Rediriger automatiquement l'admin vers son espace
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'admin') {
+      console.log('👑 Admin détecté - Redirection automatique vers espace admin');
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   return (
     <div className="min-h-screen bg-white">

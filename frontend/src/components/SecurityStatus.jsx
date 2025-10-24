@@ -2,7 +2,7 @@ import React from 'react';
 import { useSecureAuth } from '../hooks/useSecureAuth';
 
 const SecurityStatus = () => {
-  const { user, isSecure, hasApiKey, hasValidToken } = useSecureAuth();
+  const { user, isSecure, hasValidToken } = useSecureAuth();
 
   if (!user) return null;
 
@@ -21,12 +21,7 @@ const SecurityStatus = () => {
           </span>
         </div>
         
-        <div className="flex items-center justify-between text-sm">
-          <span>Clé API</span>
-          <span className={hasApiKey ? 'text-green-600' : 'text-red-600'}>
-            {hasApiKey ? '✓ Configurée' : '✗ Manquante'}
-          </span>
-        </div>
+
         
         <div className="flex items-center justify-between text-sm">
           <span>Connexion sécurisée</span>

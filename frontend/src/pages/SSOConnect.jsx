@@ -12,7 +12,7 @@ const SSOConnect = () => {
   const [serviceInfo, setServiceInfo] = useState(null);
   
   const { user } = useAuth();
-  const { isSecure, hasApiKey } = useSecureAuth();
+  const { isSecure } = useSecureAuth();
 
   const serviceName = searchParams.get('service') || 'Service Externe';
   const redirectUrl = searchParams.get('redirect_url');
@@ -46,7 +46,7 @@ const SSOConnect = () => {
   }, [user, isSecure, clientId, serviceName, navigate]);
 
   const handleAuthorize = async () => {
-    if (!user || !hasApiKey) {
+    if (!user) {
       setError('Authentification incomplète');
       return;
     }
@@ -70,8 +70,7 @@ const SSOConnect = () => {
       } else if (redirectUrl) {
         const params = new URLSearchParams({
           token: ssoToken,
-          user_id: user.id || user._id,
-          api_key: user.apiKey
+          user_id: user.id || user._id
         });
         window.location.href = `${redirectUrl}?${params.toString()}`;
       } else {
@@ -160,10 +159,6 @@ const SSOConnect = () => {
             </li>
             <li className="flex items-center">
               <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-              Clé API personnelle
-            </li>
-            <li className="flex items-center">
-              <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
               Statut d'authentification
             </li>
             {scope.includes('services') && (
@@ -192,7 +187,7 @@ const SSOConnect = () => {
         <div className="flex flex-col space-y-3">
           <button
             onClick={handleAuthorize}
-            disabled={loading || !hasApiKey}
+            disabled={loading}
             className="w-full py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (

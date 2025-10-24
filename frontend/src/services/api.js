@@ -29,34 +29,13 @@ let isLoggingOut = false;
 /**
  * Intercepteur de requête - Ajoute automatiquement les headers d'authentification
  * 
- * Logique d'authentification à 2 niveaux :
- * 1. API Key OBLIGATOIRE pour toutes les requêtes
- * 2. JWT Token pour les routes protégées uniquement
+ * Logique d'authentification JWT uniquement
  */
 api.interceptors.request.use(
   (config) => {
-    // === NIVEAU 1 : API KEY OBLIGATOIRE ===
-    const userApiKey = localStorage.getItem(STORAGE_KEYS.USER_API_KEY);
-    const systemApiKey = API_CONFIG.SYSTEM_API_KEY;
     const isPublicRoute = PUBLIC_ROUTES.some(route => config.url?.includes(route));
 
-    // Pour les utilisateurs connectés : TOUJOURS utiliser leur API Key
-    if (userApiKey && userApiKey !== 'null' && userApiKey !== 'undefined') {
-      config.headers['X-API-Key'] = userApiKey;
-      console.log('🔑 Utilisation de l\'API Key utilisateur');
-    }
-    // Pour les routes publiques (login, register, etc.) : utiliser l'API Key système
-    else if (isPublicRoute) {
-      config.headers['X-API-Key'] = systemApiKey;
-      console.log('🔑 Utilisation de l\'API Key système (route publique)');
-    }
-    // Si pas d'API Key utilisateur et route protégée : erreur
-    else {
-      console.error('❌ Aucune API Key utilisateur disponible pour une route protégée');
-      config.headers['X-API-Key'] = systemApiKey; // Fallback pour éviter l'erreur
-    }
-
-    // === NIVEAU 2 : JWT TOKEN (routes protégées seulement) ===
+    // Ajouter le JWT Token pour les routes protégées
     if (!isPublicRoute) {
       const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
       if (accessToken && accessToken !== 'null' && accessToken !== 'undefined') {
@@ -64,9 +43,8 @@ api.interceptors.request.use(
       }
     }
 
-    // Log pour debug (masquer les clés sensibles)
+    // Log pour debug
     console.log(`📡 ${config.method?.toUpperCase()} ${config.url}`, {
-      apiKey: config.headers['X-API-Key']?.substring(0, 10) + '...',
       hasJWT: !!config.headers.Authorization,
       isPublic: isPublicRoute
     });
@@ -127,6 +105,8 @@ api.interceptors.response.use(
 
         } catch (refreshError) {
           console.error('❌ Échec du renouvellement du token:', refreshError);
+          console.error('❌ URL originale:', originalRequest.url);
+          console.error('❌ Erreur refresh:', refreshError.response?.data || refreshError.message);
 
           // Refresh échoué - déconnecter l'utilisateur
           authUtils.clearStorage();
@@ -134,7 +114,7 @@ api.interceptors.response.use(
           return Promise.reject(refreshError);
         }
       } else {
-        console.warn('⚠️ Pas de refresh token disponible');
+        console.warn('⚠️ Pas de refresh token disponible pour:', originalRequest.url);
         authUtils.clearStorage();
         window.location.href = '/login';
       }
@@ -355,36 +335,7 @@ export const authService = {
     }
   },
 
-  /**
-   * Régénérer l'API Key personnelle de l'utilisateur
-   * L'ancienne clé devient invalide
-   * 
-   * @returns {Promise} Nouvelle API Key
-   */
-  async regenerateApiKey() {
-    try {
-      console.log('🔄 Régénération de l\'API Key...');
-      const response = await api.post(ENDPOINTS.AUTH.REGENERATE_API_KEY);
 
-      const newApiKey = response.data.data.apiKey;
-
-      // Sauvegarder la nouvelle API Key
-      localStorage.setItem(STORAGE_KEYS.USER_API_KEY, newApiKey);
-
-      // Mettre à jour les données utilisateur
-      const user = authUtils.getUser();
-      if (user) {
-        user.apiKey = newApiKey;
-        localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
-      }
-
-      console.log('✅ API Key régénérée');
-      return response.data;
-    } catch (error) {
-      console.error('❌ Erreur régénération API Key:', error);
-      throw error;
-    }
-  }
 };
 
 /**
@@ -432,22 +383,6 @@ export const authUtils = {
   },
 
   /**
-   * Récupérer l'API Key personnelle de l'utilisateur
-   * @returns {string|null} API Key utilisateur ou null
-   */
-  getUserApiKey() {
-    return localStorage.getItem(STORAGE_KEYS.USER_API_KEY);
-  },
-
-  /**
-   * Vérifier si l'API Key système est configurée
-   * @returns {boolean} True si l'API Key système existe
-   */
-  hasSystemApiKey() {
-    return !!API_CONFIG.SYSTEM_API_KEY;
-  },
-
-  /**
    * Sauvegarder les données d'authentification après connexion/inscription
    * 
    * @param {Object} user - Données utilisateur
@@ -455,7 +390,6 @@ export const authUtils = {
    */
   saveAuthData(user, tokens) {
     localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
-    localStorage.setItem(STORAGE_KEYS.USER_API_KEY, user.apiKey);
     localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.accessToken);
     localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
   },
@@ -467,7 +401,6 @@ export const authUtils = {
     localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER_DATA);
-    localStorage.removeItem(STORAGE_KEYS.USER_API_KEY);
   }
 };
 

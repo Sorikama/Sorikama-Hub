@@ -2,9 +2,13 @@
 import { Router } from 'express';
 import authRouter from './auth.routes';
 import proxyRouter from './proxy.routes';
-import apiKeyRouter from './apiKey.routes';
 import systemRouter from './system.routes';
 import ssoRouter from './sso.routes';
+import adminUsersRouter from './admin/users.routes';
+import adminRolesRouter from './admin/roles.routes';
+import adminRateLimitRouter from './admin/rateLimit.routes';
+import adminAuditRouter from './admin/audit.routes';
+import adminWebhooksRouter from './admin/webhooks.routes';
 import path from 'path';
 
 const router = Router();
@@ -17,14 +21,18 @@ router.get('/', (req, res) => {
 // Routes d'authentification
 router.use('/auth', authRouter);
 
-// Routes de gestion des API Keys
-router.use('/api/keys', apiKeyRouter);
-
 // Routes système (rôles, permissions, services)
 router.use('/system', systemRouter);
 
 // Routes SSO
 router.use('/sso', ssoRouter);
+
+// Routes admin (gestion des utilisateurs, services, etc.)
+router.use('/admin/users', adminUsersRouter);
+router.use('/admin/roles', adminRolesRouter);
+router.use('/admin/rate-limit', adminRateLimitRouter);
+router.use('/admin/audit', adminAuditRouter);
+router.use('/admin/webhooks', adminWebhooksRouter);
 
 // Routes de proxy vers les microservices
 router.use('/', proxyRouter);
