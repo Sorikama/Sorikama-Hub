@@ -1,0 +1,313 @@
+[2025-01-20 15:04:12] INFO: 🔴 Redis connecté avec succès
+[2025-01-20 16:04:12] INFO: 📊 Cache hit ratio: 94%
+[2025-01-20 17:04:12] INFO: 🔄 Nettoyage des clés expirées
+[2025-01-20 18:04:12] INFO: 💾 Utilisation mémoire Redis: 45MB
+[2025-01-20 19:04:12] WARN: ⚠️ Connexion Redis lente: 150ms
+[2025-01-20 20:04:12] INFO: 🔴 Redis - 1,234 opérations/sec[2025-10-20 19:13:51] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:13:51] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:13:51] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:13:51.217Z"}
+[2025-10-20 19:13:51] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:13:51] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:13:51] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:13:51.268Z"}
+[2025-10-20 19:13:51] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:13:51] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:13:51] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:13:51.979Z"}
+[2025-10-20 19:13:52] INFO: REDIS_CHECK_START 
+[2025-10-20 19:13:52] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:13:53] INFO: REDIS_CHECK_START 
+[2025-10-20 19:13:53] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:13:53] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:13:53] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:13:54] INFO: REDIS_CHECK_START 
+[2025-10-20 19:13:54] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:13:54] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:14:21] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:14:22] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:14:22] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:14:22.434Z"}
+[2025-10-20 19:14:21] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:14:22] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:14:22] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:14:22.698Z"}
+[2025-10-20 19:14:23] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:14:23] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:14:24] INFO: REDIS_CHECK_START 
+[2025-10-20 19:14:24] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:14:25] INFO: REDIS_CHECK_START 
+[2025-10-20 19:14:25] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:14:26] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:14:27] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:14:27] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:14:27.636Z"}
+[2025-10-20 19:14:29] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:14:31] INFO: REDIS_CHECK_START 
+[2025-10-20 19:14:31] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:14:43] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:14:43] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:14:43] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:14:43.730Z"}
+[2025-10-20 19:14:44] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:14:45] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:14:45] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:14:45.299Z"}
+[2025-10-20 19:14:45] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:14:45] INFO: REDIS_CHECK_START 
+[2025-10-20 19:14:45] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:14:47] INFO: REDIS_CHECK_START 
+[2025-10-20 19:14:47] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:14:47] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:15:08] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:15:08] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:15:08] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:15:08.142Z"}
+[2025-10-20 19:15:09] INFO: REDIS_CHECK_START 
+[2025-10-20 19:15:09] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:15:10] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:15:30] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:15:30] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:15:30] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:15:30.603Z"}
+[2025-10-20 19:15:32] INFO: REDIS_CHECK_START 
+[2025-10-20 19:15:32] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:15:32] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:16:02] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:16:02] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:16:02] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:16:02.418Z"}
+[2025-10-20 19:16:04] INFO: REDIS_CHECK_START 
+[2025-10-20 19:16:04] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:16:04] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:17:48] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:17:48] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:17:48] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:17:48] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:17:48] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:17:48.386Z"}
+[2025-10-20 19:17:48] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:17:48.392Z"}
+[2025-10-20 19:17:48] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:17:48] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:17:48] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:17:48.548Z"}
+[2025-10-20 19:17:49] INFO: REDIS_CHECK_START 
+[2025-10-20 19:17:49] INFO: REDIS_CHECK_START 
+[2025-10-20 19:17:49] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:17:49] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:17:50] INFO: REDIS_CHECK_START 
+[2025-10-20 19:17:50] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:17:50] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:17:50] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:17:50] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 19:18:16] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 19:18:16] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 19:18:17] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T17:18:17.006Z"}
+[2025-10-20 19:18:18] INFO: REDIS_CHECK_START 
+[2025-10-20 19:18:18] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 19:18:18] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:05:10] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:05:10] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:05:10] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:05:10.354Z"}
+[2025-10-20 22:05:12] INFO: REDIS_CHECK_START 
+[2025-10-20 22:05:12] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:05:12] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:06] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:06] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:06] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:07] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:07] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:07.101Z"}
+[2025-10-20 22:15:07] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:07] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:07.069Z"}
+[2025-10-20 22:15:07] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:07] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:07.200Z"}
+[2025-10-20 22:15:11] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:11] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:11] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:11.616Z"}
+[2025-10-20 22:15:11] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:11] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:11] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:11.571Z"}
+[2025-10-20 22:15:12] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:12] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:12] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:12.268Z"}
+[2025-10-20 22:15:13] INFO: REDIS_CHECK_START 
+[2025-10-20 22:15:13] INFO: REDIS_CHECK_START 
+[2025-10-20 22:15:13] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:15:13] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:15:13] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:13] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:13] INFO: REDIS_CHECK_START 
+[2025-10-20 22:15:13] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:15:14] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:18] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:18] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:18] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:18] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:18] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:18.387Z"}
+[2025-10-20 22:15:18] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:18.388Z"}
+[2025-10-20 22:15:18] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:18] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:18] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:18.797Z"}
+[2025-10-20 22:15:19] INFO: REDIS_CHECK_START 
+[2025-10-20 22:15:19] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:15:20] INFO: REDIS_CHECK_START 
+[2025-10-20 22:15:20] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:15:20] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:20] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:20] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:26] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:26] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:26] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:26.924Z"}
+[2025-10-20 22:15:26] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:27] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:27] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:27.120Z"}
+[2025-10-20 22:15:27] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:27] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:27] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:27.528Z"}
+[2025-10-20 22:15:28] INFO: REDIS_CHECK_START 
+[2025-10-20 22:15:28] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:15:28] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:33] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:33] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:33] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:33.767Z"}
+[2025-10-20 22:15:33] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:33] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:33] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:33.812Z"}
+[2025-10-20 22:15:33] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:34] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:34] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:34.080Z"}
+[2025-10-20 22:15:35] INFO: REDIS_CHECK_START 
+[2025-10-20 22:15:35] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:15:35] INFO: REDIS_CHECK_START 
+[2025-10-20 22:15:35] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:15:35] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:35] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:35] INFO: REDIS_CHECK_START 
+[2025-10-20 22:15:35] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:15:36] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:41] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:41] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:41] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:41.878Z"}
+[2025-10-20 22:15:41] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:42] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:42] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:42.095Z"}
+[2025-10-20 22:15:42] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:42] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:42] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:42.493Z"}
+[2025-10-20 22:15:47] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:47] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:47] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:47.489Z"}
+[2025-10-20 22:15:47] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:47] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:47] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:47.512Z"}
+[2025-10-20 22:15:47] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:15:47] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:15:47] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:15:47.889Z"}
+[2025-10-20 22:15:49] INFO: REDIS_CHECK_START 
+[2025-10-20 22:15:49] INFO: REDIS_CHECK_START 
+[2025-10-20 22:15:49] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:15:49] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:15:49] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:49] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:50] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:15:50] INFO: REDIS_CHECK_START 
+[2025-10-20 22:15:50] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:16:03] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:16:03] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:16:03] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:16:03.906Z"}
+[2025-10-20 22:16:03] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:16:04] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:16:04] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:16:04.091Z"}
+[2025-10-20 22:16:05] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:16:05] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:16:05] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:16:05] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:16:05] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:16:05.435Z"}
+[2025-10-20 22:16:13] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:16:13] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:16:13] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:16:13.854Z"}
+[2025-10-20 22:16:15] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:16:15] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:16:15] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:16:15] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:16:15.638Z"}
+[2025-10-20 22:16:15] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:16:16] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:16:16] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:16:16.784Z"}
+[2025-10-20 22:16:17] INFO: REDIS_CHECK_START 
+[2025-10-20 22:16:17] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:16:17] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:16:17] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:16:17] INFO: REDIS_CHECK_START 
+[2025-10-20 22:16:17] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:16:19] INFO: REDIS_CHECK_START 
+[2025-10-20 22:16:19] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:18:05] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:18:05] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:18:05] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:18:05.879Z"}
+[2025-10-20 22:18:07] INFO: REDIS_CHECK_START 
+[2025-10-20 22:18:07] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:18:07] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:19:43] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:19:43] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:19:43] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:19:43.348Z"}
+[2025-10-20 22:19:43] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:19:43] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:19:43] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:19:43.284Z"}
+[2025-10-20 22:19:43] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:19:44] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:19:44] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:19:44.102Z"}
+[2025-10-20 22:19:45] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:19:45] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:19:45] INFO: REDIS_CHECK_START 
+[2025-10-20 22:19:45] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:19:45] INFO: REDIS_CHECK_START 
+[2025-10-20 22:19:45] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:19:45] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:19:47] INFO: REDIS_CHECK_START 
+[2025-10-20 22:19:47] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:19:50] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:19:50] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:19:50] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:19:50.944Z"}
+[2025-10-20 22:19:50] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:19:51] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:19:51] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:19:51.062Z"}
+[2025-10-20 22:19:52] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:19:52] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:19:53] INFO: REDIS_CHECK_START 
+[2025-10-20 22:19:53] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:19:55] INFO: REDIS_CHECK_START 
+[2025-10-20 22:19:55] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-20 22:20:13] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-20 22:20:13] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":1}
+[2025-10-20 22:20:13] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":1,"connectionTime":"2025-10-20T20:20:13.360Z"}
+[2025-10-20 22:20:15] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
+[2025-10-20 22:20:15] INFO: REDIS_CHECK_START 
+[2025-10-20 22:20:15] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-21 17:55:55] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-21 17:55:55] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":0,"host":"localhost","port":6379}
+[2025-10-21 17:55:55] WARN: CACHE_RETRY_ATTEMPT {"attempt":1,"delay":50,"maxAttempts":10}
+[2025-10-21 17:55:55] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:55] INFO: CACHE_RECONNECTING {"delay":50,"attempt":2}
+[2025-10-21 17:55:55] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":1,"host":"localhost","port":6379}
+[2025-10-21 17:55:55] WARN: CACHE_RETRY_ATTEMPT {"attempt":2,"delay":100,"maxAttempts":10}
+[2025-10-21 17:55:55] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:55] INFO: CACHE_RECONNECTING {"delay":100,"attempt":3}
+[2025-10-21 17:55:55] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":2,"host":"localhost","port":6379}
+[2025-10-21 17:55:55] WARN: CACHE_RETRY_ATTEMPT {"attempt":3,"delay":150,"maxAttempts":10}
+[2025-10-21 17:55:55] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:55] INFO: CACHE_RECONNECTING {"delay":150,"attempt":4}
+[2025-10-21 17:55:55] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":3,"host":"localhost","port":6379}
+[2025-10-21 17:55:55] WARN: CACHE_RETRY_ATTEMPT {"attempt":4,"delay":200,"maxAttempts":10}
+[2025-10-21 17:55:55] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:55] INFO: CACHE_RECONNECTING {"delay":200,"attempt":5}
+[2025-10-21 17:55:56] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":4,"host":"localhost","port":6379}
+[2025-10-21 17:55:56] WARN: CACHE_RETRY_ATTEMPT {"attempt":5,"delay":250,"maxAttempts":10}
+[2025-10-21 17:55:56] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:56] INFO: CACHE_RECONNECTING {"delay":250,"attempt":6}
+[2025-10-21 17:55:56] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":5,"host":"localhost","port":6379}
+[2025-10-21 17:55:56] WARN: CACHE_RETRY_ATTEMPT {"attempt":6,"delay":300,"maxAttempts":10}
+[2025-10-21 17:55:56] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:56] INFO: CACHE_RECONNECTING {"delay":300,"attempt":7}
+[2025-10-21 17:55:56] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":6,"host":"localhost","port":6379}
+[2025-10-21 17:55:56] WARN: CACHE_RETRY_ATTEMPT {"attempt":7,"delay":350,"maxAttempts":10}
+[2025-10-21 17:55:56] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:56] INFO: CACHE_RECONNECTING {"delay":350,"attempt":8}
+[2025-10-21 17:55:57] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":7,"host":"localhost","port":6379}
+[2025-10-21 17:55:57] WARN: CACHE_RETRY_ATTEMPT {"attempt":8,"delay":400,"maxAttempts":10}
+[2025-10-21 17:55:57] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-21 17:55:57] INFO: CACHE_RECONNECTING {"delay":400,"attempt":9}
+[2025-10-21 17:55:57] INFO: REDIS_CHECK_START 
+[2025-10-21 17:55:57] INFO: REDIS_AUTO_START 
+[2025-10-21 17:55:57] INFO: REDIS_STARTING {"pid":4648}
+[2025-10-21 17:55:57] INFO: REDIS_INITIALIZED {"pid":4648}
+[2025-10-21 17:55:57] INFO: REDIS_READY {"port":6379,"pid":4648}
+[2025-10-21 17:55:57] INFO: REDIS_STATUS_CHECK {"cache":{"status":"connecting","retryCount":8},"metrics":{"status":"connecting","retryCount":8}}
+[2025-10-21 17:55:57] INFO: CACHE_CONNECTING {"host":"localhost","port":6379,"db":0,"attempt":9}
+[2025-10-21 17:55:57] INFO: CACHE_READY {"status":"connected","db":0,"totalAttempts":9,"connectionTime":"2025-10-21T15:55:57.564Z"}
