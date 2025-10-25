@@ -63,13 +63,21 @@ function Authorize() {
     setAuthorizing(true);
 
     try {
-      // Appeler le service d'autorisation
-      const { token: authToken, user: userData } = await authorizeService(serviceSlug, redirectUrl);
+      // Appeler le service d'autorisation (retourne maintenant un CODE au lieu d'un token)
+      const response = await authorizeService(serviceSlug, redirectUrl);
+      
+      // Le backend retourne maintenant un code temporaire
+      const { code, expiresIn } = response;
 
-      // Construire l'URL de callback avec le token
+      if (!code) {
+        throw new Error('Code d\'autorisation non reçu');
+      }
+
+      console.log('✅ Code d\'autorisation reçu (expire dans', expiresIn, 'secondes)');
+
+      // Construire l'URL de callback avec le CODE (pas le token!)
       const callbackUrl = new URL(redirectUrl);
-      callbackUrl.searchParams.set('token', authToken);
-      callbackUrl.searchParams.set('user', JSON.stringify(userData));
+      callbackUrl.searchParams.set('code', code);
 
       console.log('✅ Redirection vers:', callbackUrl.href);
 

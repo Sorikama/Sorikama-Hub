@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 import { ServiceModel } from '../database/models/service.model';
 import { UserModel } from '../database/models/user.model';
@@ -8,6 +9,32 @@ import AppError from '../utils/AppError';
 import { logger } from '../utils/logger';
 import { JWT_SECRET } from '../config';
 import { encryptUserId } from '../utils/encryption';
+
+// ============================================
+// STOCKAGE TEMPORAIRE DES CODES D'AUTORISATION
+// ============================================
+// En production, utiliser Redis pour le partage entre instances
+interface AuthorizationCode {
+  code: string;
+  userId: string;
+  serviceSlug: string;
+  redirectUrl: string;
+  createdAt: number;
+  expiresAt: number;
+}
+
+const authorizationCodes = new Map<string, AuthorizationCode>();
+
+// Nettoyer les codes expirés toutes les 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, data] of authorizationCodes.entries()) {
+    if (data.expiresAt < now) {
+      authorizationCodes.delete(code);
+      logger.debug(`Code d'autorisation expiré supprimé: ${code}`);
+    }
+  }
+}, 5 * 60 * 1000);
 
 /**
  * Récupérer les informations d'un service
@@ -153,7 +180,7 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
 
 /**
  * Autoriser l'accès d'un service externe
- * Génère un token JWT spécifique pour le service
+ * Génère un CODE temporaire au lieu d'un token (plus sécurisé)
  */
 export const authorizeService = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -226,7 +253,123 @@ export const authorizeService = async (req: Request, res: Response, next: NextFu
     }
 
     // ============================================
-    // 4. COLLECTER LES PERMISSIONS
+    // 4. GÉNÉRER UN CODE D'AUTORISATION TEMPORAIRE
+    // ============================================
+    // SÉCURITÉ: Le code est temporaire (5 min) et à usage unique
+    // Le token JWT ne sera généré que lors de l'échange du code
+
+    const code = crypto.randomBytes(32).toString('hex');
+    const now = Date.now();
+    const expiresIn = 5 * 60 * 1000; // 5 minutes
+
+    authorizationCodes.set(code, {
+      code,
+      userId: user._id.toString(),
+      serviceSlug,
+      redirectUrl,
+      createdAt: now,
+      expiresAt: now + expiresIn
+    });
+
+    logger.info(`✅ Code d'autorisation généré`, {
+      userId: user._id,
+      email: user.email,
+      service: serviceSlug,
+      serviceName: service.name,
+      codeExpiry: '5 minutes'
+    });
+
+    // ============================================
+    // 5. RETOURNER LE CODE (pas le token!)
+    // ============================================
+
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: `Autorisation accordée pour ${service.name}`,
+      data: {
+        code, // Code temporaire à échanger
+        expiresIn: 300, // 5 minutes en secondes
+        service: {
+          name: service.name,
+          slug: service.slug
+        }
+      }
+    });
+
+  } catch (error) {
+    logger.error('Erreur lors de l\'autorisation:', error);
+    next(error);
+  }
+};
+
+/**
+ * Échanger un code d'autorisation contre un token JWT
+ * Route appelée par le service externe depuis son backend
+ */
+export const exchangeAuthorizationCode = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { code } = req.body;
+
+    if (!code) {
+      return next(new AppError('Code d\'autorisation manquant', StatusCodes.BAD_REQUEST));
+    }
+
+    // ============================================
+    // 1. VÉRIFIER QUE LE CODE EXISTE
+    // ============================================
+
+    const authData = authorizationCodes.get(code);
+
+    if (!authData) {
+      logger.warn(`Code d'autorisation invalide ou expiré: ${code}`);
+      return next(new AppError('Code d\'autorisation invalide ou expiré', StatusCodes.UNAUTHORIZED));
+    }
+
+    // ============================================
+    // 2. VÉRIFIER QUE LE CODE N'EST PAS EXPIRÉ
+    // ============================================
+
+    if (authData.expiresAt < Date.now()) {
+      authorizationCodes.delete(code);
+      logger.warn(`Code d'autorisation expiré: ${code}`);
+      return next(new AppError('Code d\'autorisation expiré', StatusCodes.UNAUTHORIZED));
+    }
+
+    // ============================================
+    // 3. SUPPRIMER LE CODE (usage unique)
+    // ============================================
+
+    authorizationCodes.delete(code);
+    logger.debug(`Code d'autorisation utilisé et supprimé: ${code}`);
+
+    // ============================================
+    // 4. RÉCUPÉRER LES DONNÉES UTILISATEUR
+    // ============================================
+
+    const user = await UserModel.findById(authData.userId).populate({
+      path: 'roles',
+      populate: { path: 'permissions' }
+    });
+
+    if (!user || !user.isActive) {
+      return next(new AppError('Utilisateur introuvable ou inactif', StatusCodes.UNAUTHORIZED));
+    }
+
+    // ============================================
+    // 5. RÉCUPÉRER LE SERVICE
+    // ============================================
+
+    const service = await ServiceModel.findOne({
+      slug: authData.serviceSlug,
+      enabled: true
+    });
+
+    if (!service) {
+      return next(new AppError('Service introuvable ou désactivé', StatusCodes.NOT_FOUND));
+    }
+
+    // ============================================
+    // 6. COLLECTER LES PERMISSIONS
     // ============================================
 
     const permissions = new Set<string>();
@@ -237,63 +380,54 @@ export const authorizeService = async (req: Request, res: Response, next: NextFu
     });
 
     // ============================================
-    // 5. CHIFFRER L'ID UTILISATEUR
+    // 7. CHIFFRER L'ID UTILISATEUR
     // ============================================
 
     const encryptedUserId = encryptUserId(user._id.toString());
-    logger.debug('ID utilisateur chiffré pour le service externe');
 
     // ============================================
-    // 6. GÉNÉRER LE TOKEN JWT (avec toutes les infos pour validation)
+    // 8. GÉNÉRER LE TOKEN JWT
     // ============================================
 
     const tokenPayload = {
-      id: encryptedUserId, // ID chiffré
+      id: encryptedUserId,
       email: user.email,
       role: user.role,
       roles: (user.roles as any[]).map(r => r.name),
       permissions: Array.from(permissions),
-      service: serviceSlug,
+      service: authData.serviceSlug,
       serviceName: service.name
     };
 
     const token = jwt.sign(tokenPayload, JWT_SECRET, {
-      expiresIn: '24h' // Token valide 24h
+      expiresIn: '24h'
     });
 
     // ============================================
-    // 7. PRÉPARER LES INFOS UTILISATEUR (UNIQUEMENT données non sensibles)
+    // 9. PRÉPARER LES INFOS UTILISATEUR
     // ============================================
 
     const userData = {
-      id: encryptedUserId, // ID chiffré
+      id: encryptedUserId,
       email: user.email,
       firstName: user.firstName,
-      lastName: user.lastName
-      // ⚠️ PAS de role, roles, permissions - ces infos sont dans le token
-      // Le service externe n'a pas besoin de ces données sensibles
-      // Toutes les vérifications se feront côté API Gateway quand le service fera des requêtes
+      lastName: user.lastName,
+      role: user.role,
+      roles: (user.roles as any[]).map(r => r.name)
     };
 
-    // ============================================
-    // 7. LOGGER L'AUTORISATION
-    // ============================================
-
-    logger.info(`✅ Autorisation accordée`, {
+    logger.info(`✅ Token JWT généré après échange de code`, {
       userId: user._id,
       email: user.email,
-      service: serviceSlug,
-      serviceName: service.name,
-      redirectUrl
+      service: authData.serviceSlug
     });
 
     // ============================================
-    // 8. RETOURNER LE TOKEN
+    // 10. RETOURNER LE TOKEN
     // ============================================
 
     res.status(StatusCodes.OK).json({
       status: 'success',
-      message: `Autorisation accordée pour ${service.name}`,
       data: {
         token,
         user: userData,
@@ -305,7 +439,7 @@ export const authorizeService = async (req: Request, res: Response, next: NextFu
     });
 
   } catch (error) {
-    logger.error('Erreur lors de l\'autorisation:', error);
+    logger.error('Erreur lors de l\'échange du code:', error);
     next(error);
   }
 };

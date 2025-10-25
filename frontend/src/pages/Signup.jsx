@@ -2,14 +2,14 @@
  * Page d'inscription - Design compact et moderne
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Signup() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { register, verify, isLoading, error } = useAuth();
+  const { register, verify, isLoading, error, user } = useAuth();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -24,6 +24,21 @@ export default function Signup() {
   const [passwordError, setPasswordError] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [step, setStep] = useState(1);
+
+  // Récupérer les paramètres SSO depuis l'URL
+  const searchParams = new URLSearchParams(location.search);
+  const redirectUrl = searchParams.get('redirect');
+  const serviceSlug = searchParams.get('service');
+  const isSSO = redirectUrl && serviceSlug;
+
+  // Si déjà connecté et SSO, rediriger vers authorize
+  useEffect(() => {
+    if (user && isSSO) {
+      console.log('👤 Utilisateur déjà connecté - Redirection vers autorisation');
+      const authorizeUrl = `/authorize?redirect=${encodeURIComponent(redirectUrl)}&service=${serviceSlug}`;
+      navigate(authorizeUrl, { replace: true });
+    }
+  }, [user, isSSO, redirectUrl, serviceSlug, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -60,30 +75,33 @@ export default function Signup() {
     e.preventDefault();
     try {
       await verify(verificationCode);
-      
-      console.log('Inscription reussie');
-      
-      // Vérifier s'il y a un paramètre redirect dans l'URL (priorité 1)
-      const searchParams = new URLSearchParams(location.search);
-      const redirectUrl = searchParams.get('redirect');
-      
-      if (redirectUrl) {
-        const decodedUrl = decodeURIComponent(redirectUrl);
-        console.log('Redirection vers:', decodedUrl);
-        navigate(decodedUrl, { replace: true });
+
+      console.log('✅ Inscription réussie');
+
+      // ============================================
+      // SCÉNARIO 1 : INSCRIPTION SSO (avec service externe)
+      // ============================================
+      if (isSSO) {
+        console.log('🔐 SSO détecté - Redirection vers page d\'autorisation');
+        const authorizeUrl = `/authorize?redirect=${encodeURIComponent(redirectUrl)}&service=${serviceSlug}`;
+        navigate(authorizeUrl, { replace: true });
         return;
       }
-      
-      // Vérifier s'il y a un state.from (priorité 2)
+
+      // ============================================
+      // SCÉNARIO 2 : INSCRIPTION NORMALE
+      // ============================================
+
+      // Vérifier s'il y a un state.from (page protégée)
       if (location.state?.from) {
-        const from = typeof location.state.from === 'string' 
-          ? location.state.from 
+        const from = typeof location.state.from === 'string'
+          ? location.state.from
           : location.state.from.pathname + (location.state.from.search || '');
         console.log('Redirection vers page protégée:', from);
         navigate(from, { replace: true });
         return;
       }
-      
+
       // Par défaut, rediriger vers le dashboard
       console.log('Redirection vers dashboard');
       navigate('/dashboard', { replace: true });
@@ -285,7 +303,10 @@ export default function Signup() {
             {/* Lien connexion */}
             <p className="mt-6 text-center text-sm text-gray-600">
               Déjà un compte ?{' '}
-              <Link to="/login" className="font-semibold text-gray-900 hover:underline">
+              <Link
+                to={isSSO ? `/login?redirect=${encodeURIComponent(redirectUrl)}&service=${serviceSlug}` : '/login'}
+                className="font-semibold text-gray-900 hover:underline"
+              >
                 Se connecter
               </Link>
             </p>

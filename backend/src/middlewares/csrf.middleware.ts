@@ -38,7 +38,7 @@ function getSessionId(req: Request): string {
   if (req.user?.id) {
     return `user_${req.user.id}`;
   }
-  
+
   // Sinon utiliser l'IP + User-Agent
   const ip = req.ip || req.socket.remoteAddress || 'unknown';
   const userAgent = req.headers['user-agent'] || 'unknown';
@@ -52,10 +52,10 @@ function getSessionId(req: Request): string {
 export const generateCsrf = (req: Request, res: Response, next: NextFunction) => {
   try {
     const sessionId = getSessionId(req);
-    
+
     // Vérifier si un token existe déjà
     let csrfData = csrfTokens.get(sessionId);
-    
+
     // Si pas de token ou expiré, en créer un nouveau
     if (!csrfData || csrfData.expires < Date.now()) {
       const token = generateCsrfToken();
@@ -66,10 +66,10 @@ export const generateCsrf = (req: Request, res: Response, next: NextFunction) =>
       csrfTokens.set(sessionId, csrfData);
       logger.debug('Token CSRF généré', { sessionId });
     }
-    
+
     // Ajouter le token à la requête pour que les contrôleurs puissent l'utiliser
     req.csrfToken = () => csrfData!.token;
-    
+
     next();
   } catch (error) {
     logger.error('Erreur génération token CSRF:', error);
@@ -88,12 +88,23 @@ export const verifyCsrf = (req: Request, res: Response, next: NextFunction) => {
       return next();
     }
 
+    // Ignorer pour les routes d'échange OAuth (appelées par les backends externes)
+    const exemptRoutes = [
+      '/api/v1/auth/exchange',
+      '/api/v1/auth/refresh-token'
+    ];
+
+    if (exemptRoutes.some(route => req.path === route || req.originalUrl.includes(route))) {
+      logger.debug('Route exemptée de CSRF:', req.originalUrl);
+      return next();
+    }
+
     const sessionId = getSessionId(req);
     const csrfData = csrfTokens.get(sessionId);
-    
+
     // Récupérer le token CSRF depuis le header
     const clientToken = req.headers['x-csrf-token'] as string;
-    
+
     if (!clientToken) {
       logger.warn('Token CSRF manquant', {
         method: req.method,
@@ -102,18 +113,18 @@ export const verifyCsrf = (req: Request, res: Response, next: NextFunction) => {
       });
       return next(new AppError('Token CSRF manquant', StatusCodes.FORBIDDEN));
     }
-    
+
     if (!csrfData) {
       logger.warn('Session CSRF introuvable', { sessionId });
       return next(new AppError('Session CSRF invalide', StatusCodes.FORBIDDEN));
     }
-    
+
     if (csrfData.expires < Date.now()) {
       logger.warn('Token CSRF expiré', { sessionId });
       csrfTokens.delete(sessionId);
       return next(new AppError('Token CSRF expiré', StatusCodes.FORBIDDEN));
     }
-    
+
     if (clientToken !== csrfData.token) {
       logger.warn('Token CSRF invalide', {
         method: req.method,
@@ -122,7 +133,7 @@ export const verifyCsrf = (req: Request, res: Response, next: NextFunction) => {
       });
       return next(new AppError('Token CSRF invalide', StatusCodes.FORBIDDEN));
     }
-    
+
     logger.debug('Token CSRF vérifié avec succès', { sessionId });
     next();
   } catch (error) {
@@ -136,14 +147,14 @@ export const verifyCsrf = (req: Request, res: Response, next: NextFunction) => {
  */
 export const getCsrfToken = (req: Request, res: Response) => {
   const token = req.csrfToken ? req.csrfToken() : null;
-  
+
   if (!token) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       status: 'error',
       message: 'Impossible de générer un token CSRF'
     });
   }
-  
+
   res.status(StatusCodes.OK).json({
     status: 'success',
     data: {
