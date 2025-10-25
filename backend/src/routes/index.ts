@@ -9,6 +9,7 @@ import adminRolesRouter from './admin/roles.routes';
 import adminRateLimitRouter from './admin/rateLimit.routes';
 import adminAuditRouter from './admin/audit.routes';
 import adminWebhooksRouter from './admin/webhooks.routes';
+import adminServicesRouter from './admin/services.routes';
 import path from 'path';
 
 const router = Router();
@@ -33,8 +34,13 @@ router.use('/admin/roles', adminRolesRouter);
 router.use('/admin/rate-limit', adminRateLimitRouter);
 router.use('/admin/audit', adminAuditRouter);
 router.use('/admin/webhooks', adminWebhooksRouter);
+router.use('/admin/services', adminServicesRouter);
 
 // Routes de proxy vers les microservices
 router.use('/', proxyRouter);
+
+// Proxy dynamique pour services externes (doit être après les autres routes)
+import { dynamicProxyMiddleware } from '../middlewares/dynamicProxy.middleware';
+router.use('/proxy/*', dynamicProxyMiddleware);
 
 export default router;

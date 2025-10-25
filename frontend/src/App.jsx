@@ -20,6 +20,7 @@ import UsersManagement from './pages/admin/UsersManagement';
 import RolesPermissions from './pages/admin/RolesPermissions';
 import RateLimiting from './pages/admin/RateLimiting';
 import AuditTrail from './pages/admin/AuditTrail';
+import ServicesManagement from './pages/admin/ServicesManagement';
 import WebhooksManager from './pages/admin/WebhooksManager';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import LogsViewer from './pages/admin/LogsViewer';
@@ -93,6 +94,7 @@ function App() {
               <Route path="health" element={<SystemHealth />} />
               <Route path="performance" element={<PerformanceMetrics />} />
               <Route path="dependencies" element={<Dependencies />} />
+              <Route path="services" element={<ServicesManagement />} />
             </Route>
 
             {/* Services Admin (sans layout pour l'instant) */}
