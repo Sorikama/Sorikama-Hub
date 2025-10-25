@@ -10,6 +10,7 @@
 
 import axios from 'axios';
 import { API_CONFIG, ENDPOINTS, PUBLIC_ROUTES, STORAGE_KEYS } from '../config/api.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * Instance Axios configurée pour l'API Gateway
@@ -18,6 +19,7 @@ import { API_CONFIG, ENDPOINTS, PUBLIC_ROUTES, STORAGE_KEYS } from '../config/ap
 const api = axios.create({
   baseURL: API_CONFIG.BASE_URL,
   timeout: API_CONFIG.TIMEOUT,
+  withCredentials: true, // Envoyer les cookies automatiquement
   headers: {
     'Content-Type': 'application/json'
   }
@@ -26,33 +28,62 @@ const api = axios.create({
 // Flag pour indiquer qu'une déconnexion est en cours
 let isLoggingOut = false;
 
+// Cache du token CSRF
+let csrfToken = null;
+
 /**
- * Intercepteur de requête - Ajoute automatiquement les headers d'authentification
+ * Récupérer le token CSRF depuis le serveur
+ */
+async function fetchCsrfToken() {
+  try {
+    const response = await axios.get(`${API_CONFIG.BASE_URL}/security/csrf-token`, {
+      withCredentials: true
+    });
+    csrfToken = response.data.data.csrfToken;
+    logger.debug('✅ Token CSRF récupéré');
+    return csrfToken;
+  } catch (error) {
+    logger.error('❌ Erreur récupération token CSRF:', error);
+    throw error;
+  }
+}
+
+/**
+ * Intercepteur de requête - Ajoute automatiquement les headers d'authentification et CSRF
  * 
  * Logique d'authentification JWT uniquement
  */
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const isPublicRoute = PUBLIC_ROUTES.some(route => config.url?.includes(route));
 
-    // Ajouter le JWT Token pour les routes protégées
-    if (!isPublicRoute) {
-      const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-      if (accessToken && accessToken !== 'null' && accessToken !== 'undefined') {
-        config.headers.Authorization = `Bearer ${accessToken}`;
+    // Les tokens sont maintenant dans les cookies httpOnly
+    // Ils sont envoyés automatiquement avec withCredentials: true
+    // Plus besoin de les ajouter manuellement
+
+    // Ajouter le token CSRF pour les requêtes POST/PUT/PATCH/DELETE
+    if (config.method && ['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())) {
+      // Récupérer le token CSRF si on ne l'a pas encore
+      if (!csrfToken) {
+        await fetchCsrfToken();
+      }
+
+      if (csrfToken) {
+        config.headers['X-CSRF-Token'] = csrfToken;
       }
     }
 
-    // Log pour debug
-    console.log(`📡 ${config.method?.toUpperCase()} ${config.url}`, {
-      hasJWT: !!config.headers.Authorization,
-      isPublic: isPublicRoute
+    // Log pour debug (désactivé en production)
+    logger.debug(`📡 ${config.method?.toUpperCase()} ${config.url}`, {
+      isPublic: isPublicRoute,
+      withCredentials: config.withCredentials,
+      hasCsrf: !!config.headers['X-CSRF-Token']
     });
 
     return config;
   },
   (error) => {
-    console.error('❌ Erreur configuration requête:', error);
+    logger.error('❌ Erreur configuration requête:', error);
     return Promise.reject(error);
   }
 );
@@ -75,48 +106,44 @@ api.interceptors.response.use(
     const isLogoutRequest = originalRequest.url?.includes('/auth/logout');
     const isRefreshRequest = originalRequest.url?.includes('/auth/refresh');
 
+    // Si erreur 403 avec message CSRF, rafraîchir le token CSRF
+    if (error.response?.status === 403 && error.response?.data?.message?.includes('CSRF')) {
+      logger.warn('⚠️ Token CSRF invalide, récupération d\'un nouveau token...');
+      csrfToken = null; // Réinitialiser le cache
+      await fetchCsrfToken();
+
+      // Retry la requête avec le nouveau token
+      if (csrfToken) {
+        originalRequest.headers['X-CSRF-Token'] = csrfToken;
+        return api(originalRequest);
+      }
+    }
+
     // Si erreur 401 et qu'on n'a pas déjà tenté le refresh
     // ET que ce n'est pas une requête de logout ou refresh
     if (error.response?.status === 401 && !originalRequest._retry && !isLogoutRequest && !isRefreshRequest) {
       originalRequest._retry = true;
 
-      const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+      try {
+        logger.log('🔄 Tentative de renouvellement du token...');
 
-      if (refreshToken) {
-        try {
-          console.log('🔄 Tentative de renouvellement du token...');
+        // Appeler l'endpoint de refresh
+        // Le refresh token est dans les cookies httpOnly, envoyé automatiquement
+        const response = await api.post(ENDPOINTS.AUTH.REFRESH);
 
-          // Appeler l'endpoint de refresh (avec API Key mais sans JWT)
-          const response = await api.post(ENDPOINTS.AUTH.REFRESH, {
-            refreshToken
-          });
+        logger.log('✅ Token renouvelé avec succès');
 
-          const { accessToken, refreshToken: newRefreshToken } = response.data.data.tokens;
+        // Les nouveaux tokens sont dans les cookies httpOnly
+        // Retry la requête originale
+        return api(originalRequest);
 
-          // Sauvegarder les nouveaux tokens
-          localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
-          localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
+      } catch (refreshError) {
+        logger.error('❌ Échec du renouvellement du token');
 
-          console.log('✅ Token renouvelé avec succès');
-
-          // Retry la requête originale avec le nouveau token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return api(originalRequest);
-
-        } catch (refreshError) {
-          console.error('❌ Échec du renouvellement du token:', refreshError);
-          console.error('❌ URL originale:', originalRequest.url);
-          console.error('❌ Erreur refresh:', refreshError.response?.data || refreshError.message);
-
-          // Refresh échoué - déconnecter l'utilisateur
-          authUtils.clearStorage();
-          window.location.href = '/login';
-          return Promise.reject(refreshError);
-        }
-      } else {
-        console.warn('⚠️ Pas de refresh token disponible pour:', originalRequest.url);
+        // Refresh échoué - déconnecter l'utilisateur
         authUtils.clearStorage();
         window.location.href = '/login';
+        return Promise.reject(refreshError);
       }
     }
 
@@ -138,12 +165,12 @@ export const authService = {
    */
   async register(userData) {
     try {
-      console.log('📝 Demande d\'inscription pour:', userData.email);
+      logger.log('📝 Demande d\'inscription');
       const response = await api.post(ENDPOINTS.AUTH.REGISTER, userData);
-      console.log('✅ Code de vérification envoyé');
+      logger.log('✅ Code de vérification envoyé');
       return response.data;
     } catch (error) {
-      console.error('❌ Erreur inscription:', error.response?.data?.message);
+      logger.error('❌ Erreur inscription');
       throw error;
     }
   },
@@ -157,7 +184,7 @@ export const authService = {
    */
   async verify(verificationData) {
     try {
-      console.log('🔍 Vérification du code...');
+      logger.log('🔍 Vérification du code...');
       const response = await api.post(ENDPOINTS.AUTH.VERIFY, verificationData);
 
       const { user, tokens } = response.data.data;
@@ -165,10 +192,10 @@ export const authService = {
       // Sauvegarder toutes les données d'authentification
       authUtils.saveAuthData(user, tokens);
 
-      console.log('✅ Compte créé et utilisateur connecté');
+      logger.log('✅ Compte créé et utilisateur connecté');
       return response.data;
     } catch (error) {
-      console.error('❌ Erreur vérification:', error.response?.data?.message);
+      logger.error('❌ Erreur vérification');
       throw error;
     }
   },
@@ -182,7 +209,7 @@ export const authService = {
    */
   async login(credentials) {
     try {
-      console.log('🚪 Tentative de connexion pour:', credentials.email);
+      logger.log('🚪 Tentative de connexion');
       const response = await api.post(ENDPOINTS.AUTH.LOGIN, credentials);
 
       const { user, tokens } = response.data.data;
@@ -190,10 +217,10 @@ export const authService = {
       // Sauvegarder les données d'authentification
       authUtils.saveAuthData(user, tokens);
 
-      console.log('✅ Connexion réussie');
+      logger.log('✅ Connexion réussie');
       return response.data;
     } catch (error) {
-      console.error('❌ Erreur connexion:', error.response?.data?.message);
+      logger.error('❌ Erreur connexion');
       throw error;
     }
   },
@@ -204,74 +231,35 @@ export const authService = {
    * Gère manuellement le refresh token si nécessaire (car l'intercepteur ignore les requêtes de logout)
    */
   async logout() {
-    const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
-
-    // Vérifier qu'on a bien un refresh token
-    if (!refreshToken || refreshToken === 'null' || refreshToken === 'undefined') {
-      console.warn('⚠️ Pas de refresh token - déconnexion locale uniquement');
-      authUtils.clearStorage();
-      return { success: true };
-    }
-
     try {
-      console.log('🚪 Envoi de la requête de déconnexion au serveur...');
+      logger.log('🚪 Déconnexion en cours...');
 
       // Envoyer la requête de logout au serveur
-      const response = await api.post(ENDPOINTS.AUTH.LOGOUT, { refreshToken });
+      // Le refresh token est dans les cookies httpOnly, envoyé automatiquement
+      // Le backend supprimera les cookies
+      const response = await api.post(ENDPOINTS.AUTH.LOGOUT);
 
-      console.log('✅ Déconnexion validée par le serveur');
+      logger.log('✅ Déconnexion validée');
 
-      // Nettoyer le localStorage
+      // Nettoyer le cache local
       authUtils.clearStorage();
-      console.log('✅ Stockage local nettoyé');
 
       return { success: true };
 
     } catch (error) {
-      console.error('❌ Erreur lors de la déconnexion:', error);
+      logger.error('❌ Erreur lors de la déconnexion');
 
-      // Si erreur 401 (token invalide), demander un nouveau token et réessayer UNE FOIS
-      if (error.response?.status === 401) {
-        console.log('🔄 Token invalide, tentative de renouvellement...');
+      // En cas d'erreur, nettoyer quand même le cache local
+      authUtils.clearStorage();
 
-        try {
-          // Demander un nouveau token
-          const refreshResponse = await api.post(ENDPOINTS.AUTH.REFRESH, { refreshToken });
-          const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data.data.tokens;
-
-          // Sauvegarder les nouveaux tokens
-          localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
-          localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
-
-          console.log('✅ Token renouvelé, nouvelle tentative de déconnexion...');
-
-          // Réessayer le logout avec le nouveau token (DERNIÈRE TENTATIVE)
-          const retryResponse = await api.post(ENDPOINTS.AUTH.LOGOUT, { refreshToken: newRefreshToken });
-
-          console.log('✅ Déconnexion réussie après renouvellement du token');
-          authUtils.clearStorage();
-          return { success: true };
-
-        } catch (refreshError) {
-          console.error('❌ Échec du renouvellement ou deuxième tentative de déconnexion:', refreshError);
-
-          // Si on a un 401 une DEUXIÈME fois, ou si le refresh échoue, déconnecter localement
-          console.warn('⚠️ Impossible de se déconnecter proprement - déconnexion locale forcée');
-          authUtils.clearStorage();
-          return { success: true, warning: 'Session expirée, déconnexion locale effectuée' };
-        }
-      }
-
-      // Si c'est une erreur réseau ou serveur, déconnecter localement
+      // Si c'est une erreur réseau ou serveur, déconnexion locale
       if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || error.response?.status >= 500) {
-        console.warn('⚠️ Erreur serveur - déconnexion locale forcée');
-        authUtils.clearStorage();
+        logger.warn('⚠️ Erreur serveur - déconnexion locale forcée');
         return { success: true, warning: 'Déconnexion locale effectuée (serveur injoignable)' };
       }
 
-      // Pour les autres erreurs, propager le message
-      const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de la déconnexion';
-      throw new Error(errorMessage);
+      // Pour les autres erreurs, considérer comme réussi quand même
+      return { success: true, warning: 'Déconnexion locale effectuée' };
     }
   },
 
@@ -283,12 +271,12 @@ export const authService = {
    */
   async getProfile() {
     try {
-      console.log('👤 Récupération du profil...');
+      logger.log('👤 Récupération du profil...');
       const response = await api.get(ENDPOINTS.AUTH.ME);
-      console.log('✅ Profil récupéré');
+      logger.log('✅ Profil récupéré');
       return response.data;
     } catch (error) {
-      console.error('❌ Erreur récupération profil:', error);
+      logger.error('❌ Erreur récupération profil');
       throw error;
     }
   },
@@ -301,7 +289,7 @@ export const authService = {
    */
   async updateProfile(profileData) {
     try {
-      console.log('✏️ Mise à jour du profil...');
+      logger.log('✏️ Mise à jour du profil...');
       const response = await api.patch(ENDPOINTS.AUTH.UPDATE_ME, profileData);
 
       const updatedUser = response.data.data.user;
@@ -309,10 +297,10 @@ export const authService = {
       // Mettre à jour les données utilisateur en local
       localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(updatedUser));
 
-      console.log('✅ Profil mis à jour');
+      logger.log('✅ Profil mis à jour');
       return response.data;
     } catch (error) {
-      console.error('❌ Erreur mise à jour profil:', error);
+      logger.error('❌ Erreur mise à jour profil');
       throw error;
     }
   },
@@ -325,12 +313,12 @@ export const authService = {
    */
   async updatePassword(passwordData) {
     try {
-      console.log('🔒 Mise à jour du mot de passe...');
+      logger.log('🔒 Mise à jour du mot de passe...');
       const response = await api.patch(ENDPOINTS.AUTH.UPDATE_PASSWORD, passwordData);
-      console.log('✅ Mot de passe mis à jour');
+      logger.log('✅ Mot de passe mis à jour');
       return response.data;
     } catch (error) {
-      console.error('❌ Erreur mise à jour mot de passe:', error);
+      logger.error('❌ Erreur mise à jour mot de passe');
       throw error;
     }
   },
@@ -354,7 +342,7 @@ export const systemService = {
       const response = await api.get(ENDPOINTS.SYSTEM.HEALTH);
       return response.data;
     } catch (error) {
-      console.error('❌ Erreur santé système:', error);
+      logger.error('❌ Erreur santé système');
       throw error;
     }
   }
@@ -367,40 +355,48 @@ export const systemService = {
 export const authUtils = {
   /**
    * Vérifier si l'utilisateur est authentifié
-   * @returns {boolean} True si un token d'accès existe
+   * Avec httpOnly cookies, on ne peut pas vérifier directement
+   * On fait une requête au backend pour vérifier
+   * @returns {boolean} True si probablement authentifié (basé sur le cache)
    */
   isAuthenticated() {
-    return !!localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    // Avec httpOnly cookies, on ne peut pas lire les cookies en JavaScript
+    // On se base sur les données utilisateur en cache
+    const userData = sessionStorage.getItem(STORAGE_KEYS.USER_DATA);
+    return !!userData;
   },
 
   /**
-   * Récupérer les données utilisateur du stockage local
+   * Récupérer les données utilisateur du cache session
    * @returns {Object|null} Données utilisateur ou null
    */
   getUser() {
-    const userData = localStorage.getItem(STORAGE_KEYS.USER_DATA);
+    const userData = sessionStorage.getItem(STORAGE_KEYS.USER_DATA);
     return userData ? JSON.parse(userData) : null;
   },
 
   /**
-   * Sauvegarder les données d'authentification après connexion/inscription
+   * Sauvegarder les données utilisateur (pas les tokens)
+   * Les tokens sont dans les cookies httpOnly
    * 
    * @param {Object} user - Données utilisateur
-   * @param {Object} tokens - Tokens d'authentification
+   * @param {Object} tokens - Tokens (ignorés, ils sont dans les cookies)
    */
   saveAuthData(user, tokens) {
-    localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
-    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.accessToken);
-    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
+    // Sauvegarder uniquement les données utilisateur en sessionStorage
+    // sessionStorage est plus sécurisé que localStorage (effacé à la fermeture)
+    sessionStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+
+    // Les tokens sont dans les cookies httpOnly, pas besoin de les stocker
   },
 
   /**
-   * Nettoyer tout le stockage local (déconnexion)
+   * Nettoyer le cache (déconnexion)
+   * Les cookies httpOnly sont supprimés par le backend
    */
   clearStorage() {
-    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    sessionStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    // Les cookies httpOnly sont supprimés automatiquement par le backend lors du logout
   }
 };
 

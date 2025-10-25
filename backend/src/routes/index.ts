@@ -11,6 +11,7 @@ import adminAuditRouter from './admin/audit.routes';
 import adminWebhooksRouter from './admin/webhooks.routes';
 import adminServicesRouter from './admin/services.routes';
 import authorizeRouter from './authorize.routes';
+import csrfRouter from './csrf.routes';
 import path from 'path';
 
 const router = Router();
@@ -22,6 +23,9 @@ router.get('/', (req, res) => {
 
 // Routes d'authentification
 router.use('/auth', authRouter);
+
+// Routes CSRF
+router.use('/security', csrfRouter);
 
 // Routes système (rôles, permissions, services)
 router.use('/system', systemRouter);

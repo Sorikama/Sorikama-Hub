@@ -11,6 +11,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authService, authUtils } from '../services/api.js';
 import { useToast } from './ToastContext.jsx';
+import { logger } from '../utils/logger.js';
 
 // Création du contexte d'authentification
 const AuthContext = createContext();
@@ -112,7 +113,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        console.log('🔍 Vérification de l\'authentification existante...');
+        logger.log('🔍 Vérification de l\'authentification...');
 
         if (authUtils.isAuthenticated()) {
           // Token existe - récupérer les données utilisateur
@@ -120,21 +121,21 @@ export function AuthProvider({ children }) {
 
           if (user) {
             // Données utilisateur en cache - les utiliser
-            console.log('✅ Utilisateur trouvé en cache:', user.email);
+            logger.log('✅ Utilisateur trouvé en cache');
             dispatch({ type: AUTH_ACTIONS.SET_USER, payload: user });
           } else {
             // Token existe mais pas de données - récupérer le profil
-            console.log('🔄 Récupération du profil utilisateur...');
+            logger.log('🔄 Récupération du profil...');
             const profileData = await authService.getProfile();
             dispatch({ type: AUTH_ACTIONS.SET_USER, payload: profileData.data.user });
           }
         } else {
           // Pas de token - utilisateur non connecté
-          console.log('ℹ️ Aucune authentification trouvée');
+          logger.log('ℹ️ Aucune authentification trouvée');
           dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
         }
       } catch (error) {
-        console.error('❌ Erreur initialisation auth:', error);
+        logger.error('❌ Erreur initialisation auth');
 
         // Token invalide ou expiré - nettoyer et déconnecter
         authUtils.clearStorage();
@@ -161,7 +162,7 @@ export function AuthProvider({ children }) {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
         dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
-        console.log('📝 Démarrage du processus d\'inscription...');
+        logger.log('📝 Démarrage inscription...');
         const response = await authService.register(userData);
 
         // Sauvegarder le token de vérification pour l'étape 2
@@ -171,7 +172,7 @@ export function AuthProvider({ children }) {
         });
 
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
-        console.log('✅ Code de vérification envoyé');
+        logger.log('✅ Code envoyé');
 
         // Afficher un toast de succès
         toast.success('Code de vérification envoyé à votre email !');
@@ -180,7 +181,7 @@ export function AuthProvider({ children }) {
 
       } catch (error) {
         const errorMessage = error.response?.data?.message || 'Erreur lors de l\'inscription';
-        console.error('❌ Erreur inscription:', errorMessage);
+        logger.error('❌ Erreur inscription');
         dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage });
         throw error;
       }
@@ -202,7 +203,7 @@ export function AuthProvider({ children }) {
           throw new Error('Token de vérification manquant. Veuillez recommencer l\'inscription.');
         }
 
-        console.log('🔍 Vérification du code d\'inscription...');
+        logger.log('🔍 Vérification du code...');
         const response = await authService.verify({
           verificationToken: state.verificationToken,
           code
@@ -210,7 +211,7 @@ export function AuthProvider({ children }) {
 
         // Utilisateur créé et connecté automatiquement
         dispatch({ type: AUTH_ACTIONS.SET_USER, payload: response.data.user });
-        console.log('✅ Compte créé et utilisateur connecté');
+        logger.log('✅ Compte créé');
 
         // Afficher un toast de succès
         toast.success(`Bienvenue ${response.data.user.firstName} ! Votre compte a été créé avec succès.`);
@@ -219,7 +220,7 @@ export function AuthProvider({ children }) {
 
       } catch (error) {
         const errorMessage = error.response?.data?.message || 'Code de vérification invalide';
-        console.error('❌ Erreur vérification:', errorMessage);
+        logger.error('❌ Erreur vérification');
         dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage });
         throw error;
       }
@@ -237,12 +238,12 @@ export function AuthProvider({ children }) {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
         dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
-        console.log('🚪 Tentative de connexion...');
+        logger.log('🚪 Tentative de connexion...');
         const response = await authService.login(credentials);
 
         // Utilisateur connecté
         dispatch({ type: AUTH_ACTIONS.SET_USER, payload: response.data.user });
-        console.log('✅ Connexion réussie');
+        logger.log('✅ Connexion réussie');
 
         // Afficher un toast de succès
         toast.success(`Bon retour ${response.data.user.firstName} !`);
@@ -251,7 +252,7 @@ export function AuthProvider({ children }) {
 
       } catch (error) {
         const errorMessage = error.response?.data?.message || 'Email ou mot de passe incorrect';
-        console.error('❌ Erreur connexion:', errorMessage);
+        logger.error('❌ Erreur connexion');
         dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage });
         throw error;
       }
@@ -264,12 +265,12 @@ export function AuthProvider({ children }) {
      */
     async logout() {
       try {
-        console.log('🚪 Déconnexion en cours...');
+        logger.log('🚪 Déconnexion en cours...');
         const result = await authService.logout();
 
         // Si la déconnexion a réussi, mettre à jour l'état
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
-        console.log('✅ Déconnexion réussie');
+        logger.log('✅ Déconnexion réussie');
 
         // Afficher un toast de succès
         if (result?.warning) {
@@ -282,7 +283,7 @@ export function AuthProvider({ children }) {
         return result;
 
       } catch (error) {
-        console.error('❌ Erreur lors de la déconnexion:', error);
+        logger.error('❌ Erreur déconnexion');
 
         // Définir l'erreur dans l'état pour que le composant puisse l'afficher
         const errorMessage = error.message || 'Erreur lors de la déconnexion';
@@ -303,12 +304,12 @@ export function AuthProvider({ children }) {
       try {
         dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
-        console.log('✏️ Mise à jour du profil...');
+        logger.log('✏️ Mise à jour du profil...');
         const response = await authService.updateProfile(profileData);
 
         // Mettre à jour l'utilisateur dans l'état
         dispatch({ type: AUTH_ACTIONS.SET_USER, payload: response.data.user });
-        console.log('✅ Profil mis à jour');
+        logger.log('✅ Profil mis à jour');
 
         // Afficher un toast de succès
         toast.success('Profil mis à jour avec succès !');
@@ -317,7 +318,7 @@ export function AuthProvider({ children }) {
 
       } catch (error) {
         const errorMessage = error.response?.data?.message || 'Erreur lors de la mise à jour du profil';
-        console.error('❌ Erreur mise à jour profil:', errorMessage);
+        logger.error('❌ Erreur mise à jour profil');
         dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage });
         throw error;
       }
@@ -333,10 +334,10 @@ export function AuthProvider({ children }) {
       try {
         dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
-        console.log('🔒 Mise à jour du mot de passe...');
+        logger.log('🔒 Mise à jour du mot de passe...');
         const response = await authService.updatePassword(passwordData);
 
-        console.log('✅ Mot de passe mis à jour');
+        logger.log('✅ Mot de passe mis à jour');
 
         // Afficher un toast de succès
         toast.success('Mot de passe mis à jour avec succès !');
@@ -345,7 +346,7 @@ export function AuthProvider({ children }) {
 
       } catch (error) {
         const errorMessage = error.response?.data?.message || 'Erreur lors de la mise à jour du mot de passe';
-        console.error('❌ Erreur mise à jour mot de passe:', errorMessage);
+        logger.error('❌ Erreur mise à jour mot de passe');
         dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage });
         throw error;
       }
@@ -359,19 +360,19 @@ export function AuthProvider({ children }) {
     }
   };
 
-// Valeur fournie par le contexte (état + actions)
-const contextValue = {
-  // État
-  ...state,
-  // Actions
-  ...actions
-};
+  // Valeur fournie par le contexte (état + actions)
+  const contextValue = {
+    // État
+    ...state,
+    // Actions
+    ...actions
+  };
 
-return (
-  <AuthContext.Provider value={contextValue}>
-    {children}
-  </AuthContext.Provider>
-);
+  return (
+    <AuthContext.Provider value={contextValue}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 /**

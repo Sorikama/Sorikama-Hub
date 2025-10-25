@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemple CSRF & Rate Limiting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-gray-800">🛡️ Protection CSRF & Rate Limiting</h1>
+        
+        <!-- Section CSRF -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4 text-blue-600">Protection CSRF</h2>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Token CSRF actuel :</label>
+                <div class="flex gap-2">
+                    <input type="text" id="csrfToken" readonly 
+                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 font-mono text-sm">
+                    <button onclick="fetchCsrfToken()" 
+                            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        Récupérer Token
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <button onclick="testCsrfProtection()" 
+                        class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                    Tester Protection CSRF
+                </button>
+            </div>
+            
+            <div id="csrfResult" class="mt-4 p-4 rounded-md hidden"></div>
+        </div>
+        
+        <!-- Section Rate Limiting -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4 text-purple-600">Rate Limiting</h2>
+            
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div class="text-center p-4 bg-blue-50 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600" id="rateLimit">-</div>
+                    <div class="text-sm text-gray-600">Limite</div>
+                </div>
+                <div class="text-center p-4 bg-green-50 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600" id="rateRemaining">-</div>
+                    <div class="text-sm text-gray-600">Restantes</div>
+                </div>
+                <div class="text-center p-4 bg-orange-50 rounded-lg">
+                    <div class="text-2xl font-bold text-orange-600" id="rateReset">-</div>
+                    <div class="text-sm text-gray-600">Réinitialisation</div>
+                </div>
+            </div>
+            
+            <div class="flex gap-2 mb-4">
+                <button onclick="testRateLimit()" 
+                        class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">
+                    Faire une requête
+                </button>
+                <button onclick="spamRequests()" 
+                        class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                    Spam (10 requêtes)
+                </button>
+            </div>
+            
+            <div id="rateLimitResult" class="mt-4 p-4 rounded-md hidden"></div>
+        </div>
+        
+        <!-- Logs -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">📋 Logs</h2>
+            <div id="logs" class="space-y-2 max-h-96 overflow-y-auto font-mono text-sm"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:7000/api/v1';
+        
+        // Fonction pour logger
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: 'text-blue-600',
+                success: 'text-green-600',
+                error: 'text-red-600',
+                warning: 'text-orange-600'
+            };
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `p-2 rounded ${colors[type]} bg-gray-50`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logsDiv.insertBefore(logEntry, logsDiv.firstChild);
+        }
+        
+        // Récupérer le token CSRF
+        async function fetchCsrfToken() {
+            try {
+                log('Récupération du token CSRF...', 'info');
+                
+                const response = await fetch(`${API_BASE}/security/csrf-token`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const token = data.data.csrfToken;
+                    document.getElementById('csrfToken').value = token;
+                    localStorage.setItem('csrf_token', token);
+                    log('✅ Token CSRF récupéré avec succès', 'success');
+                } else {
+                    log('❌ Erreur lors de la récupération du token', 'error');
+                }
+            } catch (error) {
+                log(`❌ Erreur: ${error.message}`, 'error');
+            }
+        }
+        
+        // Tester la protection CSRF
+        async function testCsrfProtection() {
+            const resultDiv = document.getElementById('csrfResult');
+            const csrfToken = localStorage.getItem('csrf_token');
+            
+            if (!csrfToken) {
+                resultDiv.className = 'mt-4 p-4 rounded-md bg-red-100 text-red-700';
+                resultDiv.textContent = '❌ Aucun token CSRF. Récupérez-en un d\'abord !';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                log('Test de protection CSRF...', 'info');
+                
+                // Simuler une requête POST avec le token CSRF
+                const response = await fetch(`${API_BASE}/system/health`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({ test: true })
+                });
+                
+                if (response.ok) {
+                    resultDiv.className = 'mt-4 p-4 rounded-md bg-green-100 text-green-700';
+                    resultDiv.textContent = '✅ Protection CSRF validée ! Requête acceptée.';
+                    log('✅ Requête avec CSRF acceptée', 'success');
+                } else {
+                    resultDiv.className = 'mt-4 p-4 rounded-md bg-red-100 text-red-700';
+                    resultDiv.textContent = `❌ Erreur ${response.status}: ${response.statusText}`;
+                    log(`❌ Requête rejetée: ${response.status}`, 'error');
+                }
+                
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                log(`❌ Erreur: ${error.message}`, 'error');
+            }
+        }
+        
+        // Mettre à jour les statistiques de rate limiting
+        function updateRateLimitStats(headers) {
+            const limit = headers.get('X-RateLimit-Limit');
+            const remaining = headers.get('X-RateLimit-Remaining');
+            const reset = headers.get('X-RateLimit-Reset');
+            
+            if (limit) document.getElementById('rateLimit').textContent = limit;
+            if (remaining) {
+                const remainingEl = document.getElementById('rateRemaining');
+                remainingEl.textContent = remaining;
+                
+                // Changer la couleur selon le nombre restant
+                if (parseInt(remaining) < 10) {
+                    remainingEl.className = 'text-2xl font-bold text-red-600';
+                } else if (parseInt(remaining) < 30) {
+                    remainingEl.className = 'text-2xl font-bold text-orange-600';
+                } else {
+                    remainingEl.className = 'text-2xl font-bold text-green-600';
+                }
+            }
+            
+            if (reset) {
+                const resetTime = new Date(parseInt(reset));
+                document.getElementById('rateReset').textContent = resetTime.toLocaleTimeString();
+            }
+        }
+        
+        // Tester le rate limiting
+        async function testRateLimit() {
+            const resultDiv = document.getElementById('rateLimitResult');
+            
+            try {
+                log('Envoi d\'une requête...', 'info');
+                
+                const response = await fetch(`${API_BASE}/security/csrf-token`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                updateRateLimitStats(response.headers);
+                
+                if (response.status === 429) {
+                    const retryAfter = response.headers.get('Retry-After');
+                    resultDiv.className = 'mt-4 p-4 rounded-md bg-red-100 text-red-700';
+                    resultDiv.textContent = `❌ Trop de requêtes ! Réessayez dans ${retryAfter} secondes.`;
+                    log(`❌ Rate limit atteint ! Retry-After: ${retryAfter}s`, 'error');
+                } else {
+                    resultDiv.className = 'mt-4 p-4 rounded-md bg-green-100 text-green-700';
+                    resultDiv.textContent = '✅ Requête acceptée';
+                    log('✅ Requête acceptée', 'success');
+                }
+                
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                log(`❌ Erreur: ${error.message}`, 'error');
+            }
+        }
+        
+        // Spam de requêtes pour tester le rate limiting
+        async function spamRequests() {
+            log('⚠️ Envoi de 10 requêtes rapides...', 'warning');
+            
+            for (let i = 1; i <= 10; i++) {
+                await testRateLimit();
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            log('✅ Spam terminé', 'info');
+        }
+        
+        // Récupérer le token au chargement
+        window.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Application démarrée', 'info');
+            fetchCsrfToken();
+        });
+    </script>
+</body>
+</html>

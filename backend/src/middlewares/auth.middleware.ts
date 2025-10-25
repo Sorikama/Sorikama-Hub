@@ -36,11 +36,20 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
     let token;
     
     // Extraction du token depuis différentes sources
-    if (req.headers.authorization?.startsWith('Bearer')) {
+    // Priorité 1 : Cookie httpOnly (le plus sécurisé)
+    if (req.cookies?.access_token) {
+      token = req.cookies.access_token;
+    }
+    // Priorité 2 : Header Authorization (pour compatibilité API)
+    else if (req.headers.authorization?.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
-    } else if (req.cookies?.token) {
+    }
+    // Priorité 3 : Cookie legacy
+    else if (req.cookies?.token) {
       token = req.cookies.token;
-    } else if (req.headers['x-access-token']) {
+    }
+    // Priorité 4 : Header custom
+    else if (req.headers['x-access-token']) {
       token = req.headers['x-access-token'] as string;
     }
 

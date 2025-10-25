@@ -1,0 +1,12 @@
+[2025-10-25 13:14:58] INFO: 🔐 Système de sécurité initialisé
+[2025-10-25 14:14:58] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-25 15:14:58] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-25 16:14:58] INFO: 🛡️ Validation API Key réussie
+[2025-10-25 17:14:58] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-25 18:14:58] INFO: 🔐 Session utilisateur renouvelée
+[2025-10-25 13:17:45] INFO: 🔐 Système de sécurité initialisé
+[2025-10-25 14:17:45] INFO: 🔑 Nouvelle session créée pour utilisateur: admin
+[2025-10-25 15:17:45] WARN: ⚠️ Tentative de connexion avec token expiré
+[2025-10-25 16:17:45] INFO: 🛡️ Validation API Key réussie
+[2025-10-25 17:17:45] WARN: 🚨 Accès refusé - Token manquant
+[2025-10-25 18:17:45] INFO: 🔐 Session utilisateur renouvelée

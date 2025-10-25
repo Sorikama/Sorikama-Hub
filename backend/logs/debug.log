@@ -1,0 +1,103 @@
+[2025-10-25 20:14:49] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-25 20:14:49] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-25 20:14:54] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-25 20:14:54] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-25 20:14:54] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-25 20:14:54] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-25 20:14:54] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-25 20:14:54] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-25 20:14:55] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$B.ETXp1zk1LgkgtXhBR6.OPWCcQIFYe.8JKeE83fKBr6qlh8MsM3.
+[2025-10-25 20:14:56] INFO: ✅ Service email prêt
+[2025-10-25 20:14:56] INFO: 🔍 Vérification du port 7000...
+[2025-10-25 20:14:56] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-25 20:14:56] INFO: ✅ Port 7000 disponible
+[2025-10-25 20:14:56] INFO: 🔍 Vérification de Redis...
+[2025-10-25 20:14:56] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-25 20:14:56] INFO: ✅ Connexion à MongoDB réussie.
+[2025-10-25 20:14:57] INFO: ✅ Compte admin existant
+[2025-10-25 20:14:57] INFO: 🌱 Début du seeding des permissions...
+[2025-10-25 20:14:57] INFO: ✅ 21 permissions créées/mises à jour
+[2025-10-25 20:14:57] INFO:   ✓ Rôle "super_admin" créé/mis à jour (21 permissions)
+[2025-10-25 20:14:57] INFO:   ✓ Rôle "admin" créé/mis à jour (15 permissions)
+[2025-10-25 20:14:57] INFO:   ✓ Rôle "user" créé/mis à jour (1 permissions)
+[2025-10-25 20:14:57] INFO: ✅ 3 rôles système créés/mis à jour
+[2025-10-25 20:14:57] INFO: 🎉 Seeding des permissions terminé avec succès
+[2025-10-25 20:14:57] INFO: ✅ Services existants OK
+[2025-10-25 20:14:57] INFO: 🌱 Démarrage des seeders...
+[2025-10-25 20:14:57] INFO: 🌱 Début du seeding des permissions...
+[2025-10-25 20:14:57] INFO: ✅ 21 permissions créées/mises à jour
+[2025-10-25 20:14:57] INFO:   ✓ Rôle "super_admin" créé/mis à jour (21 permissions)
+[2025-10-25 20:14:57] INFO:   ✓ Rôle "admin" créé/mis à jour (15 permissions)
+[2025-10-25 20:14:57] INFO:   ✓ Rôle "user" créé/mis à jour (1 permissions)
+[2025-10-25 20:14:57] INFO: ✅ 3 rôles système créés/mis à jour
+[2025-10-25 20:14:57] INFO: 🎉 Seeding des permissions terminé avec succès
+[2025-10-25 20:14:57] INFO: ✅ Compte admin existant
+[2025-10-25 20:14:57] INFO: ✅ Tous les seeders terminés avec succès
+[2025-10-25 20:14:57] INFO: API Key Admin générée automatiquement
+[2025-10-25 20:14:58] INFO: 🗑️ Fichier log supprimé: alerts.log
+[2025-10-25 20:14:58] INFO: 🗑️ Fichier log supprimé: error.log
+[2025-10-25 20:14:58] INFO: 🗑️ Fichier log supprimé: errors.log
+[2025-10-25 20:14:58] INFO: 🗑️ Fichier log supprimé: performance.log
+[2025-10-25 20:14:58] INFO: 🗑️ Fichier log supprimé: redis-errors.log
+[2025-10-25 20:14:58] INFO: 🗑️ Fichier log supprimé: redis-metrics.log
+[2025-10-25 20:14:58] INFO: 🗑️ Fichier log supprimé: requests.log
+[2025-10-25 20:14:58] INFO: 🗑️ Fichier log supprimé: security.log
+[2025-10-25 20:14:58] INFO: 🧹 Nettoyage terminé: 8 fichiers supprimés
+[2025-10-25 20:14:58] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-25 20:14:58] INFO: ⚙️ Système: Système de logs initialisé
+[2025-10-25 20:14:58] INFO: ⚙️ Système: Serveur HTTP démarré sur le port 7000
+[2025-10-25 20:14:59] INFO: 🌐 Accès au portail: http://localhost:7000/portal/login
+[2025-10-25 20:14:59] INFO: ⚙️ Système: Démarrage complet du système Sorikama Hub - {"port":7000}
+[2025-10-25 20:15:01] INFO: 🚫 Lancement automatique désactivé (3/3 tentatives atteintes)
+[2025-10-25 20:15:01] INFO: 💡 Accédez manuellement à: http://localhost:7000
+[2025-10-25 20:17:38] INFO: 🔧 Optimiseur de performance démarré
+[2025-10-25 20:17:38] INFO: ⚡ Optimisations Node.js appliquées
+[2025-10-25 20:17:40] INFO: 🚀 Initialisation Redis Cache...
+[2025-10-25 20:17:40] INFO: 📊 Initialisation Redis Métriques...
+[2025-10-25 20:17:40] INFO: 🔗 Redis Cache - Connexion en cours vers localhost:6379
+[2025-10-25 20:17:40] INFO: 📊 Redis Métriques - Connexion en cours vers localhost:6379/db1
+[2025-10-25 20:17:40] INFO: ✅ Redis Cache connecté avec succès après 1 tentative
+[2025-10-25 20:17:40] INFO: ✅ Redis Métriques connecté avec succès après 1 tentative
+[2025-10-25 20:17:41] INFO: 💡 Hash bcrypt généré pour sécurité future: $2b$12$dxj1bL5h.oFlng1nauW0iOekwqH6I/s1Dzi3ygU/wID5axegRKfV2
+[2025-10-25 20:17:41] INFO: ✅ Service email prêt
+[2025-10-25 20:17:42] INFO: 🔍 Vérification du port 7000...
+[2025-10-25 20:17:42] INFO: 📊 Statut Redis - Cache: ready, Métriques: ready
+[2025-10-25 20:17:43] WARN: ⚠️ Port 7000 occupé, recherche du processus...
+[2025-10-25 20:17:44] ERROR: ❌ Impossible de trouver le processus sur le port 7000
+[2025-10-25 20:17:44] INFO: 🔍 Vérification de Redis...
+[2025-10-25 20:17:44] INFO: ✅ Redis déjà en cours d'exécution
+[2025-10-25 20:17:44] INFO: ✅ Connexion à MongoDB réussie.
+[2025-10-25 20:17:44] INFO: ✅ Compte admin existant
+[2025-10-25 20:17:44] INFO: 🌱 Début du seeding des permissions...
+[2025-10-25 20:17:45] INFO: ✅ 21 permissions créées/mises à jour
+[2025-10-25 20:17:45] INFO:   ✓ Rôle "super_admin" créé/mis à jour (21 permissions)
+[2025-10-25 20:17:45] INFO:   ✓ Rôle "admin" créé/mis à jour (15 permissions)
+[2025-10-25 20:17:45] INFO:   ✓ Rôle "user" créé/mis à jour (1 permissions)
+[2025-10-25 20:17:45] INFO: ✅ 3 rôles système créés/mis à jour
+[2025-10-25 20:17:45] INFO: 🎉 Seeding des permissions terminé avec succès
+[2025-10-25 20:17:45] INFO: ✅ Services existants OK
+[2025-10-25 20:17:45] INFO: 🌱 Démarrage des seeders...
+[2025-10-25 20:17:45] INFO: 🌱 Début du seeding des permissions...
+[2025-10-25 20:17:45] INFO: ✅ 21 permissions créées/mises à jour
+[2025-10-25 20:17:45] INFO:   ✓ Rôle "super_admin" créé/mis à jour (21 permissions)
+[2025-10-25 20:17:45] INFO:   ✓ Rôle "admin" créé/mis à jour (15 permissions)
+[2025-10-25 20:17:45] INFO:   ✓ Rôle "user" créé/mis à jour (1 permissions)
+[2025-10-25 20:17:45] INFO: ✅ 3 rôles système créés/mis à jour
+[2025-10-25 20:17:45] INFO: 🎉 Seeding des permissions terminé avec succès
+[2025-10-25 20:17:45] INFO: ✅ Compte admin existant
+[2025-10-25 20:17:45] INFO: ✅ Tous les seeders terminés avec succès
+[2025-10-25 20:17:45] INFO: API Key Admin générée automatiquement
+[2025-10-25 20:17:45] INFO: 🗑️ Fichier log supprimé: alerts.log
+[2025-10-25 20:17:45] INFO: 🗑️ Fichier log supprimé: errors.log
+[2025-10-25 20:17:45] INFO: 🗑️ Fichier log supprimé: redis-errors.log
+[2025-10-25 20:17:45] INFO: 🗑️ Fichier log supprimé: redis-metrics.log
+[2025-10-25 20:17:45] INFO: 🗑️ Fichier log supprimé: requests.log
+[2025-10-25 20:17:45] INFO: 🧹 Nettoyage terminé: 5 fichiers supprimés
+[2025-10-25 20:17:45] INFO: 📝 Logs de test générés pour tous les fichiers
+[2025-10-25 20:17:45] INFO: ⚙️ Système: Système de logs initialisé
+[2025-10-25 20:17:45] INFO: ⚙️ Système: Serveur HTTP démarré sur le port 7000
+[2025-10-25 20:17:46] INFO: 🌐 Accès au portail: http://localhost:7000/portal/login
+[2025-10-25 20:17:46] INFO: ⚙️ Système: Démarrage complet du système Sorikama Hub - {"port":7000}
+[2025-10-25 20:17:48] INFO: 🚫 Lancement automatique désactivé (3/3 tentatives atteintes)
+[2025-10-25 20:17:48] INFO: 💡 Accédez manuellement à: http://localhost:7000
+[2025-10-25 20:17:59] WARN: Token CSRF manquant

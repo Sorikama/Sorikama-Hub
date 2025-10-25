@@ -128,12 +128,29 @@ export const verifyAndCreateAccount = async (req: Request, res: Response, next: 
         const payload = { id: newUser._id, roles: (newUser.roles as any[]).map(r => r.name), permissions: Array.from(permissions) };
         const tokens = await generateTokens(payload);
 
+        // Envoyer les tokens dans des cookies httpOnly
+        const isProduction = process.env.NODE_ENV === 'production';
+        
+        res.cookie('access_token', tokens.accessToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 1000 // 1 heure
+        });
+
+        res.cookie('refresh_token', tokens.refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 jours
+        });
+
         res.status(StatusCodes.CREATED).json({
             status: 'success',
             message: 'Compte créé et vérifié avec succès.',
             data: {
-                user: newUser,
-                tokens: tokens,
+                user: newUser
+                // tokens supprimés - ils sont dans les cookies httpOnly
             },
         });
 
@@ -230,11 +247,29 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
             loginCount: user.loginCount
         });
 
+        // Envoyer les tokens dans des cookies httpOnly (sécurisé)
+        const isProduction = process.env.NODE_ENV === 'production';
+        
+        res.cookie('access_token', tokens.accessToken, {
+            httpOnly: true,                    // Inaccessible par JavaScript
+            secure: isProduction,              // HTTPS uniquement en production
+            sameSite: 'strict',                // Protection CSRF
+            maxAge: 60 * 60 * 1000            // 1 heure
+        });
+
+        res.cookie('refresh_token', tokens.refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'strict',
+            maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000 // 30 jours ou 7 jours
+        });
+
+        // Ne plus envoyer les tokens dans le JSON (sécurité)
         res.status(StatusCodes.OK).json({
             status: 'success',
             data: {
-                user: userResponse,
-                tokens: tokens,
+                user: userResponse
+                // tokens supprimés - ils sont dans les cookies httpOnly
             },
         });
 
@@ -252,26 +287,43 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
  */
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { refreshToken } = req.body;
+        // Récupérer le refresh token depuis le cookie httpOnly
+        const refreshToken = req.cookies?.refresh_token || req.body?.refreshToken;
 
         if (!refreshToken) {
-            return next(new AppError('Le refresh token est requis.', StatusCodes.BAD_REQUEST));
+            // Pas de refresh token, mais on supprime quand même les cookies
+            res.clearCookie('access_token');
+            res.clearCookie('refresh_token');
+            return res.status(StatusCodes.OK).json({ 
+                status: 'success', 
+                message: 'Déconnexion locale réussie.' 
+            });
         }
 
         // Le token est chiffré en base de données, nous devons donc chiffrer celui
         // fourni par le client AVANT de faire la recherche.
-        // C'est la correction clé qui permet une recherche directe et efficace.
         const encryptedToken = encrypt(refreshToken);
 
         // On cherche et supprime le token en une seule opération atomique.
         const result = await RefreshTokenModel.deleteOne({ token: encryptedToken });
 
         // Si result.deletedCount est 0, le token n'a pas été trouvé.
-        // Ce n'est pas nécessairement une erreur (ex: l'utilisateur s'est déjà déconnecté),
-        // mais on peut le logger pour information.
         if (result.deletedCount === 0) {
             logger.warn(`Tentative de déconnexion avec un refresh token inconnu ou déjà invalidé.`);
         }
+
+        // Supprimer les cookies httpOnly
+        res.clearCookie('access_token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        });
+
+        res.clearCookie('refresh_token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        });
 
         res.status(StatusCodes.OK).json({ status: 'success', message: 'Déconnexion réussie.' });
     } catch (error) {
@@ -288,7 +340,12 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
  */
 export const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { refreshToken } = req.body;
+        // Récupérer le refresh token depuis le cookie httpOnly
+        const refreshToken = req.cookies?.refresh_token || req.body?.refreshToken;
+        
+        if (!refreshToken) {
+            return next(new AppError('Refresh token manquant.', StatusCodes.UNAUTHORIZED));
+        }
         
         // Chiffrer le token reçu pour le comparer avec ceux en base
         const encryptedToken = encrypt(refreshToken);
@@ -322,7 +379,31 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
 
         logger.info(`Refresh token renouvelé pour l'utilisateur ${user.email}`);
 
-        res.status(StatusCodes.OK).json({ status: 'success', data: { user, tokens: newTokens } });
+        // Envoyer les nouveaux tokens dans des cookies httpOnly
+        const isProduction = process.env.NODE_ENV === 'production';
+        
+        res.cookie('access_token', newTokens.accessToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 1000 // 1 heure
+        });
+
+        res.cookie('refresh_token', newTokens.refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 jours
+        });
+
+        // Ne plus envoyer les tokens dans le JSON
+        res.status(StatusCodes.OK).json({ 
+            status: 'success', 
+            data: { 
+                user 
+                // tokens supprimés - ils sont dans les cookies httpOnly
+            } 
+        });
     } catch (error) {
         logger.error('Erreur lors du rafraîchissement du token:', error);
         next(error);

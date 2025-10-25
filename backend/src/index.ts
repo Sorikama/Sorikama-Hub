@@ -20,6 +20,10 @@ import { PortManager } from './utils/portManager';
 import rateLimiter from './middlewares/rateLimiter.middleware';
 import { handleUnauthorizedAttempts } from './middlewares/unauthorizedHandler.middleware';
 import { securityHeaders, detectInjection, requestSizeLimit, validateUserAgent, timingAttackProtection } from './middlewares/security.middleware';
+import { verifyCsrf } from './middlewares/csrf.middleware';
+import { publicRateLimit } from './middlewares/clientRateLimit.middleware';
+import { validateInput, strictValidation, validateEmail, validatePassword } from './middlewares/inputValidation.middleware';
+import { advancedSecurityMiddleware } from './middlewares/advancedSecurity.middleware';
 import AppError from './utils/AppError';
 import { StatusCodes } from 'http-status-codes';
 
@@ -89,8 +93,8 @@ const startServer = async () => {
     const servicesResult = await seedServices();
     if (servicesResult) {
       const { created, skipped, total, enabled } = servicesResult;
-      const statusMsg = created > 0 
-        ? `${created} créé(s), ${total} disponible(s)` 
+      const statusMsg = created > 0
+        ? `${created} créé(s), ${total} disponible(s)`
         : `${total} service(s) disponible(s)`;
       Banner.displayStartupStep('Services externes prêts', 'success', statusMsg);
     } else {
@@ -120,9 +124,9 @@ const startServer = async () => {
     );
 
     const corsOptions = {
-      origin: NODE_ENV === 'development' ? '*' : 'https://www.votre-site-de-production.com',
+      origin: NODE_ENV === 'development' ? 'http://localhost:5173' : 'https://www.votre-site-de-production.com',
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'Accept'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'Accept', 'X-CSRF-Token'],
       credentials: true
     };
     app.use(cors(corsOptions));
@@ -135,9 +139,21 @@ const startServer = async () => {
     app.use(detectInjection);
     app.use(timingAttackProtection);
 
+    // Sécurité avancée (CSP, Clickjacking, etc.)
+    app.use(advancedSecurityMiddleware);
+
     app.use(express.json({ limit: '1mb' }));
     app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+    // Validation des entrées (global)
+    app.use(validateInput());
+
+    // Rate limiting côté client (global)
+    app.use('/api', publicRateLimit);
     app.use('/api', rateLimiter);
+
+    // Protection CSRF pour les routes API (POST, PUT, PATCH, DELETE)
+    app.use('/api/v1', verifyCsrf);
 
     // Redis sera géré par RedisManager
 
@@ -332,6 +348,11 @@ const startServer = async () => {
     app.use('/docs', docsRoutes);
     app.use('/dashboard', verifyPortalSession, dashboardRoutes);
     app.use('/portal', authPortalRoutes);
+
+    // Route de démonstration sécurité (accessible sans authentification pour les tests)
+    app.get('/security-demo', (req, res) => {
+      res.sendFile(path.join(__dirname, '../public/views/security-demo.html'));
+    });
 
     // Nouvelles routes
     const dependenciesRoutes = require('./routes/dependencies.routes').default;
