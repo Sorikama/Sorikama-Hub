@@ -1,75 +1,85 @@
-// src/database/models/service.model.ts
+/**
+ * Modèle Service Externe
+ * Gestion des services externes avec proxy et routage
+ */
+
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IService extends Document {
-  id: string;
   name: string;
-  description: string;
-  url: string;
-  frontendUrl?: string;
-  icon: string;
-  color: string;
-  status: 'active' | 'inactive' | 'maintenance';
-  version?: string;
-  endpoints?: string[];
-  apiKey?: string;
-  lastCheck?: Date;
-  responseTime?: number;
-  uptime?: number;
-  requestCount?: number;
-  errorCount?: number;
-  lastError?: string;
-  healthCheckUrl?: string;
-  redirectUrls?: string[];
-  ssoEnabled: boolean;
-  authEndpoint?: string;
-  tokenEndpoint?: string;
-  userInfoEndpoint?: string;
-  clientId?: string;
-  clientSecret?: string;
-  scopes?: string[];
+  slug: string;
+  description?: string;
+  frontendUrl: string;
+  backendUrl: string;
+  proxyPath: string;
+  enabled: boolean;
+  requireAuth: boolean;
+  allowedRoles: string[];
+  createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const ServiceSchema = new Schema<IService>({
-  id: { type: String, required: true, unique: true },
-  name: { type: String, required: true },
-  description: { type: String },
-  url: { type: String, required: true },
-  frontendUrl: { type: String },
-  icon: { type: String, default: '🔗' },
-  color: { type: String, default: 'blue' },
-  status: { 
-    type: String, 
-    enum: ['active', 'inactive', 'maintenance'], 
-    default: 'active' 
+const ServiceSchema = new Schema<IService>(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true
+    },
+    description: {
+      type: String,
+      trim: true
+    },
+    frontendUrl: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    backendUrl: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    proxyPath: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true
+    },
+    enabled: {
+      type: Boolean,
+      default: true
+    },
+    requireAuth: {
+      type: Boolean,
+      default: false
+    },
+    allowedRoles: {
+      type: [String],
+      default: []
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    }
   },
-  version: { type: String },
-  endpoints: [{ type: String }],
-  apiKey: { type: String },
-  lastCheck: { type: Date },
-  responseTime: { type: Number, default: 0 },
-  uptime: { type: Number, default: 100 },
-  requestCount: { type: Number, default: 0 },
-  errorCount: { type: Number, default: 0 },
-  lastError: { type: String },
-  healthCheckUrl: { type: String, default: '/health' },
-  redirectUrls: [{ type: String }],
-  ssoEnabled: { type: Boolean, default: true },
-  authEndpoint: { type: String, default: '/auth/sorikama' },
-  tokenEndpoint: { type: String },
-  userInfoEndpoint: { type: String },
-  clientId: { type: String },
-  clientSecret: { type: String },
-  scopes: [{ type: String }]
-}, {
-  timestamps: true
-});
+  {
+    timestamps: true
+  }
+);
 
-// Index pour optimiser les requêtes
-ServiceSchema.index({ id: 1 });
-ServiceSchema.index({ status: 1 });
-ServiceSchema.index({ lastCheck: -1 });
+// Index pour recherche rapide
+ServiceSchema.index({ slug: 1 });
+ServiceSchema.index({ proxyPath: 1 });
+ServiceSchema.index({ enabled: 1 });
 
 export const ServiceModel = mongoose.model<IService>('Service', ServiceSchema);

@@ -53,14 +53,19 @@ export default function AdminLayout() {
       title: 'Sécurité & Accès',
       items: [
         { title: 'Rôles & Permissions', icon: FiShield, path: '/admin/roles' },
-        { title: 'Rate Limiting', icon: FiClock, path: '/admin/rate-limit' },
-        { title: 'Audit Trail', icon: FiFileText, path: '/admin/audit' },
+        // { title: 'Rate Limiting', icon: FiClock, path: '/admin/rate-limit' },
+        // { title: 'Audit Trail', icon: FiFileText, path: '/admin/audit' },
+      ]
+    },
+    {
+      title: 'Services Externes',
+      items: [
+        { title: 'Gestion Services', icon: FiPackage, path: '/admin/services' },
       ]
     },
     {
       title: 'Intégrations',
       items: [
-        { title: 'Services SSO', icon: FiLink, path: '/services-admin' },
         { title: 'Webhooks', icon: FiBell, path: '/admin/webhooks' },
       ]
     },
