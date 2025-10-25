@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenue !</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1f2937; background-color: #f3f4f6; }
+    .container { max-width: 600px; margin: 40px auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+    .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 40px 30px; text-align: center; }
+    .header h1 { font-size: 28px; margin-bottom: 10px; }
+    .header p { font-size: 16px; opacity: 0.9; }
+    .content { padding: 40px 30px; }
+    .greeting { font-size: 18px; font-weight: 600; color: #1f2937; margin-bottom: 20px; }
+    .message { font-size: 16px; color: #4b5563; margin-bottom: 20px; line-height: 1.8; }
+    .button-container { text-align: center; margin: 30px 0; }
+    .button { display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transition: transform 0.2s; }
+    .button:hover { transform: translateY(-2px); }
+    .feature { background: #f0fdf4; padding: 20px; margin: 15px 0; border-radius: 12px; border-left: 4px solid #10b981; }
+    .feature-title { font-weight: 600; color: #065f46; margin-bottom: 8px; font-size: 16px; }
+    .feature-desc { color: #4b5563; font-size: 14px; }
+    .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 14px; }
+    .footer p { margin: 5px 0; }
+    .divider { height: 1px; background: #e5e7eb; margin: 30px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>✅ Compte activé avec succès !</h1>
+      <p>Bienvenue dans la communauté Sorikama Hub</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <p class="greeting">Bonjour <strong>{{firstName}} {{lastName}}</strong>,</p>
+      
+      <p class="message">
+        Félicitations ! 🎉 Votre compte Sorikama Hub est maintenant actif et prêt à l'emploi. 
+        Vous pouvez dès maintenant profiter de tous les services de notre plateforme.
+      </p>
+
+      <div class="button-container">
+        <a href="{{loginUrl}}" class="button">
+          🚀 Se connecter maintenant
+        </a>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 style="color: #1f2937; margin-bottom: 20px;">🌟 Que pouvez-vous faire maintenant ?</h3>
+
+      <div class="feature">
+        <div class="feature-title">🔐 Connexion unique (SSO)</div>
+        <div class="feature-desc">
+          Accédez à tous vos services avec un seul compte. Plus besoin de mémoriser plusieurs mots de passe !
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-title">👤 Profil personnalisé</div>
+        <div class="feature-desc">
+          Gérez vos informations personnelles, vos préférences et votre sécurité depuis un seul endroit.
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-title">🔒 Sécurité renforcée</div>
+        <div class="feature-desc">
+          Vos données sont protégées par un chiffrement de niveau entreprise. Votre vie privée est notre priorité.
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-title">⚡ Accès rapide</div>
+        <div class="feature-desc">
+          Connectez-vous instantanément à tous les services intégrés sans ressaisir vos identifiants.
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="message" style="font-size: 14px; color: #6b7280;">
+        <strong>Besoin d'aide ?</strong><br>
+        Notre équipe de support est là pour vous accompagner. N'hésitez pas à nous contacter si vous avez des questions.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p><strong>Sorikama Hub</strong></p>
+      <p>Plateforme de gestion SSO</p>
+      <p style="margin-top: 15px;">© {{year}} Sorikama Hub - Tous droits réservés</p>
+    </div>
+  </div>
+</body>
+</html>

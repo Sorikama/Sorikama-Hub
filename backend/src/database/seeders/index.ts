@@ -1,20 +1,20 @@
 // src/database/seeders/index.ts
 import { logger } from '../../utils/logger';
 import { seedPermissions } from './permissions.seeder';
-import { seedRoles } from './roles.seeder';
+// import { seedRoles } from './roles.seeder'; // Désactivé - seedPermissions() crée déjà les 3 rôles système
 import { seedAdmin } from './admin.seeder';
 
 export const runSeeders = async (force = false) => {
   try {
     logger.info('🌱 Démarrage des seeders...');
     
-    // 1. Permissions (base)
+    // 1. Permissions et rôles système (3 rôles uniquement)
     await seedPermissions();
     
-    // 2. Rôles (dépend des permissions)
-    await seedRoles();
+    // Note: seedRoles() a été supprimé car seedPermissions() crée déjà les 3 rôles système
+    // Les rôles personnalisés peuvent être créés via l'interface admin
     
-    // 3. Admin (dépend des rôles)
+    // 2. Admin (dépend des rôles)
     await seedAdmin();
     
     logger.info('✅ Tous les seeders terminés avec succès');

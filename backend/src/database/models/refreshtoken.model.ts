@@ -1,7 +1,8 @@
 // src/database/models/refreshToken.model.ts
-import { Schema, model, Document } from 'mongoose';
+import { Schema, Document } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { encrypt, decrypt } from '../../utils/crypto';
+import { getOrCreateModel } from '../utils/modelHelper';
 // Interface TypeScript pour un document RefreshToken
 export interface IRefreshToken extends Document {
     _id: string;
@@ -43,4 +44,5 @@ const refreshTokenSchema = new Schema<IRefreshToken>({
     toObject: { getters: true },
 });
 
-export const RefreshTokenModel = model<IRefreshToken>('RefreshToken', refreshTokenSchema);
+// Exporter le modèle de manière sécurisée (évite l'erreur de recompilation en dev)
+export const RefreshTokenModel = getOrCreateModel<IRefreshToken>('RefreshToken', refreshTokenSchema);

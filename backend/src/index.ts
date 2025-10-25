@@ -77,6 +77,12 @@ const startServer = async () => {
     await seedAdmin();
     Banner.displayStartupStep('Compte admin initialisé', 'success', 'admin@admin.fr');
 
+    // Étape 2.6: Initialisation des permissions et rôles
+    Banner.displayStartupStep('Initialisation des permissions', 'loading');
+    const { seedPermissions } = require('./database/seeders/permissions.seeder');
+    const permResult = await seedPermissions();
+    Banner.displayStartupStep('Permissions initialisées', 'success', `${permResult.permissionsCount} permissions, ${permResult.rolesCount} rôles`);
+
     app.use(
       helmet({
         contentSecurityPolicy: {
@@ -339,7 +345,11 @@ const startServer = async () => {
 
     // Routes API - Authentification JWT uniquement
 
-    // Routes admin
+    // IMPORTANT: Monter apiRouter EN PREMIER pour que les routes spécialisées
+    // (comme /admin/users) soient prioritaires sur les routes génériques
+    app.use('/api/v1', apiRouter);
+
+    // Routes admin générales (stats, analytics)
     const adminRoutes = require('./routes/admin.routes').default;
     app.use('/api/v1/admin', adminRoutes);
 
@@ -349,14 +359,10 @@ const startServer = async () => {
     app.use('/performance', performanceRoutes);
     app.use('/performance', performanceDashboardRoutes);
 
-
-
     // Routes admin (protégées)
     const adminPublicRoutes = require('./routes/admin-public.routes').default;
     app.use('/admin', verifyPortalSession, adminPublicRoutes);
     app.use('/admin', adminControlRoutes);
-
-    app.use('/api/v1', apiRouter);
 
     app.all('*', (req: Request, res: Response, next: NextFunction) => {
       const err = new AppError(`La route ${req.originalUrl} n'existe pas sur ce serveur.`, StatusCodes.NOT_FOUND);
@@ -398,7 +404,8 @@ const startServer = async () => {
     });
 
   } catch (error) {
-    Banner.displayStartupStep('Erreur critique', 'error', error.message);
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    Banner.displayStartupStep('Erreur critique', 'error', errorMessage);
     logger.error('❌ Erreur lors du démarrage du serveur:', error);
     process.exit(1);
   }

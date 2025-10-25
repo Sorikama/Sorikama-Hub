@@ -29,8 +29,8 @@ export const requireAdmin = async (req: any, res: Response, next: NextFunction) 
       );
     }
 
-    // Vérifier que l'utilisateur a le rôle admin
-    if (req.user.role !== 'admin') {
+    // Vérifier que l'utilisateur a le rôle admin ou super_admin
+    if (req.user.role !== 'admin' && req.user.role !== 'super_admin') {
       logger.warn('❌ Tentative d\'accès admin par un utilisateur non-admin', {
         userId: req.user.id,
         email: req.user.email,
@@ -79,9 +79,15 @@ export const requireAdmin = async (req: any, res: Response, next: NextFunction) 
 export const checkIfAdmin = async (req: any, res: Response, next: NextFunction) => {
   try {
     req.isAdmin = false;
+    req.isSuperAdmin = false;
 
-    if (req.user && req.user.role === 'admin' && !req.user.isBlocked) {
-      req.isAdmin = true;
+    if (req.user && !req.user.isBlocked) {
+      if (req.user.role === 'admin' || req.user.role === 'super_admin') {
+        req.isAdmin = true;
+      }
+      if (req.user.role === 'super_admin') {
+        req.isSuperAdmin = true;
+      }
     }
 
     next();

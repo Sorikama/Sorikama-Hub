@@ -1,21 +1,17 @@
 // src/auth/auth.service.ts
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken';
 import {
   JWT_SECRET,
   JWT_EXPIRES_IN,
   JWT_REFRESH_SECRET,
-  JWT_REFRESH_EXPIRES_IN,
 } from '../config';
 import AppError from '../utils/AppError';
 import { StatusCodes } from 'http-status-codes';
 import { v4 as uuidv4 } from 'uuid';
-import { RefreshTokenModel } from '../database/models/refreshToken.model';
+import { RefreshTokenModel } from '../database/models/refreshtoken.model';
 
 /**
- * @typedef {object} UserPayload
- * @property {string} id - L'UUID de l'utilisateur.
- * @property {string[]} roles - Les noms des rôles de l'utilisateur.
- * @property {string[]} permissions - La liste consolidée des permissions de l'utilisateur.
+ * Interface pour le payload utilisateur
  */
 interface UserPayload {
   id: string;
@@ -24,9 +20,7 @@ interface UserPayload {
 }
 
 /**
- * @typedef {object} Tokens
- * @property {string} accessToken - Le jeton d'accès à courte durée de vie.
- * @property {string} refreshToken - Le jeton de rafraîchissement à longue durée de vie.
+ * Interface pour les tokens
  */
 interface Tokens {
   accessToken: string;
@@ -37,10 +31,11 @@ interface Tokens {
  * Génère une paire de tokens (accès et rafraîchissement) pour un utilisateur.
  *
  * @param {UserPayload} payload - Les informations à inclure dans le payload du JWT d'accès.
+ * @param {boolean} rememberMe - Si true, le refresh token dure 30 jours, sinon 7 jours.
  * @returns {Promise<Tokens>} Une promesse qui se résout avec les tokens générés.
  * @throws {AppError} Si les secrets JWT ne sont pas configurés.
  */
-export const generateTokens = async (payload: UserPayload): Promise<Tokens> => {
+export const generateTokens = async (payload: UserPayload, rememberMe: boolean = false): Promise<Tokens> => {
   if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
     throw new AppError(
       'Les secrets JWT ne sont pas définis dans les variables d\'environnement.',
@@ -50,14 +45,18 @@ export const generateTokens = async (payload: UserPayload): Promise<Tokens> => {
 
   // 1. Crée l'access token avec le payload complet (id, rôles, permissions)
   const accessToken = jwt.sign(payload, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
-  });
+    expiresIn: JWT_EXPIRES_IN || '1h',
+  } as jwt.SignOptions);
 
   // 2. Crée un refresh token unique et sécurisé
   const refreshToken = uuidv4();
   
-  // 3. Stocke le refresh token en base de données avec sa date d'expiration
-  await storeRefreshToken(refreshToken, payload.id);
+  // 3. Détermine la durée de validité du refresh token
+  // Si "Se souvenir de moi" : 30 jours, sinon : 7 jours
+  const expiresInDays = rememberMe ? 30 : 7;
+  
+  // 4. Stocke le refresh token en base de données avec sa date d'expiration
+  await storeRefreshToken(refreshToken, payload.id, expiresInDays);
 
   return { accessToken, refreshToken };
 };
@@ -67,10 +66,10 @@ export const generateTokens = async (payload: UserPayload): Promise<Tokens> => {
  *
  * @param {string} token - Le token JWT à vérifier.
  * @param {string} [secret='access'] - Le type de secret à utiliser ('access' ou 'refresh').
- * @returns {object} Le payload décodé du token.
+ * @returns {string | JwtPayload} Le payload décodé du token.
  * @throws {AppError} Si le token est invalide, expiré, ou que le secret est manquant.
  */
-export const verifyToken = (token: string, secret: 'access' | 'refresh' = 'access'): object => {
+export const verifyToken = (token: string, secret: 'access' | 'refresh' = 'access'): string | JwtPayload => {
   const secretKey = secret === 'access' ? JWT_SECRET : JWT_REFRESH_SECRET;
 
   if (!secretKey) {
@@ -82,7 +81,7 @@ export const verifyToken = (token: string, secret: 'access' | 'refresh' = 'acces
 
   try {
     // La fonction `verify` décode le payload et vérifie la signature et l'expiration
-    return jwt.verify(token, secretKey);
+    return jwt.verify(token, secretKey as string);
   } catch (error) {
     // Si jwt.verify échoue (ex: signature invalide, token expiré), une erreur est levée.
     // On la capture pour renvoyer une erreur standardisée de notre application.
@@ -96,11 +95,12 @@ export const verifyToken = (token: string, secret: 'access' | 'refresh' = 'acces
  *
  * @param {string} token - Le token de rafraîchissement à stocker.
  * @param {string} userId - L'ID de l'utilisateur associé.
+ * @param {number} expiresInDays - Nombre de jours avant expiration (7 ou 30).
  * @returns {Promise<void>}
  */
-const storeRefreshToken = async (token: string, userId: string): Promise<void> => {
-  // Calcule la date d'expiration en se basant sur la configuration (ex: "7d", "1h")
-  const expiresInMs = ms(JWT_REFRESH_EXPIRES_IN || '7d');
+const storeRefreshToken = async (token: string, userId: string, expiresInDays: number = 7): Promise<void> => {
+  // Calcule la date d'expiration en jours
+  const expiresInMs = expiresInDays * 24 * 60 * 60 * 1000; // Convertir jours en millisecondes
   const expiresAt = new Date(Date.now() + expiresInMs);
   
   // Crée un nouveau document pour le token de rafraîchissement
@@ -111,24 +111,3 @@ const storeRefreshToken = async (token: string, userId: string): Promise<void> =
   });
 };
 
-/**
- * Une petite fonction utilitaire pour convertir les chaînes de temps (ex: "7d", "1h") en millisecondes.
- * La bibliothèque `ms` fait très bien cela, mais voici une implémentation simple pour éviter d'ajouter une dépendance.
- * @param {string} str - La chaîne de temps.
- * @returns {number} La durée en millisecondes.
- */
-const ms = (str: string): number => {
-    const match = /^(\d+)([smhd])$/.exec(str);
-    if (!match) return 0;
-
-    const amount = parseInt(match[1]);
-    const unit = match[2];
-
-    switch(unit) {
-        case 's': return amount * 1000;
-        case 'm': return amount * 60 * 1000;
-        case 'h': return amount * 60 * 60 * 1000;
-        case 'd': return amount * 24 * 60 * 60 * 1000;
-        default: return 0;
-    }
-}

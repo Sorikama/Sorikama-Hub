@@ -1,96 +1,77 @@
 /**
- * Layout principal pour l'espace administrateur
- * 
- * Contient :
- * - Header avec logo et infos utilisateur
- * - Menu latéral avec navigation
- * - Zone de contenu principale
- * - Thème clair/sombre
+ * Layout Admin Professionnel - Sorikama Hub
+ * Design moderne avec React Icons
  */
 
-import { useState } from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import {
+  FiHome,
+  FiUsers,
+  FiShield,
+  FiClock,
+  FiFileText,
+  FiLink,
+  FiBell,
+  FiActivity,
+  FiZap,
+  FiHeart,
+  FiPackage,
+  FiMenu,
+  FiX,
+  FiSun,
+  FiMoon,
+  FiLogOut,
+  FiUser,
+  FiChevronDown
+} from 'react-icons/fi';
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
-  // Menu de navigation admin
-  const menuItems = [
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  // Menu de navigation avec React Icons
+  const menuSections = [
     {
-      title: 'Vue d\'ensemble',
-      icon: '📊',
-      path: '/admin/dashboard',
-      description: 'Statistiques globales'
+      title: 'Principal',
+      items: [
+        { title: 'Dashboard', icon: FiHome, path: '/admin/dashboard' },
+        { title: 'Utilisateurs', icon: FiUsers, path: '/admin/users' },
+      ]
     },
     {
-      title: 'Utilisateurs',
-      icon: '👥',
-      path: '/admin/users',
-      description: 'Gestion des utilisateurs'
+      title: 'Sécurité & Accès',
+      items: [
+        { title: 'Rôles & Permissions', icon: FiShield, path: '/admin/roles' },
+        { title: 'Rate Limiting', icon: FiClock, path: '/admin/rate-limit' },
+        { title: 'Audit Trail', icon: FiFileText, path: '/admin/audit' },
+      ]
     },
     {
-      title: 'Rôles & Permissions',
-      icon: '🔐',
-      path: '/admin/roles',
-      description: 'Gestion des accès'
+      title: 'Intégrations',
+      items: [
+        { title: 'Services SSO', icon: FiLink, path: '/services-admin' },
+        { title: 'Webhooks', icon: FiBell, path: '/admin/webhooks' },
+      ]
     },
     {
-      title: 'Rate Limiting',
-      icon: '⏱️',
-      path: '/admin/rate-limit',
-      description: 'Limites de requêtes'
-    },
-    {
-      title: 'Audit Trail',
-      icon: '📜',
-      path: '/admin/audit',
-      description: 'Journal d\'audit'
-    },
-    {
-      title: 'Webhooks',
-      icon: '🔔',
-      path: '/admin/webhooks',
-      description: 'Notifications externes'
-    },
-    {
-      title: 'Services SSO',
-      icon: '🔗',
-      path: '/services-admin',
-      description: 'Services externes'
-    },
-    {
-      title: 'Logs Système',
-      icon: '📝',
-      path: '/admin/logs',
-      description: 'Journaux d\'événements'
-    },
-    {
-      title: 'Performances',
-      icon: '⚡',
-      path: '/admin/performance',
-      description: 'Métriques de performance'
-    },
-    {
-      title: 'Santé Système',
-      icon: '🏥',
-      path: '/admin/health',
-      description: 'État du système'
-    },
-    {
-      title: 'API Keys',
-      icon: '🔑',
-      path: '/admin/api-keys',
-      description: 'Gestion des clés API'
-    },
-    {
-      title: 'Dépendances',
-      icon: '📦',
-      path: '/admin/dependencies',
-      description: 'Packages et versions'
+      title: 'Système & Monitoring',
+      items: [
+        { title: 'Logs Système', icon: FiActivity, path: '/admin/logs' },
+        { title: 'Performances', icon: FiZap, path: '/admin/performance' },
+        { title: 'Santé Système', icon: FiHeart, path: '/admin/health' },
+        { title: 'Dépendances', icon: FiPackage, path: '/admin/dependencies' },
+      ]
     }
   ];
 
@@ -99,164 +80,233 @@ export default function AdminLayout() {
   const handleLogout = async () => {
     if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
       await logout();
+      navigate('/login');
     }
   };
 
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-        
-        {/* Header */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 shadow-sm">
-          <div className="px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              
-              {/* Logo & Toggle */}
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors lg:hidden"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-                
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <span className="text-white font-bold text-lg">S</span>
-                  </div>
-                  <div>
-                    <h1 className="text-xl font-bold text-gray-900 dark:text-white">Sorikama Hub</h1>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Administration</p>
-                  </div>
+    <div className={theme === 'dark' ? 'dark' : ''}>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+
+        {/* ========== HEADER HORIZONTAL ========== */}
+        <header className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-50 shadow-sm">
+          <div className="h-full px-4 flex items-center justify-between">
+
+            {/* Left: Logo + Toggle */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                {isSidebarOpen ? (
+                  <FiX className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+                ) : (
+                  <FiMenu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+                )}
+              </button>
+
+              <Link to="/admin/dashboard" className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                  <span className="text-white font-bold text-lg">S</span>
                 </div>
+                <div className="hidden sm:block">
+                  <h1 className="text-lg font-bold text-gray-900 dark:text-white">Sorikama Hub</h1>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Administration</p>
+                </div>
+              </Link>
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex items-center gap-3">
+
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                {theme === 'light' ? (
+                  <FiMoon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                ) : (
+                  <FiSun className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                )}
+              </button>
+
+              {/* Status */}
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-green-700 dark:text-green-400 font-medium">En ligne</span>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-4">
-                
-                {/* Theme Switcher */}
-                <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                  <button
-                    onClick={() => setTheme('light')}
-                    className={`p-2 rounded-md transition-colors ${theme === 'light' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''}`}
-                    title="Mode clair"
-                  >
-                    ☀️
-                  </button>
-                  <button
-                    onClick={() => setTheme('dark')}
-                    className={`p-2 rounded-md transition-colors ${theme === 'dark' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''}`}
-                    title="Mode sombre"
-                  >
-                    🌙
-                  </button>
-                </div>
-
-                {/* Status */}
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">En ligne</span>
-                </div>
-
-                {/* User Menu */}
-                <div className="flex items-center gap-3 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              {/* User Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
                     {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                   </div>
-                  <div className="hidden md:block">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
-                      {user?.firstName} {user?.lastName}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
-                      👑 Administrateur
-                    </p>
+                  <div className="hidden lg:block text-left">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{user?.firstName} {user?.lastName}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Administrateur</p>
                   </div>
-                </div>
-
-                {/* Logout */}
-                <button
-                  onClick={handleLogout}
-                  className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                  title="Déconnexion"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
+                  <FiChevronDown className="w-4 h-4 text-gray-500" />
                 </button>
+
+                {showUserMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
+                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50">
+                      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{user?.firstName} {user?.lastName}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
+                      </div>
+                      <Link
+                        to="/dashboard"
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <FiHome className="w-4 h-4" />
+                        <span>Dashboard utilisateur</span>
+                      </Link>
+                      <Link
+                        to="/profile"
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <FiUser className="w-4 h-4" />
+                        <span>Mon profil</span>
+                      </Link>
+                      <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
+                      >
+                        <FiLogOut className="w-4 h-4" />
+                        <span>Déconnexion</span>
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </header>
 
-        <div className="flex">
-          
-          {/* Sidebar */}
-          <aside className={`
-            fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] z-30
-            bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
-            transition-all duration-300 overflow-y-auto
-            ${isSidebarOpen ? 'w-64' : 'w-0 lg:w-20'}
-          `}>
-            <nav className="p-4 space-y-2">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`
-                    flex items-center gap-3 px-4 py-3 rounded-xl transition-all
-                    ${isActive(item.path)
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }
-                  `}
-                >
-                  <span className="text-2xl">{item.icon}</span>
+        {/* ========== SIDEBAR VERTICAL - DESIGN PROFESSIONNEL ========== */}
+        <aside className={`
+          fixed top-16 left-0 bottom-0 z-40
+          bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
+          transition-all duration-300 ease-in-out overflow-y-auto
+          ${isSidebarOpen ? 'w-64' : 'w-0 lg:w-20'}
+        `}>
+          <div className="h-full flex flex-col">
+            {/* Navigation */}
+            <nav className="flex-1 px-3 py-6 space-y-6">
+              {menuSections.map((section, idx) => (
+                <div key={idx}>
+                  {/* Section Title */}
                   {isSidebarOpen && (
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate">{item.title}</p>
-                      <p className={`text-xs truncate ${isActive(item.path) ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`}>
-                        {item.description}
-                      </p>
+                    <div className="px-3 mb-2">
+                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        {section.title}
+                      </h3>
                     </div>
                   )}
-                </Link>
+
+                  {/* Separator for collapsed sidebar */}
+                  {!isSidebarOpen && idx > 0 && (
+                    <div className="my-3 mx-auto w-8 h-px bg-gray-200 dark:bg-gray-700" />
+                  )}
+
+                  {/* Menu Items */}
+                  <div className="space-y-1">
+                    {section.items.map((item) => {
+                      const Icon = item.icon;
+                      const active = isActive(item.path);
+
+                      return (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          className={`
+                            group relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                            ${active
+                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200'
+                            }
+                          `}
+                          title={!isSidebarOpen ? item.title : ''}
+                        >
+                          {/* Active Border */}
+                          {active && (
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-600 dark:bg-blue-400 rounded-r-full" />
+                          )}
+
+                          <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-blue-600 dark:text-blue-400' : ''}`} />
+
+                          {isSidebarOpen && (
+                            <span className="text-sm flex-1">{item.title}</span>
+                          )}
+
+                          {/* Tooltip when sidebar closed */}
+                          {!isSidebarOpen && (
+                            <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap pointer-events-none z-50 shadow-lg">
+                              {item.title}
+                              <div className="absolute right-full top-1/2 -translate-y-1/2 border-[6px] border-transparent border-r-gray-900 dark:border-r-gray-700" />
+                            </div>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
               ))}
             </nav>
 
-            {/* Retour au site */}
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+            {/* Sidebar Footer */}
+            <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
               <Link
                 to="/dashboard"
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                className="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200 transition-all"
+                title={!isSidebarOpen ? 'Retour au site' : ''}
               >
-                <span className="text-2xl">🏠</span>
+                <FiHome className="w-5 h-5 flex-shrink-0" />
                 {isSidebarOpen && (
-                  <div>
-                    <p className="font-semibold text-sm">Retour au site</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Dashboard utilisateur</p>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Retour au site</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500">Dashboard utilisateur</p>
+                  </div>
+                )}
+                {!isSidebarOpen && (
+                  <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap pointer-events-none z-50 shadow-lg">
+                    Retour au site
+                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-[6px] border-transparent border-r-gray-900 dark:border-r-gray-700" />
                   </div>
                 )}
               </Link>
             </div>
-          </aside>
+          </div>
+        </aside>
 
-          {/* Main Content */}
-          <main className={`
-            flex-1 transition-all duration-300
-            ${isSidebarOpen ? 'lg:ml-0' : 'lg:ml-0'}
-          `}>
-            <div className="p-4 sm:p-6 lg:p-8">
-              <Outlet />
-            </div>
-          </main>
-        </div>
+        {/* ========== MAIN CONTENT ========== */}
+        <main className={`
+          pt-16 transition-all duration-300
+          ${isSidebarOpen ? 'lg:pl-64' : 'lg:pl-20'}
+        `}>
+          <div className="p-6 lg:p-8 max-w-[1600px]">
+            <Outlet />
+          </div>
+        </main>
 
-        {/* Mobile Sidebar Overlay */}
+        {/* Mobile Overlay */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}

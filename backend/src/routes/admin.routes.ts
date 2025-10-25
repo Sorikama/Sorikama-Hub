@@ -21,11 +21,11 @@ const router = Router();
 router.get('/stats', async (req, res) => {
   try {
     logger.info('📊 Récupération des statistiques système...');
-    
+
     // 1. Statistiques base de données (avec cache)
     const dbStats = await CacheService.get('admin:db_stats');
     let dbData;
-    
+
     if (!dbStats) {
       dbData = {
         users: {
@@ -34,13 +34,13 @@ router.get('/stats', async (req, res) => {
           verified: await UserModel.countDocuments({ isVerified: true })
         }
       };
-      
+
       // Cache pendant 5 minutes
       await CacheService.set('admin:db_stats', dbData, 300);
     } else {
       dbData = dbStats;
     }
-    
+
     // 2. Métriques système en temps réel
     const [cpuInfo, memInfo, diskInfo, networkStats] = await Promise.all([
       si.cpu(),
@@ -48,7 +48,7 @@ router.get('/stats', async (req, res) => {
       si.fsSize(),
       si.networkStats()
     ]);
-    
+
     // 3. Métriques API depuis Redis
     const apiMetrics = {
       requests: {
@@ -64,13 +64,13 @@ router.get('/stats', async (req, res) => {
         delete: await MetricsService.get('api.requests.method.delete')
       }
     };
-    
+
     // Calculer le taux de succès
     if (apiMetrics.requests.total > 0) {
-      apiMetrics.requests.success_rate = 
-        ((apiMetrics.requests.total - apiMetrics.requests.errors) / apiMetrics.requests.total * 100).toFixed(2);
+      apiMetrics.requests.success_rate =
+        parseFloat(((apiMetrics.requests.total - apiMetrics.requests.errors) / apiMetrics.requests.total * 100).toFixed(2));
     }
-    
+
     // 4. Assembler la réponse complète
     const response = {
       success: true,
@@ -78,20 +78,20 @@ router.get('/stats', async (req, res) => {
       data: {
         // Données applicatives
         application: dbData,
-        
+
         // Métriques système
         system: {
           uptime: process.uptime(),
           version: '1.0.0',
           node_version: process.version,
-          
+
           // CPU
           cpu: {
             model: cpuInfo.manufacturer + ' ' + cpuInfo.brand,
             cores: cpuInfo.cores,
             speed: cpuInfo.speed + ' GHz'
           },
-          
+
           // Mémoire
           memory: {
             total: Math.round(memInfo.total / 1024 / 1024 / 1024 * 100) / 100 + ' GB',
@@ -99,7 +99,7 @@ router.get('/stats', async (req, res) => {
             free: Math.round(memInfo.free / 1024 / 1024 / 1024 * 100) / 100 + ' GB',
             usage_percent: Math.round(memInfo.used / memInfo.total * 100)
           },
-          
+
           // Stockage
           storage: diskInfo.map(disk => ({
             filesystem: disk.fs,
@@ -108,7 +108,7 @@ router.get('/stats', async (req, res) => {
             available: Math.round(disk.available / 1024 / 1024 / 1024 * 100) / 100 + ' GB',
             usage_percent: Math.round(disk.use)
           })),
-          
+
           // Réseau
           network: networkStats.map(net => ({
             interface: net.iface,
@@ -116,13 +116,13 @@ router.get('/stats', async (req, res) => {
             tx_bytes: Math.round(net.tx_bytes / 1024 / 1024 * 100) / 100 + ' MB'
           }))
         },
-        
+
         // Métriques API
         api: apiMetrics,
-        
+
         // Métriques de performance
         performance: {
-          avg_response_time: apiMetrics.response_times.length > 0 
+          avg_response_time: apiMetrics.response_times.length > 0
             ? Math.round(apiMetrics.response_times.reduce((sum, item) => sum + item.value, 0) / apiMetrics.response_times.length)
             : 0,
           requests_per_minute: await calculateRPM(),
@@ -130,16 +130,17 @@ router.get('/stats', async (req, res) => {
         }
       }
     };
-    
+
     logger.info('✅ Statistiques système récupérées avec succès');
     res.json(response);
-    
-  } catch (error) {
+
+  } catch (error: unknown) {
     logger.error('❌ Erreur lors de la récupération des statistiques:', error);
-    res.status(500).json({ 
-      success: false, 
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({
+      success: false,
       message: 'Erreur lors de la récupération des statistiques système',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
     });
   }
 });
@@ -151,13 +152,13 @@ async function calculateRPM(): Promise<number> {
   try {
     const currentMinute = Math.floor(Date.now() / 60000);
     let totalRequests = 0;
-    
+
     // Sommer les 5 dernières minutes
     for (let i = 0; i < 5; i++) {
       const requests = await MetricsService.get(`api.rps.minute.${currentMinute - i}`);
       totalRequests += requests;
     }
-    
+
     return Math.round(totalRequests / 5); // Moyenne sur 5 minutes
   } catch (error) {
     logger.error('Erreur calcul RPM:', error);
@@ -178,55 +179,8 @@ async function calculateCacheHitRatio(): Promise<number> {
   }
 }
 
-// Liste de tous les utilisateurs
-router.get('/users', async (req, res) => {
-  try {
-    const users = await UserModel.find()
-      .populate('roles', 'name')
-      .select('-password')
-      .sort({ createdAt: -1 });
-    
-    res.json({ success: true, data: users });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
-  }
-});
-
-// Détails d'un utilisateur
-router.get('/users/:id', async (req, res) => {
-  try {
-    const user = await UserModel.findById(req.params.id)
-      .populate('roles')
-      .select('-password');
-    
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé' });
-    }
-    
-    res.json({ success: true, data: user });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
-  }
-});
-
-// Désactiver un utilisateur
-router.patch('/users/:id/deactivate', async (req, res) => {
-  try {
-    const user = await UserModel.findByIdAndUpdate(
-      req.params.id,
-      { isActive: false },
-      { new: true }
-    ).select('-password');
-    
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé' });
-    }
-    
-    res.json({ success: true, data: user });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
-  }
-});
+// Routes utilisateurs déplacées vers /admin/users.routes.ts
+// Utiliser le router dédié pour une meilleure organisation
 
 // Endpoint analytics (alias pour stats)
 router.get('/analytics', async (req, res) => {
@@ -236,7 +190,7 @@ router.get('/analytics', async (req, res) => {
     const totalRequests = await MetricsService.get('api.requests.total') || 0;
     const totalServices = 6;
     const uptime = Math.round(process.uptime());
-    
+
     res.json({
       success: true,
       data: {
@@ -252,18 +206,7 @@ router.get('/analytics', async (req, res) => {
   }
 });
 
-// Supprimer un utilisateur
-router.delete('/users/:userId', async (req, res) => {
-  try {
-    const user = await UserModel.findByIdAndDelete(req.params.userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé' });
-    }
-    res.json({ success: true, message: 'Utilisateur supprimé' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
-  }
-});
+// Route de suppression d'utilisateur déplacée vers /admin/users.routes.ts
 
 // Lister toutes les sessions SSO
 router.get('/sessions', async (req, res) => {

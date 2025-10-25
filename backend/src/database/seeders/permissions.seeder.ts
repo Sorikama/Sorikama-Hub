@@ -1,90 +1,267 @@
-// src/database/seeders/permissions.seeder.ts
+/**
+ * Seeder pour les permissions par défaut
+ */
+
 import { PermissionModel } from '../models/permission.model';
+import { RoleModel } from '../models/role.model';
 import { logger } from '../../utils/logger';
 
-export const permissionsData = [
-  // Permissions système
-  { action: 'manage', subject: 'system', description: 'Gestion complète du système' },
-  { action: 'read', subject: 'system', description: 'Lecture des informations système' },
-  
-  // Permissions utilisateurs
-  { action: 'create', subject: 'user', description: 'Créer des utilisateurs' },
-  { action: 'read', subject: 'user', description: 'Lire les informations utilisateur' },
-  { action: 'update', subject: 'user', description: 'Modifier les utilisateurs' },
-  { action: 'delete', subject: 'user', description: 'Supprimer des utilisateurs' },
-  { action: 'manage', subject: 'user', description: 'Gestion complète des utilisateurs' },
-  
-  // Permissions rôles et permissions
-  { action: 'create', subject: 'role', description: 'Créer des rôles' },
-  { action: 'read', subject: 'role', description: 'Lire les rôles' },
-  { action: 'update', subject: 'role', description: 'Modifier les rôles' },
-  { action: 'delete', subject: 'role', description: 'Supprimer des rôles' },
-  { action: 'assign', subject: 'role', description: 'Assigner des rôles aux utilisateurs' },
-  
-  { action: 'create', subject: 'permission', description: 'Créer des permissions' },
-  { action: 'read', subject: 'permission', description: 'Lire les permissions' },
-  { action: 'update', subject: 'permission', description: 'Modifier les permissions' },
-  { action: 'delete', subject: 'permission', description: 'Supprimer des permissions' },
-  
-  // Permissions API Gateway
-  { action: 'configure', subject: 'gateway', description: 'Configurer l\'API Gateway' },
-  { action: 'monitor', subject: 'gateway', description: 'Surveiller l\'API Gateway' },
-  { action: 'route', subject: 'gateway', description: 'Gérer le routage' },
-  
-  // Permissions services Sorikama
-  { action: 'read', subject: 'soristore', description: 'Accès en lecture à SoriStore' },
-  { action: 'write', subject: 'soristore', description: 'Accès en écriture à SoriStore' },
-  { action: 'manage', subject: 'soristore', description: 'Gestion complète de SoriStore' },
-  
-  { action: 'read', subject: 'soripay', description: 'Accès en lecture à SoriPay' },
-  { action: 'write', subject: 'soripay', description: 'Accès en écriture à SoriPay' },
-  { action: 'manage', subject: 'soripay', description: 'Gestion complète de SoriPay' },
-  
-  { action: 'read', subject: 'soriwallet', description: 'Accès en lecture à SoriWallet' },
-  { action: 'write', subject: 'soriwallet', description: 'Accès en écriture à SoriWallet' },
-  { action: 'manage', subject: 'soriwallet', description: 'Gestion complète de SoriWallet' },
-  
-  { action: 'read', subject: 'sorilearn', description: 'Accès en lecture à SoriLearn' },
-  { action: 'write', subject: 'sorilearn', description: 'Accès en écriture à SoriLearn' },
-  { action: 'manage', subject: 'sorilearn', description: 'Gestion complète de SoriLearn' },
-  
-  { action: 'read', subject: 'sorihealth', description: 'Accès en lecture à SoriHealth' },
-  { action: 'write', subject: 'sorihealth', description: 'Accès en écriture à SoriHealth' },
-  { action: 'manage', subject: 'sorihealth', description: 'Gestion complète de SoriHealth' },
-  
-  { action: 'read', subject: 'soriaccess', description: 'Accès en lecture à SoriAccess' },
-  { action: 'write', subject: 'soriaccess', description: 'Accès en écriture à SoriAccess' },
-  { action: 'manage', subject: 'soriaccess', description: 'Gestion complète de SoriAccess' },
-  
-  // Permissions analytics et reporting
-  { action: 'read', subject: 'analytics', description: 'Consulter les analytics' },
-  { action: 'export', subject: 'analytics', description: 'Exporter les données analytics' },
-  
-  // Permissions notifications
-  { action: 'send', subject: 'notification', description: 'Envoyer des notifications' },
-  { action: 'manage', subject: 'notification', description: 'Gérer les notifications' },
-  
-  // Permissions audit et logs
-  { action: 'read', subject: 'audit', description: 'Consulter les logs d\'audit' },
-  { action: 'export', subject: 'audit', description: 'Exporter les logs d\'audit' },
+/**
+ * Permissions par défaut du système
+ */
+const defaultPermissions = [
+  // Gestion des utilisateurs
+  {
+    action: 'read',
+    subject: 'users',
+    description: 'Voir la liste des utilisateurs'
+  },
+  {
+    action: 'create',
+    subject: 'users',
+    description: 'Créer de nouveaux utilisateurs'
+  },
+  {
+    action: 'update',
+    subject: 'users',
+    description: 'Modifier les utilisateurs'
+  },
+  {
+    action: 'delete',
+    subject: 'users',
+    description: 'Supprimer des utilisateurs'
+  },
+  {
+    action: 'block',
+    subject: 'users',
+    description: 'Bloquer/débloquer des utilisateurs'
+  },
+
+  // Gestion des rôles
+  {
+    action: 'read',
+    subject: 'roles',
+    description: 'Voir la liste des rôles'
+  },
+  {
+    action: 'create',
+    subject: 'roles',
+    description: 'Créer de nouveaux rôles'
+  },
+  {
+    action: 'update',
+    subject: 'roles',
+    description: 'Modifier les rôles'
+  },
+  {
+    action: 'delete',
+    subject: 'roles',
+    description: 'Supprimer des rôles'
+  },
+
+  // Gestion des permissions
+  {
+    action: 'read',
+    subject: 'permissions',
+    description: 'Voir la liste des permissions'
+  },
+  {
+    action: 'assign',
+    subject: 'permissions',
+    description: 'Assigner des permissions aux rôles'
+  },
+
+  // Gestion des services
+  {
+    action: 'read',
+    subject: 'services',
+    description: 'Voir la liste des services'
+  },
+  {
+    action: 'create',
+    subject: 'services',
+    description: 'Créer de nouveaux services'
+  },
+  {
+    action: 'update',
+    subject: 'services',
+    description: 'Modifier les services'
+  },
+  {
+    action: 'delete',
+    subject: 'services',
+    description: 'Supprimer des services'
+  },
+
+  // Gestion des logs et audit
+  {
+    action: 'read',
+    subject: 'logs',
+    description: 'Voir les logs système'
+  },
+  {
+    action: 'read',
+    subject: 'audit',
+    description: 'Voir l\'historique d\'audit'
+  },
+
+  // Gestion des statistiques
+  {
+    action: 'read',
+    subject: 'stats',
+    description: 'Voir les statistiques'
+  },
+
+  // Gestion de la configuration
+  {
+    action: 'read',
+    subject: 'config',
+    description: 'Voir la configuration système'
+  },
+  {
+    action: 'update',
+    subject: 'config',
+    description: 'Modifier la configuration système'
+  },
+
+  // Accès aux services (pour tous les utilisateurs)
+  {
+    action: 'access',
+    subject: 'services',
+    description: 'Accéder aux services de la plateforme'
+  }
 ];
 
-export const seedPermissions = async (): Promise<void> => {
+/**
+ * Les 3 rôles système par défaut (non modifiables)
+ * D'autres rôles personnalisés peuvent être créés via l'interface
+ */
+const defaultRoles = [
+  {
+    name: 'super_admin',
+    description: 'Super Administrateur - Accès complet et gestion de tous les admins',
+    isEditable: false,
+    isSystem: true,
+    permissions: 'all' // Toutes les permissions
+  },
+  {
+    name: 'admin',
+    description: 'Administrateur - Gestion des utilisateurs et services',
+    isEditable: false,
+    isSystem: true,
+    permissions: [
+      'read:users', 'create:users', 'update:users', 'delete:users', 'block:users',
+      'read:services', 'create:services', 'update:services', 'delete:services',
+      'read:stats', 'read:logs', 'read:audit',
+      'read:roles', 'read:permissions',
+      'access:services'
+    ]
+  },
+  {
+    name: 'user',
+    description: 'Utilisateur standard - Accès aux services de la plateforme',
+    isEditable: false,
+    isSystem: true,
+    permissions: ['access:services'] // Seulement accès aux services
+  }
+];
+
+/**
+ * Seeder principal
+ */
+export async function seedPermissions() {
   try {
-    logger.info('[SEEDER] Début du seeding des permissions...');
-    
-    for (const permData of permissionsData) {
-      await PermissionModel.findOneAndUpdate(
-        { action: permData.action, subject: permData.subject },
-        permData,
+    logger.info('🌱 Début du seeding des permissions...');
+
+    // 1. Créer ou mettre à jour les permissions (éviter les doublons)
+    const createdPermissions = [];
+    for (const perm of defaultPermissions) {
+      const permission = await PermissionModel.findOneAndUpdate(
+        { action: perm.action, subject: perm.subject },
+        { 
+          $set: {
+            description: perm.description
+          },
+          $setOnInsert: {
+            action: perm.action,
+            subject: perm.subject
+          }
+        },
         { upsert: true, new: true }
       );
+      createdPermissions.push(permission);
     }
-    
-    const count = await PermissionModel.countDocuments();
-    logger.info(`[SEEDER] ${count} permissions créées/mises à jour avec succès`);
+
+    logger.info(`✅ ${createdPermissions.length} permissions créées/mises à jour`);
+
+    // 2. Créer les 3 rôles système uniquement (éviter les doublons)
+    let rolesCreated = 0;
+    for (const roleData of defaultRoles) {
+      let permissionIds;
+
+      if (roleData.permissions === 'all') {
+        // Super Admin : toutes les permissions
+        permissionIds = createdPermissions.map(p => p._id);
+      } else {
+        // Admin et User : permissions spécifiques
+        permissionIds = createdPermissions
+          .filter(p => roleData.permissions.includes(`${p.action}:${p.subject}`))
+          .map(p => p._id);
+      }
+
+      const role = await RoleModel.findOneAndUpdate(
+        { name: roleData.name },
+        {
+          $set: {
+            description: roleData.description,
+            permissions: permissionIds,
+            isEditable: false, // Rôles système non modifiables
+            isSystem: true
+          },
+          $setOnInsert: {
+            name: roleData.name
+          }
+        },
+        { upsert: true, new: true }
+      );
+
+      if (role) {
+        rolesCreated++;
+        logger.info(`  ✓ Rôle "${roleData.name}" créé/mis à jour (${permissionIds.length} permissions)`);
+      }
+    }
+
+    logger.info(`✅ ${rolesCreated} rôles système créés/mis à jour`);
+    logger.info('🎉 Seeding des permissions terminé avec succès');
+
+    return {
+      success: true,
+      permissionsCount: createdPermissions.length,
+      rolesCount: rolesCreated
+    };
   } catch (error) {
-    logger.error('[SEEDER] Erreur lors du seeding des permissions:', error);
+    logger.error('❌ Erreur lors du seeding des permissions:', error);
     throw error;
   }
-};
+}
+
+/**
+ * Fonction pour réinitialiser les permissions (développement uniquement)
+ */
+export async function resetPermissions() {
+  try {
+    logger.warn('⚠️ Réinitialisation des permissions...');
+
+    // Supprimer toutes les permissions et rôles
+    await PermissionModel.deleteMany({});
+    await RoleModel.deleteMany({});
+
+    // Re-créer les 3 rôles système
+    await seedPermissions();
+
+    logger.info('✅ Permissions réinitialisées - 3 rôles système recréés');
+  } catch (error) {
+    logger.error('❌ Erreur lors de la réinitialisation:', error);
+    throw error;
+  }
+}

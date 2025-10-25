@@ -12,6 +12,86 @@ import AppError from '../../utils/AppError';
 import { logger } from '../../utils/logger';
 
 /**
+ * Récupérer TOUS les utilisateurs sans pagination
+ * 
+ * Query params:
+ * - search: recherche par email ou nom
+ * - role: filtrer par rôle (user, admin)
+ * - isBlocked: filtrer par statut bloqué (true, false)
+ * - isActive: filtrer par statut actif (true, false)
+ * - sortBy: champ de tri (createdAt, lastActivity, loginCount)
+ * - sortOrder: ordre de tri (asc, desc)
+ */
+export const getAllUsersNoPagination = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Récupération des paramètres de requête
+    const search = req.query.search as string;
+    const role = req.query.role as string;
+    const isBlocked = req.query.isBlocked as string;
+    const isActive = req.query.isActive as string;
+    const sortBy = (req.query.sortBy as string) || 'createdAt';
+    const sortOrder = (req.query.sortOrder as string) || 'desc';
+
+    // Construction du filtre
+    const filter: any = {};
+
+    // Filtre de recherche (email ou nom)
+    if (search) {
+      filter.$or = [
+        { email: { $regex: search, $options: 'i' } },
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Filtre par rôle
+    if (role) {
+      filter.role = role;
+    }
+
+    // Filtre par statut bloqué
+    if (isBlocked !== undefined) {
+      filter.isBlocked = isBlocked === 'true';
+    }
+
+    // Filtre par statut actif
+    if (isActive !== undefined) {
+      filter.isActive = isActive === 'true';
+    }
+
+    // Construction du tri
+    const sort: any = {};
+    sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+
+    // Récupération de TOUS les utilisateurs (sans pagination)
+    const usersRaw = await UserModel.find(filter)
+      .select('-password -passwordResetToken -passwordResetExpires')
+      .sort(sort);
+
+    // Convertir en objets simples avec décryptage
+    const users = usersRaw.map(user => user.toObject());
+
+    logger.info('📋 TOUS les utilisateurs récupérés (sans pagination)', {
+      adminId: (req as any).user.id,
+      total: users.length,
+      filters: filter
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        users,
+        total: users.length
+      }
+    });
+
+  } catch (error) {
+    logger.error('❌ Erreur lors de la récupération de tous les utilisateurs:', error);
+    next(error);
+  }
+};
+
+/**
  * Récupérer la liste de tous les utilisateurs avec filtres et pagination
  * 
  * Query params:
@@ -70,13 +150,15 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
     const sort: any = {};
     sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
-    // Récupération des utilisateurs
-    const users = await UserModel.find(filter)
+    // Récupération des utilisateurs (sans .lean() pour garder les getters de décryptage)
+    const usersRaw = await UserModel.find(filter)
       .select('-password -passwordResetToken -passwordResetExpires')
       .sort(sort)
       .skip(skip)
-      .limit(limit)
-      .lean();
+      .limit(limit);
+
+    // Convertir en objets simples avec décryptage
+    const users = usersRaw.map(user => user.toObject());
 
     // Comptage total pour la pagination
     const total = await UserModel.countDocuments(filter);
@@ -86,8 +168,20 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
       page,
       limit,
       total,
+      usersCount: users.length,
       filters: filter
     });
+
+    // Log pour debug
+    console.log('🔍 DEBUG - Utilisateurs trouvés:', users.length);
+    console.log('🔍 DEBUG - Total en base:', total);
+    if (users.length > 0) {
+      console.log('🔍 DEBUG - Premier utilisateur:', {
+        id: users[0]._id,
+        email: users[0].email,
+        role: users[0].role
+      });
+    }
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -382,6 +476,177 @@ export const getUserStats = async (req: Request, res: Response, next: NextFuncti
 
   } catch (error) {
     logger.error('❌ Erreur lors de la récupération des statistiques:', error);
+    next(error);
+  }
+};
+
+/**
+ * Télécharger un fichier template pour l'import
+ */
+export const downloadTemplate = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const format = (req.query.format as string) || 'csv';
+
+    if (format === 'csv') {
+      const csvContent = `email,firstName,lastName,role
+john.doe@example.com,John,Doe,user
+jane.smith@example.com,Jane,Smith,user
+admin.test@example.com,Admin,Test,admin
+alice.martin@example.com,Alice,Martin,user
+bob.wilson@example.com,Bob,Wilson,user`;
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="template-import-users.csv"');
+      res.send('\uFEFF' + csvContent); // BOM pour Excel
+    } else if (format === 'json') {
+      const jsonContent = [
+        {
+          email: 'john.doe@example.com',
+          firstName: 'John',
+          lastName: 'Doe',
+          role: 'user'
+        },
+        {
+          email: 'jane.smith@example.com',
+          firstName: 'Jane',
+          lastName: 'Smith',
+          role: 'user'
+        },
+        {
+          email: 'admin.test@example.com',
+          firstName: 'Admin',
+          lastName: 'Test',
+          role: 'admin'
+        }
+      ];
+
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', 'attachment; filename="template-import-users.json"');
+      res.json(jsonContent);
+    } else {
+      throw new AppError('Format non supporté', StatusCodes.BAD_REQUEST);
+    }
+
+    logger.info('📥 Template téléchargé', {
+      adminId: (req as any).user.id,
+      format
+    });
+
+  } catch (error) {
+    logger.error('❌ Erreur lors du téléchargement du template:', error);
+    next(error);
+  }
+};
+
+/**
+ * Importer des utilisateurs depuis un fichier
+ */
+export const importUsers = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const mode = req.body.mode || 'create'; // create, update, merge
+    
+    // Vérifier si un fichier a été uploadé
+    if (!req.body.file && !req.file) {
+      throw new AppError('Aucun fichier fourni', StatusCodes.BAD_REQUEST);
+    }
+
+    // Pour l'instant, on attend les données en JSON dans le body
+    // Dans une vraie implémentation, il faudrait utiliser multer pour gérer l'upload
+    const usersData = req.body.users || [];
+
+    if (!Array.isArray(usersData) || usersData.length === 0) {
+      throw new AppError('Format de données invalide', StatusCodes.BAD_REQUEST);
+    }
+
+    let created = 0;
+    let updated = 0;
+    let errors = 0;
+    const errorDetails: any[] = [];
+
+    for (const userData of usersData) {
+      try {
+        const { email, firstName, lastName, role = 'user' } = userData;
+
+        if (!email || !firstName || !lastName) {
+          errors++;
+          errorDetails.push({ email, error: 'Champs requis manquants' });
+          continue;
+        }
+
+        // Vérifier si l'utilisateur existe
+        const existingUser = await UserModel.findOne({ email });
+
+        if (mode === 'create' && !existingUser) {
+          // Créer un nouvel utilisateur
+          await UserModel.create({
+            email,
+            firstName,
+            lastName,
+            role,
+            isVerified: true,
+            isActive: true,
+            password: 'temp_password_' + Math.random().toString(36).slice(-8) // Mot de passe temporaire
+          });
+          created++;
+        } else if (mode === 'update' && existingUser) {
+          // Mettre à jour l'utilisateur existant
+          existingUser.firstName = firstName;
+          existingUser.lastName = lastName;
+          if (role) existingUser.role = role;
+          await existingUser.save();
+          updated++;
+        } else if (mode === 'merge') {
+          if (existingUser) {
+            // Mettre à jour
+            existingUser.firstName = firstName;
+            existingUser.lastName = lastName;
+            if (role) existingUser.role = role;
+            await existingUser.save();
+            updated++;
+          } else {
+            // Créer
+            await UserModel.create({
+              email,
+              firstName,
+              lastName,
+              role,
+              isVerified: true,
+              isActive: true,
+              password: 'temp_password_' + Math.random().toString(36).slice(-8)
+            });
+            created++;
+          }
+        }
+      } catch (error) {
+        errors++;
+        errorDetails.push({ 
+          email: userData.email, 
+          error: error instanceof Error ? error.message : 'Unknown error' 
+        });
+      }
+    }
+
+    logger.info('📥 Import utilisateurs terminé', {
+      adminId: (req as any).user.id,
+      mode,
+      created,
+      updated,
+      errors
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Import terminé: ${created} créés, ${updated} mis à jour, ${errors} erreurs`,
+      data: {
+        created,
+        updated,
+        errors,
+        errorDetails: errors > 0 ? errorDetails : undefined
+      }
+    });
+
+  } catch (error) {
+    logger.error('❌ Erreur lors de l\'import des utilisateurs:', error);
     next(error);
   }
 };

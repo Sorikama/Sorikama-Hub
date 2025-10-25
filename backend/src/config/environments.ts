@@ -15,6 +15,7 @@ const validateEnvVars = () => {
     'MONGO_URI',
     'JWT_SECRET',
     'JWT_EXPIRES_IN',
+    'JWT_REFRESH_SECRET',
     'ENCRYPTION_KEY',
     'DEFAULT_ADMIN_EMAIL',
     'DEFAULT_ADMIN_PASSWORD',

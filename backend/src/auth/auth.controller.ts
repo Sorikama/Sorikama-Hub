@@ -15,7 +15,7 @@ import { createBlindIndex, encrypt } from '../utils/crypto';
 import AppError from '../utils/AppError';
 import { logger } from '../utils/logger';
 import { JWT_SECRET, BASE_URL } from '../config';
-import { RefreshTokenModel } from '../database/models/refreshToken.model';
+import { RefreshTokenModel } from '../database/models/refreshtoken.model';
 
 // ===================================================================================
 // --- 🖋️ Processus d'Inscription ---
@@ -155,7 +155,7 @@ export const verifyAndCreateAccount = async (req: Request, res: Response, next: 
  */
 export const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, rememberMe } = req.body;
 
         const emailHash = createBlindIndex(email);
         const user = await UserModel.findOne({ emailHash }).select('+password').populate({
@@ -187,9 +187,19 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
             ));
         }
 
-        // Mettre à jour lastActivity et loginCount
-        user.lastActivity = new Date();
+        // Mettre à jour les infos de connexion
+        const now = new Date();
+        user.lastActivity = now;
         user.loginCount = (user.loginCount || 0) + 1;
+        user.lastLoginAt = now;
+        user.lastLoginIP = req.ip || req.socket.remoteAddress || 'unknown';
+        user.lastLoginDevice = req.headers['user-agent'] || 'unknown';
+        
+        // Première connexion
+        if (!user.firstLoginAt) {
+            user.firstLoginAt = now;
+        }
+        
         await user.save();
 
         const permissions = new Set<string>();
@@ -204,7 +214,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
             permissions: Array.from(permissions),
         };
 
-        const tokens = await generateTokens(payload);
+        // Générer les tokens avec durée adaptée selon "Se souvenir de moi"
+        // Si rememberMe = true : refresh token valide 30 jours
+        // Si rememberMe = false : refresh token valide 7 jours (par défaut)
+        const tokens = await generateTokens(payload, rememberMe);
 
         // Retirer le mot de passe de la réponse
         const userResponse = user.toObject();

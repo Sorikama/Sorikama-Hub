@@ -376,3 +376,208 @@ export const getUserRoles = async (req: Request, res: Response, next: NextFuncti
     next(error);
   }
 };
+
+
+/**
+ * Seeder les permissions par défaut
+ */
+export const seedPermissions = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Import dynamique du seeder
+    const seederModule = require('../../database/seeders/permissions.seeder');
+    const result = await seederModule.seedPermissions();
+
+    logger.info('🌱 Permissions seedées via API', {
+      adminId: (req as any).user.id,
+      result
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Permissions et rôles par défaut créés avec succès',
+      data: result
+    });
+  } catch (error) {
+    logger.error('❌ Erreur lors du seeding des permissions:', error);
+    next(error);
+  }
+};
+
+/**
+ * Exporter les rôles
+ */
+export const exportRoles = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const isEditable = req.query.isEditable as string;
+
+    // Construction du filtre
+    const filter: any = {};
+    if (isEditable !== undefined) {
+      filter.isEditable = isEditable === 'true';
+    }
+
+    // Récupérer les rôles
+    const roles = await RoleModel.find(filter)
+      .populate('permissions', 'action subject description')
+      .sort({ name: 1 })
+      .lean();
+
+    // Compter les utilisateurs par rôle
+    const rolesWithCounts = await Promise.all(
+      roles.map(async (role) => {
+        const userCount = await UserModel.countDocuments({ roles: role._id });
+        return {
+          ...role,
+          userCount,
+          permissions: role.permissions.map((p: any) => ({
+            id: p._id,
+            action: p.action,
+            subject: p.subject,
+            fullPermission: `${p.action}:${p.subject}`
+          }))
+        };
+      })
+    );
+
+    logger.info('📥 Export des rôles', {
+      adminId: (req as any).user.id,
+      count: rolesWithCounts.length,
+      filter
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        roles: rolesWithCounts
+      }
+    });
+  } catch (error) {
+    logger.error('❌ Erreur lors de l\'export des rôles:', error);
+    next(error);
+  }
+};
+
+/**
+ * Importer des rôles
+ */
+export const importRoles = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const mode = req.body.mode || 'create'; // create, update, merge
+    const rolesData = req.body.roles || [];
+
+    if (!Array.isArray(rolesData) || rolesData.length === 0) {
+      throw new AppError('Format de données invalide', StatusCodes.BAD_REQUEST);
+    }
+
+    let created = 0;
+    let updated = 0;
+    let errors = 0;
+    const errorDetails: any[] = [];
+
+    for (const roleData of rolesData) {
+      try {
+        const { name, description, permissions } = roleData;
+
+        if (!name) {
+          errors++;
+          errorDetails.push({ name, error: 'Nom requis' });
+          continue;
+        }
+
+        // Vérifier si le rôle existe
+        const existingRole = await RoleModel.findOne({ name });
+
+        // Traiter les permissions
+        let permissionIds: any[] = [];
+        if (permissions && Array.isArray(permissions)) {
+          // Si ce sont des strings (format "action:subject")
+          if (typeof permissions[0] === 'string') {
+            const permissionDocs = await Promise.all(
+              permissions.map(async (perm: string) => {
+                const [action, subject] = perm.split(':');
+                return await PermissionModel.findOne({ action, subject });
+              })
+            );
+            permissionIds = permissionDocs.filter(p => p).map(p => p!._id);
+          } else {
+            // Si ce sont déjà des IDs
+            permissionIds = permissions;
+          }
+        }
+
+        if (mode === 'create' && !existingRole) {
+          // Créer un nouveau rôle
+          await RoleModel.create({
+            name,
+            description,
+            permissions: permissionIds,
+            isEditable: true
+          });
+          created++;
+        } else if (mode === 'update' && existingRole) {
+          // Mettre à jour le rôle existant
+          if (!existingRole.isEditable) {
+            errors++;
+            errorDetails.push({ name, error: 'Rôle système non modifiable' });
+            continue;
+          }
+          existingRole.description = description || existingRole.description;
+          existingRole.permissions = permissionIds.length > 0 ? permissionIds : existingRole.permissions;
+          await existingRole.save();
+          updated++;
+        } else if (mode === 'merge') {
+          if (existingRole) {
+            // Mettre à jour
+            if (existingRole.isEditable) {
+              existingRole.description = description || existingRole.description;
+              existingRole.permissions = permissionIds.length > 0 ? permissionIds : existingRole.permissions;
+              await existingRole.save();
+              updated++;
+            } else {
+              errors++;
+              errorDetails.push({ name, error: 'Rôle système non modifiable' });
+            }
+          } else {
+            // Créer
+            await RoleModel.create({
+              name,
+              description,
+              permissions: permissionIds,
+              isEditable: true
+            });
+            created++;
+          }
+        }
+      } catch (error) {
+        errors++;
+        errorDetails.push({ 
+          name: roleData.name, 
+          error: error instanceof Error ? error.message : 'Unknown error' 
+        });
+      }
+    }
+
+    logger.info('📥 Import rôles terminé', {
+      adminId: (req as any).user.id,
+      mode,
+      created,
+      updated,
+      errors
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Import terminé: ${created} créés, ${updated} mis à jour, ${errors} erreurs`,
+      data: {
+        created,
+        updated,
+        errors,
+        errorDetails: errors > 0 ? errorDetails : undefined
+      }
+    });
+
+  } catch (error) {
+    logger.error('❌ Erreur lors de l\'import des rôles:', error);
+    next(error);
+  }
+};
