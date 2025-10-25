@@ -141,6 +141,10 @@ const startServer = async () => {
 
     // Redis sera géré par RedisManager
 
+    // Middleware de déchiffrement automatique des IDs
+    const { autoDecryptIds } = require('./middlewares/decryptId.middleware');
+    app.use(autoDecryptIds);
+
     // Middlewares de logging et métriques
     app.use(httpRequestLogger); // VRAI logging des requêtes
     app.use(httpLoggingMiddleware);

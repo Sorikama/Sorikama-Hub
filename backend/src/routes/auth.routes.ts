@@ -12,6 +12,8 @@ import { protect } from '../middlewares/auth.middleware';
 import { requireApiKeyAndJWT } from '../middlewares/dualAuth.middleware';
 // Importe les routes d'activation de compte
 import activationRoutes from './auth/activation.routes';
+// Importe les routes d'autorisation OAuth
+import authorizeRoutes from './auth/authorize.routes';
 
 const router = Router();
 
@@ -186,6 +188,9 @@ router.use('/activation', activationRoutes);
 // ===================================================================================
 // --- 🔒 Routes Protégées (nécessitent un token JWT valide) ---
 // ===================================================================================
+
+// Routes d'autorisation OAuth (protégées)
+router.use('/', authorizeRoutes);
 
 // Le middleware 'requireApiKeyAndJWT' est appliqué à toutes les routes définies après cette ligne.
 // Il vérifie l'API Key ET le token JWT.
