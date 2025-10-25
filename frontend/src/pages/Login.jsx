@@ -1,23 +1,62 @@
 /**
  * Page de connexion - Design moderne avec icônes
+ * Gère 2 scénarios :
+ * 1. Connexion SSO (avec service externe)
+ * 2. Connexion normale (sans service externe)
  */
 
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isLoading, error } = useAuth();
-  
+  const [searchParams] = useSearchParams();
+  const { login, isLoading, error, user } = useAuth();
+
   const [credentials, setCredentials] = useState({
     email: '',
     password: '',
     rememberMe: false
   });
-  
+
   const [showPassword, setShowPassword] = useState(false);
+  const [hasRedirected, setHasRedirected] = useState(false);
+
+  // ============================================
+  // RÉCUPÉRER LES PARAMÈTRES SSO
+  // ============================================
+  const redirectUrl = searchParams.get('redirect');
+  const serviceSlug = searchParams.get('service');
+  const isSSO = redirectUrl && serviceSlug;
+
+  // ============================================
+  // SI DÉJÀ CONNECTÉ, REDIRIGER AUTOMATIQUEMENT
+  // ============================================
+  useEffect(() => {
+    if (!user || hasRedirected) return; // Pas connecté ou déjà redirigé
+
+    console.log('👤 Utilisateur déjà connecté:', user.email);
+    setHasRedirected(true);
+
+    // Scénario 1 : SSO - Rediriger vers /authorize
+    if (isSSO) {
+      console.log('🔐 SSO détecté - Redirection vers page d\'autorisation');
+      const authorizeUrl = `/authorize?redirect=${encodeURIComponent(redirectUrl)}&service=${serviceSlug}`;
+      navigate(authorizeUrl, { replace: true });
+      return;
+    }
+
+    // Scénario 2 : Connexion normale - Rediriger selon rôle
+    if (user.role === 'admin') {
+      console.log('👑 Admin détecté - Redirection vers espace admin');
+      navigate('/admin/dashboard', { replace: true });
+    } else {
+      console.log('👤 User détecté - Redirection vers dashboard');
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, isSSO, redirectUrl, serviceSlug, navigate, hasRedirected]);
 
   const handleInputChange = (e) => {
     setCredentials({
@@ -28,54 +67,62 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const response = await login(credentials);
       const userData = response?.data?.user;
-      
-      console.log('✅ Connexion réussie', { role: userData?.role });
-      
-      // Vérifier s'il y a un paramètre redirect dans l'URL (priorité 1)
-      const searchParams = new URLSearchParams(location.search);
-      const redirectUrl = searchParams.get('redirect');
-      
-      if (redirectUrl) {
-        const decodedUrl = decodeURIComponent(redirectUrl);
-        console.log('🔄 Redirection vers:', decodedUrl);
-        navigate(decodedUrl, { replace: true });
+
+      console.log('✅ Connexion réussie', {
+        email: userData?.email,
+        role: userData?.role,
+        isSSO
+      });
+
+      setHasRedirected(true); // Marquer qu'on va rediriger
+
+      // ============================================
+      // SCÉNARIO 1 : CONNEXION SSO (avec service externe)
+      // ============================================
+      if (isSSO) {
+        console.log('🔐 SSO - Redirection vers page d\'autorisation');
+        const authorizeUrl = `/authorize?redirect=${encodeURIComponent(redirectUrl)}&service=${serviceSlug}`;
+        navigate(authorizeUrl, { replace: true });
         return;
       }
-      
-      // Vérifier s'il y a un state.from (priorité 2)
+
+      // ============================================
+      // SCÉNARIO 2 : CONNEXION NORMALE (sans service externe)
+      // ============================================
+
+      // Vérifier s'il y a un state.from (page protégée)
       if (location.state?.from) {
-        const from = typeof location.state.from === 'string' 
-          ? location.state.from 
+        const from = typeof location.state.from === 'string'
+          ? location.state.from
           : location.state.from.pathname + (location.state.from.search || '');
         console.log('🔄 Redirection vers page protégée:', from);
         navigate(from, { replace: true });
         return;
       }
-      
-      // Rediriger selon le rôle de l'utilisateur (priorité 3)
+
+      // Rediriger selon le rôle de l'utilisateur
       if (userData?.role === 'admin') {
-        console.log('👑 Admin détecté - Redirection vers espace admin');
+        console.log('👑 Admin - Redirection vers espace admin');
         navigate('/admin/dashboard', { replace: true });
-        return;
+      } else {
+        console.log('👤 User - Redirection vers dashboard');
+        navigate('/dashboard', { replace: true });
       }
-      
-      // Par défaut, rediriger vers le dashboard utilisateur
-      console.log('🔄 Redirection vers dashboard utilisateur');
-      navigate('/dashboard', { replace: true });
-      
+
     } catch (error) {
       console.error('❌ Erreur connexion:', error);
+      setHasRedirected(false); // Réinitialiser en cas d'erreur
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-8 sm:py-12 px-4">
       <div className="w-full max-w-md">
-        
+
         {/* En-tête */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-900 rounded-2xl mb-4 shadow-lg">
@@ -84,16 +131,36 @@ export default function Login() {
             </svg>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2">
-            Bon retour !
+            {isSSO ? 'Connexion SSO' : 'Bon retour !'}
           </h1>
           <p className="text-gray-600">
-            Connectez-vous à votre compte Sorikama
+            {isSSO
+              ? `Connectez-vous pour accéder à ${serviceSlug}`
+              : 'Connectez-vous à votre compte Sorikama'
+            }
           </p>
         </div>
 
+        {/* Notice SSO */}
+        {isSSO && (
+          <div className="mb-6 bg-blue-50 border-l-4 border-blue-500 text-blue-700 px-4 py-3 rounded-lg">
+            <div className="flex items-start">
+              <svg className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="text-sm font-medium">Connexion via service externe</p>
+                <p className="text-xs mt-1">
+                  Vous serez redirigé vers <strong>{serviceSlug}</strong> après autorisation
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Formulaire */}
         <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-100">
-          
+
           {error && (
             <div className="mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg animate-slide-in-up">
               <div className="flex items-center">
@@ -106,7 +173,7 @@ export default function Login() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            
+
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
