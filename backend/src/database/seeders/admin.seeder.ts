@@ -18,8 +18,6 @@ import { createBlindIndex } from '../../utils/crypto';
  */
 export async function seedAdmin() {
   try {
-    logger.info('🌱 Démarrage du seeder admin...');
-
     // Email et mot de passe du compte admin
     const adminEmail = 'admin@admin.fr';
     const adminPassword = 'Admin@123';
@@ -29,7 +27,7 @@ export async function seedAdmin() {
     const existingAdmin = await UserModel.findOne({ emailHash });
 
     if (existingAdmin) {
-      logger.info('✅ Le compte admin existe déjà');
+      logger.info('✅ Compte admin existant');
       return existingAdmin;
     }
 
@@ -47,21 +45,17 @@ export async function seedAdmin() {
       loginCount: 0,
     });
 
-    logger.info('✅ Compte admin créé avec succès', {
-      id: admin._id,
+    logger.info('✅ Compte admin créé', {
       email: adminEmail,
       role: admin.role
     });
 
-    logger.info('🔑 Identifiants admin:', {
-      email: adminEmail,
-      password: adminPassword
-    });
+    logger.info('🔑 Identifiants: admin@admin.fr / Admin@123');
 
     return admin;
 
   } catch (error: any) {
-    logger.error('❌ Erreur lors de la création du compte admin:', error);
+    logger.error('❌ Erreur création compte admin:', error);
     throw error;
   }
 }

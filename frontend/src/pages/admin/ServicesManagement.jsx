@@ -102,6 +102,38 @@ export default function ServicesManagement() {
     }
   };
 
+  const testConnection = async (service) => {
+    try {
+      const response = await api.post(`/admin/services/${service._id}/test`);
+      const { test } = response.data;
+      
+      if (test.status === 'online') {
+        alert(
+          `✅ Service ${test.serviceName} en ligne !\n\n` +
+          `Backend: ${test.backendUrl}\n` +
+          `Temps de réponse: ${test.responseTime}ms\n` +
+          `Statut: Opérationnel`
+        );
+      } else if (test.status === 'offline') {
+        alert(
+          `❌ Service ${test.serviceName} hors ligne\n\n` +
+          `Backend: ${test.backendUrl}\n` +
+          `Erreur: ${test.error}\n\n` +
+          `Assurez-vous que le backend est démarré sur ce port.`
+        );
+      } else {
+        alert(
+          `⚠️ Service ${test.serviceName} - Statut inconnu\n\n` +
+          `Backend: ${test.backendUrl}\n` +
+          `Temps de réponse: ${test.responseTime}ms`
+        );
+      }
+    } catch (error) {
+      console.error('Erreur test connexion:', error);
+      alert(`❌ Erreur lors du test de connexion\n\n${error.response?.data?.message || error.message}`);
+    }
+  };
+
   const openModal = (service = null) => {
     if (service) {
       setEditingService(service);
@@ -362,25 +394,37 @@ export default function ServicesManagement() {
 
               {/* Footer */}
               <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <a
-                  href={service.frontendUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 transition-colors"
-                >
-                  <FiExternalLink className="w-4 h-4" />
-                  Ouvrir le service
-                </a>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={service.frontendUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                  >
+                    <FiExternalLink className="w-4 h-4" />
+                    Ouvrir
+                  </a>
+                  <button
+                    onClick={() => testConnection(service)}
+                    className="flex items-center gap-2 text-sm text-green-600 hover:text-green-700 transition-colors"
+                    title="Tester la connexion au backend"
+                  >
+                    <FiRefreshCw className="w-4 h-4" />
+                    Tester
+                  </button>
+                </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => openModal(service)}
                     className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors"
+                    title="Modifier"
                   >
                     <FiEdit2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(service._id)}
                     className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors"
+                    title="Supprimer"
                   >
                     <FiTrash2 className="w-4 h-4" />
                   </button>

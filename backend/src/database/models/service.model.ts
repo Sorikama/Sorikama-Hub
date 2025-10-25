@@ -15,7 +15,7 @@ export interface IService extends Document {
   enabled: boolean;
   requireAuth: boolean;
   allowedRoles: string[];
-  createdBy: mongoose.Types.ObjectId;
+  createdBy: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -67,7 +67,7 @@ const ServiceSchema = new Schema<IService>(
       default: []
     },
     createdBy: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'User',
       required: true
     }

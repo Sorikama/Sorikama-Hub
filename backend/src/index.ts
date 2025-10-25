@@ -73,15 +73,29 @@ const startServer = async () => {
     Banner.displayStartupStep('MongoDB connecté', 'success');
 
     // Étape 2.5: Initialisation du compte admin
-    Banner.displayStartupStep('Initialisation du compte admin', 'loading');
+    Banner.displayStartupStep('Vérification compte admin', 'loading');
     await seedAdmin();
-    Banner.displayStartupStep('Compte admin initialisé', 'success', 'admin@admin.fr');
+    Banner.displayStartupStep('Compte admin prêt', 'success', 'admin@admin.fr');
 
     // Étape 2.6: Initialisation des permissions et rôles
-    Banner.displayStartupStep('Initialisation des permissions', 'loading');
+    Banner.displayStartupStep('Chargement permissions & rôles', 'loading');
     const { seedPermissions } = require('./database/seeders/permissions.seeder');
     const permResult = await seedPermissions();
-    Banner.displayStartupStep('Permissions initialisées', 'success', `${permResult.permissionsCount} permissions, ${permResult.rolesCount} rôles`);
+    Banner.displayStartupStep('Permissions & rôles prêts', 'success', `${permResult.permissionsCount} permissions, ${permResult.rolesCount} rôles`);
+
+    // Étape 2.7: Initialisation des services externes
+    Banner.displayStartupStep('Initialisation des services externes', 'loading');
+    const { seedServices } = require('./database/seeders/services.seeder');
+    const servicesResult = await seedServices();
+    if (servicesResult) {
+      const { created, skipped, total, enabled } = servicesResult;
+      const statusMsg = created > 0 
+        ? `${created} créé(s), ${total} disponible(s)` 
+        : `${total} service(s) disponible(s)`;
+      Banner.displayStartupStep('Services externes prêts', 'success', statusMsg);
+    } else {
+      Banner.displayStartupStep('Services externes', 'success', 'Aucun service configuré');
+    }
 
     app.use(
       helmet({
@@ -378,10 +392,10 @@ const startServer = async () => {
     logSystemEvent('Système de logs initialisé', 'info');
     Banner.displayStartupStep('Logs initialisés', 'success');
 
-    // Étape 5: Démarrage du monitoring
-    Banner.displayStartupStep('Démarrage du monitoring', 'loading');
-    MonitoringService.startMonitoring(5); // Monitoring toutes les 5 minutes
-    Banner.displayStartupStep('Monitoring démarré', 'success');
+    // Étape 5: Démarrage du monitoring (désactivé temporairement)
+    // Banner.displayStartupStep('Démarrage du monitoring', 'loading');
+    // MonitoringService.startMonitoring(5); // Monitoring toutes les 5 minutes
+    // Banner.displayStartupStep('Monitoring démarré', 'success');
 
     // Étape 5: Démarrage du serveur
     Banner.displayStartupStep('Démarrage du serveur HTTP', 'loading');

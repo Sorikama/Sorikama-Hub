@@ -198,46 +198,45 @@ export class RoutingEngine {
   }
 
   private async startHealthChecks(): Promise<void> {
-    setInterval(async () => {
-      for (const [path, route] of this.routes) {
-        if (route.healthCheck) {
-          try {
-            // Utiliser une approche compatible Node.js
-            const http = await import('http');
-            const url = new URL(`${route.target}${route.healthCheck}`);
+    // Health checks désactivés - Utiliser le système de services externes à la place
+    // setInterval(async () => {
+    //   for (const [path, route] of this.routes) {
+    //     if (route.healthCheck) {
+    //       try {
+    //         const http = await import('http');
+    //         const url = new URL(`${route.target}${route.healthCheck}`);
             
-            const options = {
-              hostname: url.hostname,
-              port: url.port || 80,
-              path: url.pathname,
-              method: 'GET',
-              timeout: 5000
-            };
+    //         const options = {
+    //           hostname: url.hostname,
+    //           port: url.port || 80,
+    //           path: url.pathname,
+    //           method: 'GET',
+    //           timeout: 5000
+    //         };
             
-            const isHealthy = await new Promise<boolean>((resolve) => {
-              const req = http.request(options, (res) => {
-                resolve(res.statusCode === 200);
-              });
+    //         const isHealthy = await new Promise<boolean>((resolve) => {
+    //           const req = http.request(options, (res) => {
+    //             resolve(res.statusCode === 200);
+    //           });
               
-              req.on('error', () => resolve(false));
-              req.on('timeout', () => resolve(false));
-              req.setTimeout(5000);
-              req.end();
-            });
+    //           req.on('error', () => resolve(false));
+    //           req.on('timeout', () => resolve(false));
+    //           req.setTimeout(5000);
+    //           req.end();
+    //         });
             
-            const wasHealthy = this.healthStatus.get(route.name);
-            this.healthStatus.set(route.name, isHealthy);
+    //         const wasHealthy = this.healthStatus.get(route.name);
+    //         this.healthStatus.set(route.name, isHealthy);
             
-            if (wasHealthy !== isHealthy) {
-              logger.info(`[ROUTING] Service ${route.name} status changed: ${isHealthy ? 'healthy' : 'unhealthy'}`);
-            }
-          } catch (error) {
-            this.healthStatus.set(route.name, false);
-            // Pas de log pour éviter le spam quand les services ne sont pas démarrés
-          }
-        }
-      }
-    }, 30000);
+    //         if (wasHealthy !== isHealthy) {
+    //           logger.info(`[ROUTING] Service ${route.name} status changed: ${isHealthy ? 'healthy' : 'unhealthy'}`);
+    //         }
+    //       } catch (error) {
+    //         this.healthStatus.set(route.name, false);
+    //       }
+    //     }
+    //   }
+    // }, 30000);
   }
 
   public getRoutes(): ServiceRoute[] {
@@ -266,5 +265,12 @@ export class RoutingEngine {
   }
 }
 
-// Instance singleton
-export const routingEngine = new RoutingEngine();
+// Instance singleton - Désactivé (utiliser le système de services externes à la place)
+// export const routingEngine = new RoutingEngine();
+
+// Mock pour compatibilité avec l'ancien code
+export const routingEngine = {
+  getRoutes: () => [],
+  getHealthStatus: () => new Map(),
+  matchRoute: () => null
+};
