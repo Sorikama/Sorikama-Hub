@@ -1,0 +1,12 @@
+[2025-10-25 13:14:58] INFO: ⚡ Monitoring des performances activé
+[2025-10-25 14:14:58] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-25 15:14:58] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-25 16:14:58] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-25 17:14:58] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-25 18:14:58] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
+[2025-10-25 13:17:45] INFO: ⚡ Monitoring des performances activé
+[2025-10-25 14:17:45] INFO: 📈 Temps de réponse moyen: 145ms
+[2025-10-25 15:17:45] INFO: 💾 Utilisation mémoire: 68%
+[2025-10-25 16:17:45] WARN: 🐌 Requête lente détectée: 1250ms
+[2025-10-25 17:17:45] INFO: 🔄 Nettoyage automatique du cache
+[2025-10-25 18:17:45] INFO: 📊 CPU: 45%, RAM: 72%, Disque: 23%
