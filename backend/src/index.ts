@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import http from 'http';
 
 // Import de nos modules internes
-import { PORT, NODE_ENV } from './config/environments';
+import { PORT, NODE_ENV, BASE_URL, FRONTEND_URL, BACKEND_URL } from './config/environments';
 import { logger } from './utils/logger';
 import { RedisManager } from './utils/redisManager';
 import { Banner } from './utils/banner';
@@ -33,6 +33,7 @@ import fs from 'fs';
 import { connectDB } from './database/connexion';
 import path from 'path';
 import authRoutes from './routes/auth.routes';
+import { ServiceModel } from './database/models/service.model';
 import proxyRoutes from './routes/proxy.routes';
 import swaggerRoutes from './routes/swagger.routes';
 import docsRoutes from './routes/docs.routes';
@@ -123,8 +124,45 @@ const startServer = async () => {
       })
     );
 
+    // Configuration CORS dynamique pour autoriser les services externes
     const corsOptions = {
-      origin: NODE_ENV === 'development' ? 'http://localhost:5173' : 'https://www.votre-site-de-production.com',
+      origin: async (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+        // Toujours autoriser les requêtes sans origin (Postman, curl, etc.)
+        if (!origin) {
+          return callback(null, true);
+        }
+
+        // Autoriser le frontend Sorikama
+        if (origin === FRONTEND_URL) {
+          return callback(null, true);
+        }
+
+        try {
+          // Récupérer tous les services actifs depuis la DB
+          const services = await ServiceModel.find({ enabled: true }).select('frontendUrl');
+          
+          // Vérifier si l'origin correspond à un service enregistré
+          const allowedOrigins = services.map((s: any) => {
+            try {
+              return new URL(s.frontendUrl).origin;
+            } catch {
+              return null;
+            }
+          }).filter(Boolean);
+
+          if (allowedOrigins.includes(origin)) {
+            logger.debug(`✅ CORS autorisé pour le service: ${origin}`);
+            return callback(null, true);
+          }
+
+          // Origin non autorisée
+          logger.warn(`⚠️ CORS refusé pour: ${origin}`);
+          callback(new Error('Not allowed by CORS'));
+        } catch (error) {
+          logger.error('Erreur vérification CORS:', error);
+          callback(new Error('CORS verification failed'));
+        }
+      },
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'Accept', 'X-CSRF-Token'],
       credentials: true
@@ -214,8 +252,8 @@ const startServer = async () => {
 
         swaggerSpec.servers = [
           {
-            url: `http://localhost:${PORT}/api/v1`,
-            description: 'Serveur de développement local'
+            url: BASE_URL,
+            description: NODE_ENV === 'production' ? 'Serveur de production' : 'Serveur de développement local'
           }
         ];
         swaggerSpec.security = [{ bearerAuth: [] }];
@@ -239,7 +277,7 @@ const startServer = async () => {
             version: '1.0.0',
             description: 'API Gateway centralisée pour l\'écosystème Sorikama.'
           },
-          servers: [{ url: `http://localhost:${PORT}/api/v1` }],
+          servers: [{ url: BASE_URL }],
           components: {
             securitySchemes: {
               bearerAuth: {
@@ -315,7 +353,7 @@ const startServer = async () => {
         createdAt: session?.createdAt || Date.now(),
         environment: NODE_ENV,
         port: PORT,
-        baseUrl: `http://localhost:${PORT}/api/v1`,
+        baseUrl: BASE_URL,
         uptime: Math.floor(process.uptime())
       };
 
@@ -431,13 +469,13 @@ const startServer = async () => {
 
       // Attendre un peu pour les connexions Redis
       setTimeout(async () => {
-        await Banner.displayStartupComplete(7000);
-        logger.info(`🌐 Accès au portail: http://localhost:7000/portal/login`);
-        logSystemEvent('Démarrage complet du système Sorikama Hub', 'info', { port: 7000 });
+        await Banner.displayStartupComplete(PORT);
+        logger.info(`🌐 Accès au portail: ${BACKEND_URL}/portal/login`);
+        logSystemEvent('Démarrage complet du système Sorikama Hub', 'info', { port: PORT });
 
         // Lancement automatique du navigateur
         setTimeout(() => {
-          BrowserLauncher.autoLaunch(7000);
+          BrowserLauncher.autoLaunch(PORT);
         }, 2000);
       }, 1000);
     });

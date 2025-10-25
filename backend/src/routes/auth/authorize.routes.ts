@@ -32,7 +32,7 @@ router.get('/services/:serviceId', protect, authorizeController.getServiceInfo);
  * @swagger
  * /auth/authorize:
  *   post:
- *     summary: Autoriser l'accès d'un service externe
+ *     summary: Autoriser l'accès d'un service externe (génère un code temporaire)
  *     tags: [Authentification]
  *     security:
  *       - bearerAuth: []
@@ -49,14 +49,64 @@ router.get('/services/:serviceId', protect, authorizeController.getServiceInfo);
  *               service:
  *                 type: string
  *                 description: Slug du service externe
- *                 example: mon-service
+ *                 example: masebuy
  *               redirectUrl:
  *                 type: string
  *                 description: URL de callback du service
  *                 example: http://localhost:3001/auth/callback
  *     responses:
  *       200:
- *         description: Autorisation accordée
+ *         description: Code d'autorisation généré
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     code:
+ *                       type: string
+ *                       description: Code temporaire à échanger (valide 5 min)
+ *                     expiresIn:
+ *                       type: number
+ *                       description: Durée de validité en secondes
+ *                       example: 300
+ *       401:
+ *         description: Non authentifié
+ *       403:
+ *         description: Service non autorisé
+ *       404:
+ *         description: Service introuvable
+ */
+router.post('/authorize', requireApiKeyAndJWT, authorizeController.authorizeService);
+
+/**
+ * @swagger
+ * /auth/exchange:
+ *   post:
+ *     summary: Échanger un code d'autorisation contre un token JWT
+ *     description: Route appelée par le backend du service externe pour obtenir le token
+ *     tags: [Authentification]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 description: Code d'autorisation reçu
+ *                 example: a1b2c3d4e5f6...
+ *     responses:
+ *       200:
+ *         description: Token JWT généré
  *         content:
  *           application/json:
  *             schema:
@@ -75,12 +125,8 @@ router.get('/services/:serviceId', protect, authorizeController.getServiceInfo);
  *                       type: object
  *                       description: Informations utilisateur
  *       401:
- *         description: Non authentifié
- *       403:
- *         description: Service non autorisé
- *       404:
- *         description: Service introuvable
+ *         description: Code invalide ou expiré
  */
-router.post('/authorize', requireApiKeyAndJWT, authorizeController.authorizeService);
+router.post('/exchange', authorizeController.exchangeAuthorizationCode);
 
 export default router;

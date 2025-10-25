@@ -25,6 +25,8 @@ const validateEnvVars = () => {
     'SMTP_PASS',
     'EMAIL_FROM',
     'BASE_URL',
+    'FRONTEND_URL',
+    'BACKEND_URL',
     'BLIND_INDEX_PEPPER',
   ];
 
@@ -63,6 +65,8 @@ export const {
   SMTP_PASS,
   EMAIL_FROM,
   BASE_URL,
+  FRONTEND_URL,
+  BACKEND_URL,
   BLIND_INDEX_PEPPER,
 } = process.env as { [key: string]: string }; // Assert que les variables existent après validation
 

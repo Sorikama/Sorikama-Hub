@@ -334,7 +334,7 @@ export class ServiceManager {
       const authUrl = new URL(service.url + (service.authEndpoint || '/auth/sorikama'));
       authUrl.searchParams.set('token', token);
       authUrl.searchParams.set('state', state);
-      authUrl.searchParams.set('redirect_uri', redirectUrl || `http://localhost:${process.env.PORT || 7000}/api/v1/sso/callback`);
+      authUrl.searchParams.set('redirect_uri', redirectUrl || `${process.env.BASE_URL}/sso/callback`);
       authUrl.searchParams.set('client_id', 'sorikama-hub');
       
       if (service.scopes && service.scopes.length > 0) {
@@ -349,7 +349,7 @@ export class ServiceManager {
       });
     } else {
       // Service non accessible - redirection directe vers callback Hub
-      const callbackUrl = new URL(`http://localhost:${process.env.PORT || 7000}/api/v1/sso/callback`);
+      const callbackUrl = new URL(`${process.env.BASE_URL}/sso/callback`);
       callbackUrl.searchParams.set('token', token);
       callbackUrl.searchParams.set('state', state);
       callbackUrl.searchParams.set('service_id', serviceId);

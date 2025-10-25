@@ -157,7 +157,7 @@ router.get('/callback', async (req: Request, res: Response) => {
             Il expire dans 1 heure.
           </p>
 
-          <a href="http://localhost:5173/dashboard" class="button">Retour au Dashboard</a>
+          <a href="${process.env.FRONTEND_URL}/dashboard" class="button">Retour au Dashboard</a>
         </div>
       </body>
       </html>
@@ -205,7 +205,7 @@ router.get('/callback', async (req: Request, res: Response) => {
           <div class="error">❌</div>
           <h1>Erreur SSO</h1>
           <p>${error.message}</p>
-          <a href="http://localhost:5173/dashboard" class="button">Retour au Dashboard</a>
+          <a href="${process.env.FRONTEND_URL}/dashboard" class="button">Retour au Dashboard</a>
         </div>
       </body>
       </html>
