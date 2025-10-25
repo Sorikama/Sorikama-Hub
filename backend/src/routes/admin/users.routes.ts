@@ -10,12 +10,81 @@ import { Router } from 'express';
 import { protect } from '../../middlewares/auth.middleware';
 import { requireAdmin } from '../../middlewares/adminAuth.middleware';
 import * as usersController from '../../controllers/admin/users.controller';
+import * as usersCreateController from '../../controllers/admin/users.create.controller';
 
 const router = Router();
 
 // Appliquer l'authentification et la vérification admin sur toutes les routes
 router.use(protect);
 router.use(requireAdmin);
+
+/**
+ * POST /api/v1/admin/users/create
+ * Créer un utilisateur SANS mot de passe (activation par email)
+ * IMPORTANT: Cette route doit être AVANT /:userId pour éviter les conflits
+ */
+router.post('/create', usersCreateController.createUserWithoutPassword);
+
+/**
+ * POST /api/v1/admin/users/create-with-password
+ * Créer un utilisateur AVEC mot de passe (compte immédiatement actif)
+ * IMPORTANT: Cette route doit être AVANT /:userId pour éviter les conflits
+ */
+router.post('/create-with-password', usersCreateController.createUserWithPassword);
+
+/**
+ * GET /api/v1/admin/users/stats/overview
+ * Récupérer les statistiques globales des utilisateurs
+ * IMPORTANT: Cette route doit être AVANT /:userId pour éviter les conflits
+ */
+router.get('/stats/overview', usersController.getUsersOverview);
+
+/**
+ * GET /api/v1/admin/users/debug/count
+ * Debug - Compter tous les utilisateurs
+ * IMPORTANT: Cette route doit être AVANT /:userId pour éviter les conflits
+ */
+router.get('/debug/count', async (_req, res) => {
+  try {
+    const total = await require('../../database/models/user.model').UserModel.countDocuments();
+    const admins = await require('../../database/models/user.model').UserModel.countDocuments({ role: 'admin' });
+    const users = await require('../../database/models/user.model').UserModel.countDocuments({ role: 'user' });
+
+    res.json({
+      success: true,
+      data: {
+        total,
+        admins,
+        users,
+        message: 'Debug info'
+      }
+    });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({ success: false, error: errorMessage });
+  }
+});
+
+/**
+ * GET /api/v1/admin/users/all
+ * Récupérer TOUS les utilisateurs sans pagination
+ * IMPORTANT: Cette route doit être AVANT / pour éviter les conflits
+ */
+router.get('/all', usersController.getAllUsersNoPagination);
+
+/**
+ * GET /api/v1/admin/users/template
+ * Télécharger un fichier template pour l'import
+ * IMPORTANT: Cette route doit être AVANT /:userId pour éviter les conflits
+ */
+router.get('/template', usersController.downloadTemplate);
+
+/**
+ * POST /api/v1/admin/users/import
+ * Importer des utilisateurs depuis un fichier (JSON, CSV, Excel)
+ * IMPORTANT: Cette route doit être AVANT /:userId pour éviter les conflits
+ */
+router.post('/import', usersController.importUsers);
 
 /**
  * GET /api/v1/admin/users
@@ -58,11 +127,5 @@ router.delete('/:userId/sessions', usersController.revokeUserSessions);
  * Récupérer les statistiques d'un utilisateur
  */
 router.get('/:userId/stats', usersController.getUserStats);
-
-/**
- * GET /api/v1/admin/users/stats/overview
- * Récupérer les statistiques globales des utilisateurs
- */
-router.get('/stats/overview', usersController.getUsersOverview);
 
 export default router;

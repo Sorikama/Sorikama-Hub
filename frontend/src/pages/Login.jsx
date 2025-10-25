@@ -13,7 +13,8 @@ export default function Login() {
   
   const [credentials, setCredentials] = useState({
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   });
   
   const [showPassword, setShowPassword] = useState(false);
@@ -181,12 +182,14 @@ export default function Login() {
             <div className="flex items-center">
               <input
                 id="remember"
-                name="remember"
+                name="rememberMe"
                 type="checkbox"
+                checked={credentials.rememberMe}
+                onChange={(e) => setCredentials({ ...credentials, rememberMe: e.target.checked })}
                 className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900 focus:ring-2"
               />
               <label htmlFor="remember" className="ml-2 text-sm text-gray-600">
-                Se souvenir de moi
+                Se souvenir de moi (30 jours)
               </label>
             </div>
 

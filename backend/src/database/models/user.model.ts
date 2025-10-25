@@ -14,6 +14,9 @@ export interface IUser extends Document {
     email: string;
     emailHash: string;
     password?: string;
+    activationToken?: string;
+    activationTokenExpires?: Date;
+    isActivated: boolean; // Compte activé (mot de passe défini)
     isVerified: boolean;
     isActive: boolean;
     isBlocked: boolean; // Utilisateur bloqué par l'admin
@@ -21,12 +24,17 @@ export interface IUser extends Document {
     blockedReason?: string; // Raison du blocage
     lastActivity?: Date; // Dernière activité de l'utilisateur
     loginCount: number; // Nombre de connexions
-    role: 'user' | 'admin'; // Rôle de l'utilisateur (user ou admin)
+    lastLoginAt?: Date; // Date de dernière connexion
+    lastLoginIP?: string; // IP de dernière connexion
+    lastLoginDevice?: string; // Device de dernière connexion
+    firstLoginAt?: Date; // Date de première connexion
+    role: 'user' | 'admin' | 'super_admin'; // Rôle de l'utilisateur
     roles: string[] | IRole[]; // Rôles multiples (pour évolution future)
     comparePassword(password: string): Promise<boolean>;
     passwordResetToken?: string;
     passwordResetExpires?: Date;
     createPasswordResetToken(): string;
+    createActivationToken(): string;
 }
 
 // Schéma Mongoose pour les Utilisateurs
@@ -66,11 +74,25 @@ const userSchema = new Schema<IUser>({
         required: true,
         select: false, // Pas besoin de retourner ce champ par défaut
     },
-    // Mot de passe haché
+    // Mot de passe haché (optionnel si créé par admin)
     password: {
         type: String,
-        required: true,
+        required: false,
         select: false,
+    },
+    // Token d'activation du compte (première connexion)
+    activationToken: {
+        type: String,
+        select: false,
+    },
+    activationTokenExpires: {
+        type: Date,
+        select: false,
+    },
+    // Indique si le compte a été activé (mot de passe défini)
+    isActivated: {
+        type: Boolean,
+        default: false,
     },
     // Si l'email a été vérifié
     isVerified: {
@@ -105,10 +127,26 @@ const userSchema = new Schema<IUser>({
         type: Number,
         default: 0,
     },
-    // Rôle principal de l'utilisateur (user ou admin)
+    // Date de dernière connexion
+    lastLoginAt: {
+        type: Date,
+    },
+    // IP de dernière connexion
+    lastLoginIP: {
+        type: String,
+    },
+    // Device de dernière connexion
+    lastLoginDevice: {
+        type: String,
+    },
+    // Date de première connexion
+    firstLoginAt: {
+        type: Date,
+    },
+    // Rôle principal de l'utilisateur (user, admin ou super_admin)
     role: {
         type: String,
-        enum: ['user', 'admin'],
+        enum: ['user', 'admin', 'super_admin'],
         default: 'user',
     },
     passwordResetToken: {
@@ -185,6 +223,27 @@ userSchema.methods.createPasswordResetToken = function (): string {
 
     // 4. Retourner le token NON haché pour l'envoyer par email
     return resetToken;
+};
+
+/**
+ * Créer un token d'activation de compte
+ * Utilisé lors de la création d'un utilisateur par un admin (sans mot de passe)
+ */
+userSchema.methods.createActivationToken = function (): string {
+    // 1. Générer un token aléatoire
+    const activationToken = crypto.randomBytes(32).toString('hex');
+
+    // 2. Hacher le token avant de le sauvegarder en BDD
+    this.activationToken = crypto
+        .createHash('sha256')
+        .update(activationToken)
+        .digest('hex');
+
+    // 3. Définir une date d'expiration (7 jours)
+    this.activationTokenExpires = Date.now() + 7 * 24 * 60 * 60 * 1000;
+
+    // 4. Retourner le token NON haché pour l'envoyer par email
+    return activationToken;
 };
 
 export const UserModel = model<IUser>('User', userSchema);

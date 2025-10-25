@@ -3,10 +3,14 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { ConfirmProvider } from './context/ConfirmContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Pages
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ActivateAccount from './pages/auth/ActivateAccount';
 import Profile from './pages/Profile';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
@@ -30,19 +34,20 @@ import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import Navbar from './components/Navbar';
-import ToastContainer from './components/ToastContainer';
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <div className="App">
-          <Navbar />
-          <Routes>
+        <ConfirmProvider>
+          <div className="App">
+            <Navbar />
+            <Routes>
             {/* Routes publiques */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/activate-account/:token" element={<ActivateAccount />} />
 
             {/* Routes protégées */}
             <Route
@@ -105,8 +110,20 @@ function App() {
           </Routes>
 
           {/* Conteneur des toasts - Affiché globalement */}
-          <ToastContainer />
+          <ToastContainer
+            position="bottom-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
         </div>
+        </ConfirmProvider>
       </AuthProvider>
     </ThemeProvider>
   );

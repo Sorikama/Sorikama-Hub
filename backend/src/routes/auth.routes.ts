@@ -10,6 +10,8 @@ import * as schemas from '../auth/auth.validation';
 // Importe le middleware pour protéger les routes
 import { protect } from '../middlewares/auth.middleware';
 import { requireApiKeyAndJWT } from '../middlewares/dualAuth.middleware';
+// Importe les routes d'activation de compte
+import activationRoutes from './auth/activation.routes';
 
 const router = Router();
 
@@ -176,6 +178,10 @@ router.post('/reset-password/:token', validateBody(schemas.resetPasswordSchema),
 // Valide la présence du refresh token avant de générer de nouveaux tokens
 router.post('/refresh-token', validateBody(schemas.refreshTokenSchema), authController.refreshToken);
 
+// ===================================================================================
+// --- 🔓 Routes d'activation de compte (publiques) ---
+// ===================================================================================
+router.use('/activation', activationRoutes);
 
 // ===================================================================================
 // --- 🔒 Routes Protégées (nécessitent un token JWT valide) ---

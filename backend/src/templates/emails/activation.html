@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activez votre compte</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1f2937; background-color: #f3f4f6; }
+    .container { max-width: 600px; margin: 40px auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
+    .header h1 { font-size: 28px; margin-bottom: 10px; }
+    .header p { font-size: 16px; opacity: 0.9; }
+    .content { padding: 40px 30px; }
+    .greeting { font-size: 18px; font-weight: 600; color: #1f2937; margin-bottom: 20px; }
+    .message { font-size: 16px; color: #4b5563; margin-bottom: 20px; line-height: 1.8; }
+    .button-container { text-align: center; margin: 30px 0; }
+    .button { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: transform 0.2s; }
+    .button:hover { transform: translateY(-2px); }
+    .info-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px; border-radius: 8px; margin: 20px 0; }
+    .info-box strong { color: #1e40af; }
+    .link-box { background: #f9fafb; padding: 16px; border-radius: 8px; margin: 20px 0; word-break: break-all; }
+    .link-box a { color: #667eea; text-decoration: none; }
+    .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 14px; }
+    .footer p { margin: 5px 0; }
+    .divider { height: 1px; background: #e5e7eb; margin: 30px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🎉 Bienvenue sur Sorikama Hub !</h1>
+      <p>Activez votre compte pour commencer</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <p class="greeting">Bonjour <strong>{{firstName}} {{lastName}}</strong>,</p>
+      
+      <p class="message">
+        Votre compte a été créé avec succès ! Pour commencer à utiliser la plateforme Sorikama Hub, 
+        vous devez activer votre compte en définissant votre mot de passe personnel.
+      </p>
+
+      <div class="button-container">
+        <a href="{{activationUrl}}" class="button">
+          🔓 Activer mon compte
+        </a>
+      </div>
+
+      <div class="info-box">
+        <strong>⏰ Important :</strong> Ce lien d'activation est valide pendant <strong>7 jours</strong>. 
+        Après cette période, vous devrez demander un nouveau lien.
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="message" style="font-size: 14px;">
+        Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :
+      </p>
+      
+      <div class="link-box">
+        <a href="{{activationUrl}}">{{activationUrl}}</a>
+      </div>
+
+      <p class="message" style="font-size: 14px; color: #6b7280;">
+        <strong>Vous n'avez pas demandé la création de ce compte ?</strong><br>
+        Vous pouvez ignorer cet email en toute sécurité. Aucune action ne sera effectuée.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p><strong>Sorikama Hub</strong></p>
+      <p>Plateforme de gestion SSO</p>
+      <p style="margin-top: 15px;">© {{year}} Sorikama Hub - Tous droits réservés</p>
+    </div>
+  </div>
+</body>
+</html>

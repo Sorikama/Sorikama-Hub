@@ -9,7 +9,11 @@
     "dev:quick": "node start-dev.js",
     "dev:clean": "node start-clean.js",
     "kill:port": "netstat -ano | findstr :7000 && for /f \"tokens=5\" %a in ('netstat -ano ^| findstr :7000') do taskkill /PID %a /F",
-    "db:seed": "ts-node src/database/seeders/index.ts"
+    "db:fresh": "ts-node src/scripts/db-fresh.ts",
+    "db:seed": "ts-node src/scripts/db-seed.ts",
+    "db:refresh-roles": "ts-node src/scripts/db-refresh-roles.ts",
+    "show:roles": "ts-node src/scripts/show-roles.ts",
+    "clean:roles": "ts-node src/scripts/clean-old-roles.ts"
   },
   "dependencies": {
     "@types/figlet": "^1.7.0",
@@ -30,7 +34,7 @@
     "js-yaml": "^4.1.0",
     "jsonwebtoken": "^9.0.1",
     "juice": "^11.0.1",
-    "mongoose": "^8.18.1",
+    "mongoose": "^6.12.0",
     "nodemailer": "^7.0.6",
     "nodemailer-express-handlebars": "^7.0.0",
     "redis": "^5.8.3",

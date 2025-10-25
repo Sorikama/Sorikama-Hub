@@ -22,6 +22,11 @@ router.delete('/:roleId', rolesController.deleteRole);
 
 // Routes pour les permissions
 router.get('/permissions/all', rolesController.getAllPermissions);
+router.post('/permissions/seed', rolesController.seedPermissions);
+
+// Routes pour l'import/export
+router.get('/export', rolesController.exportRoles);
+router.post('/import', rolesController.importRoles);
 
 // Routes pour assigner des rôles aux utilisateurs
 router.get('/users/:userId/roles', rolesController.getUserRoles);

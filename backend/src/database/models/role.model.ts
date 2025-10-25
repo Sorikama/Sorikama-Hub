@@ -10,6 +10,7 @@ export interface IRole extends Document {
     description?: string;
     permissions: string[] | IPermission[]; // Peut contenir des ObjectId ou des documents peuplés
     isEditable: boolean;
+    isSystem?: boolean; // Flag pour identifier les rôles système
 }
 
 // Schéma Mongoose pour les Rôles
@@ -38,6 +39,11 @@ const roleSchema = new Schema<IRole>({
     isEditable: {
         type: Boolean,
         default: true,
+    },
+    // Flag pour identifier les rôles système (super_admin, admin, user)
+    isSystem: {
+        type: Boolean,
+        default: false,
     }
 }, {
     timestamps: true,
