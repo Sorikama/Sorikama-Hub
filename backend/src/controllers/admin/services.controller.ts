@@ -45,21 +45,15 @@ export const createService = async (req: Request, res: Response) => {
       allowedRoles
     } = req.body;
 
-    // Vérifier si le slug existe déjà
-    const existingSlug = await ServiceModel.findOne({ slug });
-    if (existingSlug) {
+    // Vérifier l'unicité du slug et du proxyPath
+    const { checkServiceUniqueness } = await import('../../database/seeders/services.seeder');
+    const uniquenessCheck = await checkServiceUniqueness(slug, proxyPath);
+    
+    if (!uniquenessCheck.isUnique) {
       return res.status(400).json({
         success: false,
-        message: 'Ce slug est déjà utilisé'
-      });
-    }
-
-    // Vérifier si le proxyPath existe déjà
-    const existingProxy = await ServiceModel.findOne({ proxyPath });
-    if (existingProxy) {
-      return res.status(400).json({
-        success: false,
-        message: 'Ce chemin proxy est déjà utilisé'
+        message: 'Erreur de validation',
+        errors: uniquenessCheck.errors
       });
     }
 
@@ -123,24 +117,20 @@ export const updateService = async (req: Request, res: Response) => {
       });
     }
 
-    // Vérifier si le nouveau slug existe déjà (sauf pour ce service)
-    if (slug && slug !== service.slug) {
-      const existingSlug = await ServiceModel.findOne({ slug, _id: { $ne: id } });
-      if (existingSlug) {
+    // Vérifier l'unicité si slug ou proxyPath modifiés
+    if ((slug && slug !== service.slug) || (proxyPath && proxyPath !== service.proxyPath)) {
+      const { checkServiceUniqueness } = await import('../../database/seeders/services.seeder');
+      const uniquenessCheck = await checkServiceUniqueness(
+        slug || service.slug,
+        proxyPath || service.proxyPath,
+        id
+      );
+      
+      if (!uniquenessCheck.isUnique) {
         return res.status(400).json({
           success: false,
-          message: 'Ce slug est déjà utilisé'
-        });
-      }
-    }
-
-    // Vérifier si le nouveau proxyPath existe déjà (sauf pour ce service)
-    if (proxyPath && proxyPath !== service.proxyPath) {
-      const existingProxy = await ServiceModel.findOne({ proxyPath, _id: { $ne: id } });
-      if (existingProxy) {
-        return res.status(400).json({
-          success: false,
-          message: 'Ce chemin proxy est déjà utilisé'
+          message: 'Erreur de validation',
+          errors: uniquenessCheck.errors
         });
       }
     }
@@ -275,6 +265,93 @@ export const getServiceBySlug = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Erreur lors de la récupération du service'
+    });
+  }
+};
+
+/**
+ * Obtenir les statistiques des services
+ */
+export const getServicesStats = async (req: Request, res: Response) => {
+  try {
+    const { getServicesStats } = await import('../../database/seeders/services.seeder');
+    const stats = await getServicesStats();
+
+    res.json({
+      success: true,
+      stats
+    });
+  } catch (error: any) {
+    logger.error('Erreur récupération stats services:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération des statistiques'
+    });
+  }
+};
+
+/**
+ * Tester la connexion à un service
+ */
+export const testServiceConnection = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const service = await ServiceModel.findById(id);
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service non trouvé'
+      });
+    }
+
+    // Tester la connexion au backend
+    const startTime = Date.now();
+    let backendStatus = 'unknown';
+    let backendError = null;
+
+    try {
+      const axios = require('axios');
+      const response = await axios.get(service.backendUrl, {
+        timeout: 5000,
+        validateStatus: () => true // Accepter tous les status codes
+      });
+      
+      backendStatus = response.status >= 200 && response.status < 500 ? 'online' : 'error';
+    } catch (error: any) {
+      backendStatus = 'offline';
+      backendError = error.code === 'ECONNREFUSED' 
+        ? 'Connexion refusée - Le serveur ne répond pas'
+        : error.message;
+    }
+
+    const responseTime = Date.now() - startTime;
+
+    logger.info('🔍 Test de connexion service', {
+      serviceId: service._id,
+      name: service.name,
+      backendUrl: service.backendUrl,
+      status: backendStatus,
+      responseTime: `${responseTime}ms`
+    });
+
+    res.json({
+      success: true,
+      test: {
+        serviceName: service.name,
+        backendUrl: service.backendUrl,
+        frontendUrl: service.frontendUrl,
+        status: backendStatus,
+        responseTime,
+        error: backendError,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    logger.error('Erreur test connexion service:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors du test de connexion'
     });
   }
 };

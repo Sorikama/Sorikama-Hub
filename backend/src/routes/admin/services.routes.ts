@@ -9,7 +9,9 @@ import {
   updateService,
   deleteService,
   toggleService,
-  getServiceBySlug
+  getServiceBySlug,
+  getServicesStats,
+  testServiceConnection
 } from '../../controllers/admin/services.controller';
 import { protect } from '../../middlewares/auth.middleware';
 import { requireAdmin } from '../../middlewares/adminAuth.middleware';
@@ -21,10 +23,12 @@ router.use(protect, requireAdmin);
 
 // CRUD Services
 router.get('/', getAllServices);
+router.get('/stats', getServicesStats);
 router.post('/', createService);
 router.get('/:slug', getServiceBySlug);
 router.put('/:id', updateService);
 router.delete('/:id', deleteService);
 router.patch('/:id/toggle', toggleService);
+router.post('/:id/test', testServiceConnection);
 
 export default router;

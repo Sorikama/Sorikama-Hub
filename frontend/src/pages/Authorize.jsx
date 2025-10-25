@@ -1,243 +1,121 @@
 /**
- * Page d'autorisation SSO - Connexion d'applications tierces
- * Design moderne et stylé
+ * Page d'autorisation SSO - Version compacte et dynamique
  */
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import api from '../services/api';
 
 export default function Authorize() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [isLoading, setIsLoading] = useState(false);
+  
+  const [loading, setLoading] = useState(true);
+  const [authorizing, setAuthorizing] = useState(false);
   const [error, setError] = useState('');
+  const [serviceInfo, setServiceInfo] = useState(null);
+  const [alreadyAuthorized, setAlreadyAuthorized] = useState(false);
 
-  // Récupérer les paramètres de l'URL
-  const serviceId = searchParams.get('service_id') || searchParams.get('client_id');
-  const redirectUrl = searchParams.get('redirect_url') || searchParams.get('redirect_uri');
+  // Paramètres URL
+  const serviceId = searchParams.get('service_id');
+  const redirectUrl = searchParams.get('redirect_url');
   const scope = searchParams.get('scope') || 'profile email';
 
-  // Informations de l'application qui demande l'accès
-  const [appInfo, setAppInfo] = useState({
-    name: 'Application Tierce',
-    logo: '🔗',
-    description: 'Cette application souhaite accéder à votre compte Sorikama',
-    website: 'https://example.com',
-    color: 'from-blue-500 to-purple-500'
-  });
-
   useEffect(() => {
-    console.log('🔍 Authorize - Paramètres reçus:', {
-      serviceId,
-      redirectUrl,
-      scope,
-      isAuthenticated,
-      allParams: searchParams.toString()
-    });
-
     // Rediriger vers login si non authentifié
     if (!isAuthenticated) {
-      console.log('🔒 Non authentifié, redirection vers login avec paramètres dans l\'URL');
-
-      // Construire l'URL de login avec le redirect en paramètre
-      const fullAuthorizeUrl = window.location.pathname + window.location.search;
-      const loginUrl = `/login?redirect=${encodeURIComponent(fullAuthorizeUrl)}`;
-
-      console.log('� Redisrection vers:', loginUrl);
-      navigate(loginUrl);
+      const fullUrl = window.location.pathname + window.location.search;
+      navigate(`/login?redirect=${encodeURIComponent(fullUrl)}`);
       return;
     }
 
-    // Vérifier que les paramètres requis sont présents
+    // Vérifier que service_id est présent
     if (!serviceId) {
-      console.error('❌ service_id manquant');
       setError('Paramètre service_id manquant');
+      setLoading(false);
       return;
     }
 
-    console.log('✅ Utilisateur authentifié avec service_id:', serviceId);
-
-    // Charger les informations du service depuis l'API
-    const loadServiceInfo = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:7000/api/v1'}/services/${serviceId}`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          const service = data.data;
-          
-          // Mapper les couleurs du backend vers les classes Tailwind
-          const colorMap = {
-            'blue': 'from-blue-500 to-cyan-500',
-            'purple': 'from-purple-500 to-pink-500',
-            'green': 'from-green-500 to-emerald-500',
-            'red': 'from-red-500 to-rose-500',
-            'yellow': 'from-yellow-500 to-orange-500',
-            'indigo': 'from-indigo-500 to-blue-500'
-          };
-          
-          setAppInfo({
-            name: service.name,
-            logo: service.icon || '🔗',
-            description: service.description || 'Cette application souhaite accéder à votre compte Sorikama',
-            website: service.frontendUrl || service.url,
-            color: colorMap[service.color] || 'from-blue-500 to-purple-500'
-          });
-        } else {
-          // Service non trouvé - utiliser les paramètres URL si fournis
-          const appName = searchParams.get('app_name');
-          const appLogo = searchParams.get('app_logo');
-          const appDescription = searchParams.get('app_description');
-          const appWebsite = searchParams.get('app_website');
-          
-          if (appName) {
-            setAppInfo({
-              name: appName,
-              logo: appLogo || '🔗',
-              description: appDescription || 'Cette application souhaite accéder à votre compte Sorikama',
-              website: appWebsite || 'https://example.com',
-              color: 'from-blue-500 to-purple-500'
-            });
-          } else {
-            setAppInfo({
-              name: serviceId,
-              logo: '🔗',
-              description: 'Cette application souhaite accéder à votre compte Sorikama',
-              website: 'https://example.com',
-              color: 'from-blue-500 to-purple-500'
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Erreur chargement service:', error);
-        // Fallback sur le service_id
-        setAppInfo({
-          name: serviceId,
-          logo: '🔗',
-          description: 'Cette application souhaite accéder à votre compte Sorikama',
-          website: 'https://example.com',
-          color: 'from-blue-500 to-purple-500'
-        });
-      }
-    };
-
+    // Charger les infos du service
     loadServiceInfo();
-  }, [isAuthenticated, navigate, searchParams, serviceId]);
+  }, [isAuthenticated, serviceId, navigate]);
 
-  // Permissions demandées
-  const requestedScopes = scope.split(' ').map(s => {
-    const scopeInfo = {
-      'profile': {
-        icon: '👤',
-        title: 'Informations de profil',
-        description: 'Nom, prénom et identifiant'
-      },
-      'email': {
-        icon: '📧',
-        title: 'Adresse email',
-        description: 'Votre adresse email principale'
-      },
-      'services': {
-        icon: '🔗',
-        title: 'Services connectés',
-        description: 'Liste de vos services Sorikama actifs'
-      },
-      'transactions': {
-        icon: '💰',
-        title: 'Historique des transactions',
-        description: 'Accès à vos transactions et paiements'
-      },
-      'apikey': {
-        icon: '🔑',
-        title: 'Clé API',
-        description: 'Votre clé API personnelle pour les requêtes'
+  const loadServiceInfo = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/authorize/service/${serviceId}`);
+      
+      if (response.data.success) {
+        setServiceInfo(response.data.service);
+        setAlreadyAuthorized(response.data.alreadyAuthorized);
       }
-    };
-
-    return scopeInfo[s] || {
-      icon: '🔒',
-      title: s,
-      description: 'Permission personnalisée'
-    };
-  });
+    } catch (err) {
+      console.error('Erreur chargement service:', err);
+      if (err.response?.status === 404) {
+        setError('Service non trouvé. Vérifiez que le service existe dans la configuration.');
+      } else {
+        setError('Erreur lors du chargement du service');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAuthorize = async () => {
-    setIsLoading(true);
-    setError('');
-
     try {
-      console.log('✅ Autorisation accordée pour:', serviceId);
+      setAuthorizing(true);
+      const response = await api.post(`/authorize/service/${serviceId}/authorize`, {
+        scopes: scope.split(' '),
+        redirectUrl
+      });
 
-      // Construire l'URL de redirection SSO vers le backend
-      // On utilise une requête GET avec axios pour envoyer les headers d'authentification
-      const params = new URLSearchParams();
-      if (redirectUrl) {
-        params.append('redirect_url', redirectUrl);
+      if (response.data.success) {
+        // Rediriger vers le service avec le token
+        window.location.href = response.data.redirectUrl;
       }
-
-      const ssoAuthUrl = `/sso/auth/${serviceId}${params.toString() ? '?' + params.toString() : ''}`;
-
-      console.log('🚀 Appel API SSO:', ssoAuthUrl);
-
-      // Faire une requête avec axios qui inclut automatiquement les headers JWT
-      // Le backend va rediriger, donc on suit la redirection
-      const response = await fetch(
-        `${import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:7000/api/v1'}${ssoAuthUrl}`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('sorikama_access_token')}`
-          },
-          redirect: 'follow'
-        }
-      );
-
-      // Si la réponse est une redirection, suivre l'URL
-      if (response.redirected) {
-        console.log('🔄 Redirection vers:', response.url);
-        window.location.href = response.url;
-      } else {
-        // Sinon, lire la réponse
-        const data = await response.json();
-        if (data.redirectUrl) {
-          window.location.href = data.redirectUrl;
-        } else {
-          throw new Error('Pas d\'URL de redirection reçue');
-        }
-      }
-
-    } catch (error) {
-      console.error('❌ Erreur autorisation:', error);
-      setError('Une erreur est survenue lors de l\'autorisation');
-      setIsLoading(false);
+    } catch (err) {
+      console.error('Erreur autorisation:', err);
+      setError('Erreur lors de l\'autorisation');
+      setAuthorizing(false);
     }
   };
 
   const handleDeny = () => {
-    console.log('❌ Autorisation refusée');
-    // Rediriger vers le dashboard avec un message
     navigate('/dashboard?auth_denied=true');
   };
 
-  if (!isAuthenticated) {
+  // Permissions disponibles
+  const scopeDetails = {
+    'profile': { icon: '👤', title: 'Profil', desc: 'Nom, prénom' },
+    'email': { icon: '📧', title: 'Email', desc: 'Adresse email' },
+    'services': { icon: '🔗', title: 'Services', desc: 'Services connectés' },
+  };
+
+  const requestedScopes = scope.split(' ').map(s => scopeDetails[s] || { icon: '🔒', title: s, desc: 'Permission' });
+
+  // Loading
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">Redirection vers la connexion...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Chargement...</p>
         </div>
       </div>
     );
   }
 
+  // Error
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">⚠️</span>
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Erreur</h2>
           <p className="text-gray-600 mb-6">{error}</p>
@@ -252,148 +130,147 @@ export default function Authorize() {
     );
   }
 
+  const colorMap = {
+    'blue': 'from-blue-500 to-cyan-500',
+    'purple': 'from-purple-500 to-pink-500',
+    'green': 'from-green-500 to-emerald-500',
+  };
+  const serviceColor = colorMap[serviceInfo?.color] || 'from-blue-500 to-purple-500';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 py-12 px-4 flex items-center justify-center">
-      <div className="max-w-lg w-full">
-
-        {/* Carte principale */}
-        <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden transform hover:scale-[1.02] transition-transform duration-300">
-
-          {/* En-tête avec logo de l'app */}
-          <div className={`bg-gradient-to-r ${appInfo.color} p-10 text-center relative overflow-hidden`}>
-            {/* Décoration animée */}
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -mr-20 -mt-20 opacity-10 animate-pulse"></div>
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full -ml-16 -mb-16 opacity-10 animate-pulse" style={{ animationDelay: '1s' }}></div>
-
-            <div className="relative">
-              <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-2xl transform hover:rotate-6 transition-transform">
-                <span className="text-5xl">{appInfo.logo}</span>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-8 px-4 flex items-center justify-center">
+      <div className="max-w-2xl w-full">
+        
+        {/* Carte compacte */}
+        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+          
+          {/* Header compact */}
+          <div className={`bg-gradient-to-r ${serviceColor} p-6 text-center relative overflow-hidden`}>
+            <div className="absolute inset-0 bg-white/10"></div>
+            <div className="relative flex items-center justify-center gap-4">
+              <div className="w-16 h-16 bg-white/95 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-3xl">{serviceInfo?.logo || '🔗'}</span>
               </div>
-              <h1 className="text-3xl font-bold text-white mb-2">
-                {appInfo.name}
-              </h1>
-              <p className="text-white/90 text-sm font-medium">
-                souhaite se connecter à votre compte
-              </p>
+              <div className="text-left">
+                <h1 className="text-2xl font-black text-white">{serviceInfo?.name}</h1>
+                <p className="text-white/90 text-sm font-medium">demande l'accès à votre compte</p>
+              </div>
             </div>
           </div>
 
-          {/* Informations utilisateur */}
-          <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
-            <div className="flex items-center gap-4">
-              <div className={`w-14 h-14 bg-gradient-to-br ${appInfo.color} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                <span className="text-xl font-bold text-white">
+          <div className="p-6">
+            
+            {/* User info compact */}
+            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl mb-6">
+              <div className={`w-12 h-12 bg-gradient-to-br ${serviceColor} rounded-xl flex items-center justify-center shadow-lg`}>
+                <span className="text-lg font-black text-white">
                   {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                 </span>
               </div>
-              <div>
-                <p className="font-bold text-gray-900 text-lg">
-                  {user?.firstName} {user?.lastName}
-                </p>
-                <p className="text-sm text-gray-600">{user?.email}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-gray-900 truncate">{user?.firstName} {user?.lastName}</p>
+                <p className="text-sm text-gray-600 truncate">{user?.email}</p>
+              </div>
+              {alreadyAuthorized && (
+                <div className="flex items-center gap-1 text-xs text-green-600 font-bold bg-green-50 px-2 py-1 rounded-full">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Déjà autorisé
+                </div>
+              )}
+            </div>
+
+            {/* Permissions compactes */}
+            <div className="mb-6">
+              <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Autorisations demandées
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                {requestedScopes.map((s, i) => (
+                  <div key={i} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <span className="text-xl">{s.icon}</span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-gray-900">{s.title}</p>
+                      <p className="text-xs text-gray-600 truncate">{s.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
 
-          {/* Permissions demandées */}
-          <div className="p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <span className="text-2xl">🔐</span>
-              Autorisations demandées
-            </h2>
-
-            <div className="space-y-3 mb-6">
-              {requestedScopes.map((scope, index) => (
-                <div key={index} className="flex items-start gap-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className={`w-12 h-12 bg-gradient-to-br ${appInfo.color} rounded-xl flex items-center justify-center flex-shrink-0 shadow-md`}>
-                    <span className="text-xl">{scope.icon}</span>
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900">{scope.title}</p>
-                    <p className="text-sm text-gray-600">{scope.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Informations de l'app */}
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-5 mb-6">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm text-blue-900 font-bold mb-1">
-                    À propos de {appInfo.name}
-                  </p>
-                  <p className="text-sm text-blue-800 mb-2">
-                    {appInfo.description}
-                  </p>
-                  <a href={appInfo.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline font-medium">
-                    {appInfo.website} →
+            {/* Info service compact */}
+            {serviceInfo?.description && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
+                <p className="text-xs text-blue-900 font-medium">{serviceInfo.description}</p>
+                {serviceInfo.website && (
+                  <a href={serviceInfo.website} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline font-bold mt-1 inline-block">
+                    {serviceInfo.website} →
                   </a>
-                </div>
+                )}
               </div>
+            )}
+
+            {/* Warning compact */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6">
+              <p className="text-xs text-amber-900 font-medium">
+                Vous pouvez révoquer cet accès à tout moment depuis vos paramètres.
+              </p>
             </div>
 
-            {/* Avertissement */}
-            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-5 mb-8">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-yellow-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                </div>
-                <p className="text-sm text-yellow-900 font-medium">
-                  En autorisant cette application, vous lui donnez accès aux informations listées ci-dessus. Vous pouvez révoquer cet accès à tout moment depuis vos paramètres.
-                </p>
-              </div>
-            </div>
-
-            {/* Boutons d'action */}
-            <div className="flex gap-4">
+            {/* Actions */}
+            <div className="flex gap-3">
               <button
                 onClick={handleDeny}
-                disabled={isLoading}
-                className="flex-1 bg-gray-200 text-gray-700 py-4 rounded-2xl font-bold hover:bg-gray-300 transition-all disabled:opacity-50 hover:shadow-lg"
+                disabled={authorizing}
+                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-200 transition disabled:opacity-50"
               >
                 Refuser
               </button>
               <button
                 onClick={handleAuthorize}
-                disabled={isLoading}
-                className={`flex-1 bg-gradient-to-r ${appInfo.color} text-white py-4 rounded-2xl font-bold hover:shadow-2xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+                disabled={authorizing}
+                className={`flex-1 bg-gradient-to-r ${serviceColor} text-white py-3 rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 flex items-center justify-center gap-2`}
               >
-                {isLoading ? (
+                {authorizing ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Autorisation...
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Autorisation...</span>
                   </>
                 ) : (
                   <>
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Autoriser
+                    <span>{alreadyAuthorized ? 'Renouveler' : 'Autoriser'}</span>
                   </>
                 )}
               </button>
             </div>
+
+            {/* SSL badge */}
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+              <span className="font-semibold">Connexion sécurisée</span>
+            </div>
           </div>
         </div>
 
-        {/* Lien retour */}
-        <div className="text-center mt-8">
+        {/* Retour */}
+        <div className="text-center mt-6">
           <button
             onClick={() => navigate('/dashboard')}
-            className="text-gray-600 hover:text-gray-900 text-sm font-semibold flex items-center gap-2 mx-auto hover:gap-3 transition-all"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm font-bold px-4 py-2 rounded-lg hover:bg-white/50 transition"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Retour au dashboard
+            <span>Retour</span>
           </button>
         </div>
       </div>

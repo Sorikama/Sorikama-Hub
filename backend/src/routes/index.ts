@@ -10,6 +10,7 @@ import adminRateLimitRouter from './admin/rateLimit.routes';
 import adminAuditRouter from './admin/audit.routes';
 import adminWebhooksRouter from './admin/webhooks.routes';
 import adminServicesRouter from './admin/services.routes';
+import authorizeRouter from './authorize.routes';
 import path from 'path';
 
 const router = Router();
@@ -35,6 +36,9 @@ router.use('/admin/rate-limit', adminRateLimitRouter);
 router.use('/admin/audit', adminAuditRouter);
 router.use('/admin/webhooks', adminWebhooksRouter);
 router.use('/admin/services', adminServicesRouter);
+
+// Routes d'autorisation
+router.use('/authorize', authorizeRouter);
 
 // Routes de proxy vers les microservices
 router.use('/', proxyRouter);
