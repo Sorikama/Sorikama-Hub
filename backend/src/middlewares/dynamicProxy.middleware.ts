@@ -21,9 +21,9 @@ export const dynamicProxyMiddleware = async (
 ) => {
   try {
     // Extraire le chemin proxy de l'URL
-    // Format: /api/proxy/{proxyPath}/...
-    const match = req.path.match(/^\/proxy\/([^\/]+)(\/.*)?$/);
-    
+    // Format: /{proxyPath}/...
+    const match = req.path.match(/^\/([^\/]+)(\/.*)?$/);
+
     if (!match) {
       return next();
     }
@@ -59,11 +59,11 @@ export const dynamicProxyMiddleware = async (
       try {
         const jwt = require('jsonwebtoken');
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-        
+
         // Charger l'utilisateur
         const { UserModel } = require('../database/models/user.model');
         const user = await UserModel.findById(decoded.id);
-        
+
         if (!user) {
           return res.status(401).json({
             success: false,
@@ -93,19 +93,19 @@ export const dynamicProxyMiddleware = async (
 
     // Récupérer ou créer le proxy
     let proxy = proxyCache.get(service.proxyPath);
-    
+
     if (!proxy) {
-      proxy = createProxyMiddleware({
+      proxy = createProxyMiddleware(<any>{
         target: service.backendUrl,
         changeOrigin: true,
         pathRewrite: {
-          [`^/api/v1/proxy/${service.proxyPath}`]: ''
+          [`^/${service.proxyPath}`]: ''
         },
-        onProxyReq: (proxyReq, req, res) => {
+        onProxyReq: (proxyReq: any, req: any, res: any) => {
           // Ajouter des headers personnalisés
           proxyReq.setHeader('X-Proxied-By', 'Sorikama-Hub');
           proxyReq.setHeader('X-Service-Name', service.name);
-          
+
           // Transférer le token d'authentification si présent
           const authHeader = req.headers.authorization;
           if (authHeader) {
@@ -119,12 +119,12 @@ export const dynamicProxyMiddleware = async (
             user: (req as any).user?.email
           });
         },
-        onProxyRes: (proxyRes, req, res) => {
+        onProxyRes: (proxyRes: any, req: any, res: any) => {
           // Ajouter des headers de réponse
           proxyRes.headers['X-Proxied-By'] = 'Sorikama-Hub';
           proxyRes.headers['X-Service-Name'] = service.name;
         },
-        onError: (err, req, res) => {
+        onError: (err: any, req: any, res: any) => {
           logger.error('❌ Erreur proxy', {
             service: service.name,
             error: err.message,

@@ -5,6 +5,10 @@
 import { Request, Response } from 'express';
 import { ServiceModel } from '../../database/models/service.model';
 import { logger } from '../../utils/logger';
+import { 
+  checkServiceUniqueness, 
+  getServicesStats as getServicesStatsFromSeeder 
+} from '../../database/seeders/services.seeder';
 
 /**
  * Récupérer tous les services
@@ -46,7 +50,6 @@ export const createService = async (req: Request, res: Response) => {
     } = req.body;
 
     // Vérifier l'unicité du slug et du proxyPath
-    const { checkServiceUniqueness } = await import('../../database/seeders/services.seeder');
     const uniquenessCheck = await checkServiceUniqueness(slug, proxyPath);
     
     if (!uniquenessCheck.isUnique) {
@@ -119,7 +122,6 @@ export const updateService = async (req: Request, res: Response) => {
 
     // Vérifier l'unicité si slug ou proxyPath modifiés
     if ((slug && slug !== service.slug) || (proxyPath && proxyPath !== service.proxyPath)) {
-      const { checkServiceUniqueness } = await import('../../database/seeders/services.seeder');
       const uniquenessCheck = await checkServiceUniqueness(
         slug || service.slug,
         proxyPath || service.proxyPath,
@@ -274,8 +276,7 @@ export const getServiceBySlug = async (req: Request, res: Response) => {
  */
 export const getServicesStats = async (req: Request, res: Response) => {
   try {
-    const { getServicesStats } = await import('../../database/seeders/services.seeder');
-    const stats = await getServicesStats();
+    const stats = await getServicesStatsFromSeeder();
 
     res.json({
       success: true,
@@ -286,6 +287,102 @@ export const getServicesStats = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Erreur lors de la récupération des statistiques'
+    });
+  }
+};
+
+/**
+ * Récupérer la clé API d'un service
+ * Endpoint sécurisé - uniquement pour les admins
+ */
+export const getServiceApiKey = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Récupérer le service avec la clé API (select: false par défaut)
+    const service = await ServiceModel.findById(id).select('+apiKey');
+    
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service non trouvé'
+      });
+    }
+
+    logger.info('🔑 Clé API consultée', {
+      serviceId: service._id,
+      serviceName: service.name,
+      consultedBy: (req as any).user.email
+    });
+
+    res.json({
+      success: true,
+      data: {
+        serviceId: service._id,
+        serviceName: service.name,
+        apiKey: service.apiKey,
+        apiKeyLastRotated: service.apiKeyLastRotated,
+        warning: 'Ne partagez jamais cette clé publiquement. Elle permet au service de communiquer avec Sorikama.'
+      }
+    });
+  } catch (error: any) {
+    logger.error('Erreur récupération clé API:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération de la clé API'
+    });
+  }
+};
+
+/**
+ * Régénérer la clé API d'un service
+ * ATTENTION : Cela invalidera l'ancienne clé !
+ */
+export const rotateServiceApiKey = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const service = await ServiceModel.findById(id).select('+apiKey');
+    
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service non trouvé'
+      });
+    }
+
+    // Sauvegarder l'ancienne clé pour les logs
+    const oldApiKey = service.apiKey;
+
+    // Générer une nouvelle clé
+    service.apiKey = service.generateApiKey();
+    service.apiKeyLastRotated = new Date();
+    await service.save();
+
+    logger.warn('🔄 Clé API régénérée', {
+      serviceId: service._id,
+      serviceName: service.name,
+      oldKeyPrefix: oldApiKey.substring(0, 15) + '...',
+      newKeyPrefix: service.apiKey.substring(0, 15) + '...',
+      rotatedBy: (req as any).user.email
+    });
+
+    res.json({
+      success: true,
+      message: 'Clé API régénérée avec succès',
+      data: {
+        serviceId: service._id,
+        serviceName: service.name,
+        apiKey: service.apiKey,
+        apiKeyLastRotated: service.apiKeyLastRotated,
+        warning: 'L\'ancienne clé ne fonctionne plus. Mettez à jour la configuration du service externe.'
+      }
+    });
+  } catch (error: any) {
+    logger.error('Erreur rotation clé API:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la régénération de la clé API'
     });
   }
 };

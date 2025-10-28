@@ -9,6 +9,11 @@ import AppError from '../utils/AppError';
 import { logger } from '../utils/logger';
 import { JWT_SECRET } from '../config';
 import { encryptUserId } from '../utils/encryption';
+import { 
+  revokeAuthorization as revokeAuth, 
+  getUserAuthorizations as getAuths,
+  createAuthorization 
+} from '../services/authorization.service';
 
 // ============================================
 // STOCKAGE TEMPORAIRE DES CODES D'AUTORISATION
@@ -94,15 +99,28 @@ export const revokeAuthorization = async (req: Request, res: Response, next: Nex
   try {
     const { serviceId } = req.params;
     const userId = req.user._id;
+    const { reason = 'user_request' } = req.body;
 
     logger.info(`Révocation autorisation`, {
       userId,
-      serviceId
+      serviceId,
+      reason
     });
+
+    const revoked = await revokeAuth({
+      userId,
+      serviceId,
+      reason,
+      revokedBy: 'user'
+    });
+
+    if (!revoked) {
+      return next(new AppError('Aucune autorisation active trouvée', StatusCodes.NOT_FOUND));
+    }
 
     res.status(StatusCodes.OK).json({
       status: 'success',
-      message: 'Autorisation révoquée'
+      message: 'Autorisation révoquée avec succès'
     });
   } catch (error) {
     logger.error('Erreur révocation:', error);
@@ -117,10 +135,32 @@ export const getUserAuthorizations = async (req: Request, res: Response, next: N
   try {
     const userId = req.user._id;
 
+    const authorizations = await getAuths(userId);
+
+    // Formater les données pour la réponse
+    const formattedAuths = authorizations.map(auth => {
+      const service = auth.serviceId as any;
+      return {
+        id: auth._id,
+        service: {
+          id: service._id,
+          name: service.name,
+          slug: service.slug,
+          description: service.description,
+          frontendUrl: service.frontendUrl
+        },
+        scopes: auth.scopes,
+        createdAt: auth.createdAt,
+        lastUsedAt: auth.lastUsedAt,
+        expiresAt: auth.expiresAt
+      };
+    });
+
     res.status(StatusCodes.OK).json({
       status: 'success',
       data: {
-        authorizations: []
+        authorizations: formattedAuths,
+        count: formattedAuths.length
       }
     });
   } catch (error) {
@@ -423,7 +463,20 @@ export const exchangeAuthorizationCode = async (req: Request, res: Response, nex
     });
 
     // ============================================
-    // 10. RETOURNER LE TOKEN
+    // 10. CRÉER L'AUTORISATION EN BASE
+    // ============================================
+    
+    await createAuthorization({
+      userId: user._id.toString(),
+      serviceId: service._id.toString(),
+      token,
+      scopes: ['profile', 'email'],
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent']
+    });
+
+    // ============================================
+    // 11. RETOURNER LE TOKEN
     // ============================================
 
     res.status(StatusCodes.OK).json({

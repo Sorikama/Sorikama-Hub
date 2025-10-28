@@ -11,7 +11,9 @@ import {
   toggleService,
   getServiceBySlug,
   getServicesStats,
-  testServiceConnection
+  testServiceConnection,
+  getServiceApiKey,
+  rotateServiceApiKey
 } from '../../controllers/admin/services.controller';
 import { protect } from '../../middlewares/auth.middleware';
 import { requireAdmin } from '../../middlewares/adminAuth.middleware';
@@ -31,4 +33,10 @@ router.delete('/:id', deleteService);
 router.patch('/:id/toggle', toggleService);
 router.post('/:id/test', testServiceConnection);
 
+// Gestion des clés API
+router.get('/:id/api-key', getServiceApiKey); // Voir la clé API
+router.post('/:id/api-key/rotate', rotateServiceApiKey); // Régénérer la clé API
+
 export default router;
+
+
