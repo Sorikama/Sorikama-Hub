@@ -15,6 +15,10 @@ export interface IServiceAuthorization extends Document {
   expiresAt: Date;
   refreshExpiresAt: Date;
   isActive: boolean;
+  isRevoked: boolean;
+  revokedAt?: Date;
+  revokedReason?: string;
+  revokedBy?: string; // 'user' | 'admin' | 'service' | 'system'
   lastUsedAt?: Date;
   ipAddress?: string;
   userAgent?: string;
@@ -55,6 +59,21 @@ const ServiceAuthorizationSchema = new Schema<IServiceAuthorization>(
     isActive: {
       type: Boolean,
       default: true
+    },
+    isRevoked: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
+    revokedAt: {
+      type: Date
+    },
+    revokedReason: {
+      type: String
+    },
+    revokedBy: {
+      type: String,
+      enum: ['user', 'admin', 'service', 'system']
     },
     refreshExpiresAt: {
       type: Date,

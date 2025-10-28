@@ -441,6 +441,19 @@ const startServer = async () => {
     app.use('/admin', verifyPortalSession, adminPublicRoutes);
     app.use('/admin', adminControlRoutes);
 
+    // Routes de callbacks des services externes
+    const serviceCallbackRoutes = require('./routes/serviceCallback.routes').default;
+    app.use('/api/service-callback', serviceCallbackRoutes);
+
+    // Routes de gestion utilisateur pour les services externes
+    const serviceUserRoutes = require('./routes/serviceUser.routes').default;
+    app.use('/api/service-user', serviceUserRoutes);
+
+    // Proxy dynamique pour les services externes
+    // Format: /{proxyPath}/* → redirige vers le backend du service
+    const { dynamicProxyMiddleware } = require('./middlewares/dynamicProxy.middleware');
+    app.use('/:proxyPath/*', dynamicProxyMiddleware);
+
     app.all('*', (req: Request, res: Response, next: NextFunction) => {
       const err = new AppError(`La route ${req.originalUrl} n'existe pas sur ce serveur.`, StatusCodes.NOT_FOUND);
       next(err);

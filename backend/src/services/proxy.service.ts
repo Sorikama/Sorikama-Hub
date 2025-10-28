@@ -1,8 +1,10 @@
 // src/services/proxy.service.ts
-import { createProxyMiddleware, Options } from 'http-proxy-middleware';
+import { createProxyMiddleware, Options, RequestHandler } from 'http-proxy-middleware';
 import { Request, Response } from 'express';
+import { ClientRequest, IncomingMessage } from 'http';
 import { logger } from '../utils/logger';
 import { ServiceRoute } from './routingEngine.service';
+import { encryptUserId } from '../utils/encryption';
 
 // Métriques de performance
 interface ProxyMetrics {
@@ -17,14 +19,13 @@ const metrics = new Map<string, ProxyMetrics>();
 /**
  * Crée un proxy avancé avec retry, timeout et métriques
  */
-export const createAdvancedProxy = (route: ServiceRoute, targetUrl: string) => {
-  const options: Options = {
+export const createAdvancedProxy = (route: ServiceRoute, targetUrl: string): RequestHandler => {
+  const options: any = {
     target: targetUrl,
     changeOrigin: true,
     timeout: route.timeout || 30000,
-    proxyTimeout: route.timeout || 30000,
     
-    onProxyReq: (proxyReq, req: Request, res: Response) => {
+    onProxyReq: (proxyReq: ClientRequest, req: Request, _res: Response) => {
       const startTime = Date.now();
       req.startTime = startTime;
       
@@ -32,7 +33,11 @@ export const createAdvancedProxy = (route: ServiceRoute, targetUrl: string) => {
       
       // En-têtes de sécurité
       if (req.user) {
-        proxyReq.setHeader('X-User-Id', req.user._id || req.user.id);
+        // Chiffrer l'ID utilisateur pour la sécurité
+        const userId = req.user._id || req.user.id;
+        const encryptedUserId = encryptUserId(userId.toString());
+        
+        proxyReq.setHeader('X-User-Id', encryptedUserId);
         proxyReq.setHeader('X-User-Email', req.user.email);
         
         if (req.user.roles) {
@@ -52,8 +57,9 @@ export const createAdvancedProxy = (route: ServiceRoute, targetUrl: string) => {
       }
       
       // En-têtes de traçabilité
-      proxyReq.setHeader('X-Request-ID', req.headers['x-request-id'] || generateRequestId());
-      proxyReq.setHeader('X-Forwarded-For', req.ip);
+      const requestId = req.headers['x-request-id'] || generateRequestId();
+      proxyReq.setHeader('X-Request-ID', requestId);
+      proxyReq.setHeader('X-Forwarded-For', req.ip || 'unknown');
       proxyReq.setHeader('X-Gateway-Version', '1.0.0');
       proxyReq.setHeader('X-Service-Name', route.name);
       
@@ -61,7 +67,7 @@ export const createAdvancedProxy = (route: ServiceRoute, targetUrl: string) => {
       updateMetrics(route.name, 'request');
     },
     
-    onProxyRes: (proxyRes, req: Request, res: Response) => {
+    onProxyRes: (proxyRes: IncomingMessage, req: Request, _res: Response) => {
       const responseTime = Date.now() - (req.startTime || Date.now());
       
       // En-têtes de réponse
@@ -74,7 +80,7 @@ export const createAdvancedProxy = (route: ServiceRoute, targetUrl: string) => {
       // Mise à jour des métriques
       updateMetrics(route.name, 'response', responseTime);
       
-      if (proxyRes.statusCode >= 400) {
+      if (proxyRes.statusCode && proxyRes.statusCode >= 400) {
         updateMetrics(route.name, 'error');
       }
     },
@@ -93,12 +99,13 @@ export const createAdvancedProxy = (route: ServiceRoute, targetUrl: string) => {
       updateMetrics(route.name, 'error');
       
       // Retry logic
-      if (route.retries && req.retryCount < route.retries) {
-        req.retryCount = (req.retryCount || 0) + 1;
+      const retryCount = req.retryCount || 0;
+      if (route.retries && retryCount < route.retries) {
+        req.retryCount = retryCount + 1;
         logger.info(`[PROXY] Retry ${req.retryCount}/${route.retries} for ${route.name}`);
         
         // Attendre avant retry
-        await new Promise(resolve => setTimeout(resolve, 1000 * req.retryCount));
+        await new Promise(resolve => setTimeout(resolve, 1000 * (req.retryCount || 1)));
         return; // Le proxy va automatiquement retry
       }
       
@@ -129,21 +136,23 @@ export const createAdvancedProxy = (route: ServiceRoute, targetUrl: string) => {
 };
 
 // Fonction de compatibilité (deprecated)
-export const createProxy = (target: string) => {
-  const options: Options = {
+export const createProxy = (target: string): RequestHandler => {
+  const options: any = {
     target,
     changeOrigin: true,
-    onProxyReq: (proxyReq, req: Request, res) => {
+    onProxyReq: (proxyReq: ClientRequest, req: Request, _res: Response) => {
       logger.info(`[PROXY] Redirection : ${req.method} ${req.originalUrl} -> ${target}${req.url}`);
       if (req.user) {
-        proxyReq.setHeader('X-User-Id', req.user.id);
+        // Chiffrer l'ID utilisateur
+        const encryptedUserId = encryptUserId(req.user.id.toString());
+        proxyReq.setHeader('X-User-Id', encryptedUserId);
         if (Array.isArray(req.user.roles)) {
           const roleNames = req.user.roles.map((r: any) => r.name).join(',');
           proxyReq.setHeader('X-User-Roles', roleNames);
         }
       }
     },
-    onError: (err, req, res) => {
+    onError: (err: any, _req: Request, res: Response) => {
       logger.error(`[PROXY] Erreur de proxy vers ${target}:`, err);
       if (!res.headersSent) {
         res.status(502).json({
@@ -158,7 +167,7 @@ export const createProxy = (target: string) => {
 
 // Génération d'ID de requête unique
 const generateRequestId = (): string => {
-  return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `req_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 };
 
 // Mise à jour des métriques

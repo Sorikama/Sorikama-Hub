@@ -6,6 +6,7 @@
 import { ServiceModel } from '../models/service.model';
 import { UserModel } from '../models/user.model';
 import { logger } from '../../utils/logger';
+import crypto from 'crypto';
 
 /**
  * Services par défaut à créer
@@ -87,14 +88,24 @@ export const seedServices = async () => {
                 continue;
             }
 
-            // Créer le service
+            // Créer le service avec génération manuelle de la clé API
             try {
+                // Générer la clé API manuellement
+                const apiKey = `sk_live_${crypto.randomBytes(32).toString('hex')}`;
+                
                 const service = await ServiceModel.create({
                     ...serviceData,
+                    apiKey,
                     createdBy: admin._id
                 });
 
+                // Récupérer le service avec la clé API pour l'afficher
+                const serviceWithKey = await ServiceModel.findById(service._id).select('+apiKey');
+                
                 logger.info(`✅ Service créé: ${service.name}`);
+                logger.info(`   🔑 Clé API: ${serviceWithKey?.apiKey}`);
+                logger.info(`   ⚠️  Sauvegardez cette clé, elle ne sera plus affichée !`);
+                
                 createdCount++;
             } catch (createError: any) {
                 if (createError.code === 11000) {

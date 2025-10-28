@@ -9,7 +9,8 @@ import {
   revokeAuthorization,
   getUserAuthorizations,
   verifyAccessToken,
-  refreshAccessToken
+  refreshAccessToken,
+  exchangeAuthorizationCode
 } from '../controllers/authorize.controller';
 import { protect } from '../middlewares/auth.middleware';
 import {
@@ -41,6 +42,7 @@ router.delete('/service/:serviceId/revoke', protect, revokeAuthorization);
 router.get('/my-authorizations', protect, getUserAuthorizations);
 
 // Routes publiques pour les services
+router.post('/exchange-code', exchangeAuthorizationCode); // Échanger le code contre un token
 router.post('/verify-token', verifyAccessToken);
 router.post('/refresh-token', refreshAccessToken);
 
