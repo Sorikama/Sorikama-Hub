@@ -10,3 +10,52 @@
 [2025-10-25 20:17:42] INFO: REDIS_STATUS_CHECK {"cache":{"status":"ready","retryCount":0},"metrics":{"status":"ready","retryCount":0}}
 [2025-10-25 20:17:44] INFO: REDIS_CHECK_START 
 [2025-10-25 20:17:44] INFO: REDIS_ALREADY_RUNNING {"port":6379}
+[2025-10-31 17:03:02] INFO: REDIS_INIT {"type":"cache","config":{"host":"localhost","port":6379,"db":0}}
+[2025-10-31 17:03:02] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":0,"host":"localhost","port":6379}
+[2025-10-31 17:03:02] WARN: CACHE_RETRY_ATTEMPT {"attempt":1,"delay":50,"maxAttempts":10}
+[2025-10-31 17:03:02] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-31 17:03:02] INFO: CACHE_RECONNECTING {"delay":50,"attempt":2}
+[2025-10-31 17:03:02] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":1,"host":"localhost","port":6379}
+[2025-10-31 17:03:02] WARN: CACHE_RETRY_ATTEMPT {"attempt":2,"delay":100,"maxAttempts":10}
+[2025-10-31 17:03:02] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-31 17:03:02] INFO: CACHE_RECONNECTING {"delay":100,"attempt":3}
+[2025-10-31 17:03:02] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":2,"host":"localhost","port":6379}
+[2025-10-31 17:03:02] WARN: CACHE_RETRY_ATTEMPT {"attempt":3,"delay":150,"maxAttempts":10}
+[2025-10-31 17:03:02] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-31 17:03:02] INFO: CACHE_RECONNECTING {"delay":150,"attempt":4}
+[2025-10-31 17:03:02] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":3,"host":"localhost","port":6379}
+[2025-10-31 17:03:02] WARN: CACHE_RETRY_ATTEMPT {"attempt":4,"delay":200,"maxAttempts":10}
+[2025-10-31 17:03:02] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-31 17:03:02] INFO: CACHE_RECONNECTING {"delay":200,"attempt":5}
+[2025-10-31 17:03:02] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":4,"host":"localhost","port":6379}
+[2025-10-31 17:03:02] WARN: CACHE_RETRY_ATTEMPT {"attempt":5,"delay":250,"maxAttempts":10}
+[2025-10-31 17:03:02] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-31 17:03:02] INFO: CACHE_RECONNECTING {"delay":250,"attempt":6}
+[2025-10-31 17:03:03] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":5,"host":"localhost","port":6379}
+[2025-10-31 17:03:03] WARN: CACHE_RETRY_ATTEMPT {"attempt":6,"delay":300,"maxAttempts":10}
+[2025-10-31 17:03:03] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-31 17:03:03] INFO: CACHE_RECONNECTING {"delay":300,"attempt":7}
+[2025-10-31 17:03:03] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":6,"host":"localhost","port":6379}
+[2025-10-31 17:03:03] WARN: CACHE_RETRY_ATTEMPT {"attempt":7,"delay":350,"maxAttempts":10}
+[2025-10-31 17:03:03] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-31 17:03:03] INFO: CACHE_RECONNECTING {"delay":350,"attempt":8}
+[2025-10-31 17:03:03] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":7,"host":"localhost","port":6379}
+[2025-10-31 17:03:03] WARN: CACHE_RETRY_ATTEMPT {"attempt":8,"delay":400,"maxAttempts":10}
+[2025-10-31 17:03:03] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-31 17:03:03] INFO: CACHE_RECONNECTING {"delay":400,"attempt":9}
+[2025-10-31 17:03:04] INFO: REDIS_CHECK_START 
+[2025-10-31 17:03:04] INFO: REDIS_AUTO_START 
+[2025-10-31 17:03:04] ERROR: REDIS_SPAWN_ERROR {"error":"spawn redis-server ENOENT"}
+[2025-10-31 17:03:04] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":8,"host":"localhost","port":6379}
+[2025-10-31 17:03:04] WARN: CACHE_RETRY_ATTEMPT {"attempt":9,"delay":450,"maxAttempts":10}
+[2025-10-31 17:03:04] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-31 17:03:04] INFO: CACHE_RECONNECTING {"delay":450,"attempt":10}
+[2025-10-31 17:03:04] INFO: REDIS_STATUS_CHECK {"cache":{"status":"reconnecting","retryCount":9},"metrics":{"status":"reconnecting","retryCount":9}}
+[2025-10-31 17:03:04] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":9,"host":"localhost","port":6379}
+[2025-10-31 17:03:04] WARN: CACHE_RETRY_ATTEMPT {"attempt":10,"delay":500,"maxAttempts":10}
+[2025-10-31 17:03:04] WARN: CACHE_CLOSE {"reason":"connection_closed"}
+[2025-10-31 17:03:04] INFO: CACHE_RECONNECTING {"delay":500,"attempt":11}
+[2025-10-31 17:03:05] ERROR: CACHE_ERROR {"error":"connect ECONNREFUSED 127.0.0.1:6379","code":"ECONNREFUSED","errno":-4078,"attempt":10,"host":"localhost","port":6379}
+[2025-10-31 17:03:05] WARN: CACHE_RETRY_ATTEMPT {"attempt":11,"delay":550,"maxAttempts":10}
+[2025-10-31 17:03:05] ERROR: CACHE_CONNECTION_FAILED {"totalAttempts":11}
+[2025-10-31 17:03:05] WARN: CACHE_CLOSE {"reason":"connection_closed"}
