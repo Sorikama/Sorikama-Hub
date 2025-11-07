@@ -16,6 +16,7 @@ jobs:
       ENVIRONMENT: staging
       DOMAIN: sorikama.com
       STACK_NAME: sorikama-staging
+      DOCKER_IMAGE_FRONTEND: ${{ secrets.DOCKER_IMAGE_FRONTEND }} 
       # SECRET_KEY: ${{ secrets.SECRET_KEY }}
       # FIRST_SUPERUSER: ${{ secrets.FIRST_SUPERUSER }}
       # FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
