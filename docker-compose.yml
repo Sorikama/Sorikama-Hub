@@ -141,6 +141,10 @@ services:
       args:
         - VITE_API_URL=https://api.sorikama.com/api/v1
         - NODE_ENV=production
+    environment:
+      - DOMAIN=sorikama.com
+      - STACK_NAME=sorikama-staging
+      - DOCKER_IMAGE_FRONTEND=${DOCKER_IMAGE_FRONTEND}
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public
