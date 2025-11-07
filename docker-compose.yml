@@ -146,18 +146,18 @@ services:
       - traefik.docker.network=traefik-public
       - traefik.constraint-label=traefik-public
 
-      - traefik.http.services.${STACK_NAME?Variable not set}-frontend.loadbalancer.server.port=3002
+      - traefik.http.services.sorikama-staging-frontend.loadbalancer.server.port=3002
 
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.rule=Host(`sorikama.com`)
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.entrypoints=http
+      - traefik.http.routers.sorikama-staging-frontend-http.rule=Host(`sorikama.com`)
+      - traefik.http.routers.sorikama-staging-frontend-http.entrypoints=http
 
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.rule=Host(`sorikama.com`)
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.entrypoints=https
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.tls=true
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.tls.certresolver=le
+      - traefik.http.routers.sorikama-staging-frontend-https.rule=Host(`sorikama.com`)
+      - traefik.http.routers.sorikama-staging-frontend-https.entrypoints=https
+      - traefik.http.routers.sorikama-staging-frontend-https.tls=true
+      - traefik.http.routers.sorikama-staging-frontend-https.tls.certresolver=le
 
       # Enable redirection for HTTP and HTTPS
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
+      - traefik.http.routers.sorikama-staging-frontend-http.middlewares=https-redirect
   # frontend:
   #   build:
   #     context: ./frontend
