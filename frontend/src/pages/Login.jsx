@@ -299,8 +299,8 @@ export default function Login() {
           <div className="text-center">
             <p className="text-sm text-gray-600">
               Vous n'avez pas de compte ?{' '}
-              <Link 
-                to={isSSO ? `/signup?redirect=${encodeURIComponent(redirectUrl)}&service=${serviceSlug}` : '/signup'} 
+              <Link
+                to={isSSO ? `/signup?redirect=${encodeURIComponent(redirectUrl)}&service=${serviceSlug}` : '/signup'}
                 className="font-semibold text-gray-900 hover:underline"
               >
                 Créer un compte
