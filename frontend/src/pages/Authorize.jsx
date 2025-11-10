@@ -29,19 +29,20 @@ function Authorize() {
       return;
     }
 
+    // IMPORTANT : Vérifier l'authentification AVANT de charger les données
+    if (!authUtils.isAuthenticated()) {
+      console.log('ℹ️ Utilisateur non connecté - Redirection vers login');
+      // Rediriger vers login en gardant les paramètres
+      navigate(`/login?redirect=${encodeURIComponent(redirectUrl)}&service=${serviceSlug}`);
+      return;
+    }
+
+    // Si connecté, charger les infos
     loadServiceInfo();
-  }, [redirectUrl, serviceSlug]);
+  }, [redirectUrl, serviceSlug, navigate]);
 
   const loadServiceInfo = async () => {
     try {
-      // Vérifier l'authentification avec authUtils
-      if (!authUtils.isAuthenticated()) {
-        console.error('❌ Pas de token - ProtectedRoute aurait dû rediriger');
-        setError('Session expirée');
-        setLoading(false);
-        return;
-      }
-
       // Charger les infos du service et de l'utilisateur en parallèle
       const [serviceData, userData] = await Promise.all([
         getServiceBySlug(serviceSlug),
@@ -54,6 +55,14 @@ function Authorize() {
 
     } catch (err) {
       console.error('❌ Erreur chargement:', err);
+      
+      // Si erreur 401, rediriger vers login
+      if (err.response?.status === 401) {
+        console.log('ℹ️ Session expirée - Redirection vers login');
+        navigate(`/login?redirect=${encodeURIComponent(redirectUrl)}&service=${serviceSlug}`);
+        return;
+      }
+      
       setError(err.response?.data?.message || 'Service introuvable ou non autorisé');
       setLoading(false);
     }
