@@ -130,6 +130,7 @@ services:
     #   - traefik.http.routers.${STACK_NAME}-backend-https.tls=true
     #   - traefik.http.routers.${STACK_NAME}-backend-https.tls.certresolver=le
  
+ 
   frontend:
     image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
     restart: always
