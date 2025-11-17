@@ -1,16 +1,20 @@
 /**
- * Dashboard utilisateur - Design moderne et fun
+ * Dashboard utilisateur - Tableau de bord professionnel
  */
 
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [hoveredService, setHoveredService] = useState(null);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    servicesActifs: 0,
+    derniereConnexion: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
+    sessionsActives: 1
+  });
 
   // Charger les services depuis le backend
   useEffect(() => {
@@ -20,24 +24,14 @@ export default function Dashboard() {
         const data = await response.json();
         
         if (data.success && data.data.services) {
-          const colors = [
-            { color: 'from-blue-500 to-cyan-500', bgColor: 'from-blue-50 to-cyan-50' },
-            { color: 'from-purple-500 to-pink-500', bgColor: 'from-purple-50 to-pink-50' },
-            { color: 'from-pink-500 to-rose-500', bgColor: 'from-pink-50 to-rose-50' },
-            { color: 'from-yellow-500 to-orange-500', bgColor: 'from-yellow-50 to-orange-50' },
-            { color: 'from-green-500 to-emerald-500', bgColor: 'from-green-50 to-emerald-50' },
-            { color: 'from-indigo-500 to-blue-500', bgColor: 'from-indigo-50 to-blue-50' }
-          ];
-          
-          const mappedServices = data.data.services.map((service, index) => ({
+          const mappedServices = data.data.services.map((service) => ({
             name: service.name,
-            icon: '🔗',
             description: service.description || 'Service externe',
-            ...colors[index % colors.length],
             link: service.url,
-            stats: 'Disponible'
+            slug: service.slug
           }));
           setServices(mappedServices);
+          setStats(prev => ({ ...prev, servicesActifs: mappedServices.length }));
         }
       } catch (error) {
         console.error('Erreur chargement services:', error);
@@ -50,166 +44,184 @@ export default function Dashboard() {
     fetchServices();
   }, []);
 
-  const quickActions = [
-    {
-      name: 'Mon Profil',
-      icon: '👤',
-      color: 'from-blue-500 to-cyan-500',
-      link: '/profile'
-    },
-    {
-      name: 'Paramètres',
-      icon: '⚙️',
-      color: 'from-purple-500 to-pink-500',
-      link: '#'
-    },
-    {
-      name: 'Notifications',
-      icon: '🔔',
-      color: 'from-green-500 to-emerald-500',
-      link: '#',
-      badge: '3'
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         
-        {/* En-tête avec avatar */}
-        <div className="mb-8 bg-white rounded-3xl shadow-lg border border-gray-200 p-8 relative overflow-hidden">
-          {/* Décoration */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full -mr-32 -mt-32 opacity-50"></div>
-          
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-2xl font-bold text-white">
-                  {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
-                </span>
+        {/* En-tête */}
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+            Tableau de bord
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600">
+            Bienvenue, {user?.firstName} {user?.lastName}
+          </p>
+        </div>
+
+        {/* Statistiques */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">Services actifs</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.servicesActifs}</p>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-1">
-                  Bonjour, {user?.firstName} 👋
-                </h1>
-                <p className="text-gray-600">
-                  Bienvenue sur votre espace Sorikama
-                </p>
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 ml-4">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
               </div>
             </div>
+          </div>
 
-            {/* Actions rapides */}
-            <div className="hidden md:flex items-center gap-3">
-              {quickActions.map((action) => (
-                <Link
-                  key={action.name}
-                  to={action.link}
-                  className="relative group"
-                  title={action.name}
-                >
-                  <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-110 transition-all`}>
-                    <span className="text-xl">{action.icon}</span>
-                  </div>
-                  {action.badge && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                      {action.badge}
-                    </span>
-                  )}
-                </Link>
-              ))}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">Dernière connexion</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.derniereConnexion}</p>
+              </div>
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0 ml-4">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition-shadow sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">Sessions actives</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.sessionsActives}</p>
+              </div>
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0 ml-4">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Section Services */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <span className="text-3xl">🚀</span>
-            Vos Services
+        {/* Actions rapides */}
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
+            Actions rapides
           </h2>
-          
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service, index) => (
-              <a
-                key={service.name}
-                href={service.link}
-                onMouseEnter={() => setHoveredService(index)}
-                onMouseLeave={() => setHoveredService(null)}
-                className="bg-white rounded-3xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group relative overflow-hidden"
-              >
-                {/* Fond coloré au hover */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${service.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
-                
-                <div className="relative">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`w-16 h-16 bg-gradient-to-br ${service.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
-                      <span className="text-3xl">{service.icon}</span>
-                    </div>
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full group-hover:bg-white transition-colors">
-                      {service.stats}
-                    </span>
-                  </div>
-                  
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-blue-600 group-hover:to-purple-600 transition-all">
-                    {service.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">{service.description}</p>
-                  
-                  <div className="flex items-center text-blue-600 font-semibold text-sm group-hover:gap-2 transition-all">
-                    Ouvrir
-                    <svg className="w-4 h-4 ml-1 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <Link
+              to="/profile"
+              className="group bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5 hover:shadow-md hover:border-gray-200 transition-all text-center"
+            >
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <p className="text-sm sm:text-base font-semibold text-gray-900">Mon profil</p>
+            </Link>
 
-        {/* Actions rapides mobile */}
-        <div className="md:hidden mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Actions rapides</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {quickActions.map((action) => (
-              <Link
-                key={action.name}
-                to={action.link}
-                className="relative bg-white rounded-2xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-all"
-              >
-                <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center mx-auto mb-2`}>
-                  <span className="text-2xl">{action.icon}</span>
-                </div>
-                <p className="text-xs font-semibold text-gray-900 text-center">{action.name}</p>
-                {action.badge && (
-                  <span className="absolute top-2 right-2 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                    {action.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </div>
-        </div>
+            <Link
+              to="/services"
+              className="group bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5 hover:shadow-md hover:border-gray-200 transition-all text-center"
+            >
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-green-50 to-green-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+              </div>
+              <p className="text-sm sm:text-base font-semibold text-gray-900">Services</p>
+            </Link>
 
-        {/* Carte d'aide */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl shadow-xl p-8 text-white relative overflow-hidden">
-          {/* Décoration */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32 opacity-10"></div>
-          
-          <div className="relative flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div>
-              <h2 className="text-3xl font-bold mb-2 flex items-center gap-2">
-                <span>💬</span>
-                Besoin d'aide ?
-              </h2>
-              <p className="text-blue-100 text-lg">
-                Notre équipe support est disponible 24/7
-              </p>
-            </div>
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-2xl font-bold shadow-lg hover:shadow-2xl hover:scale-105 transition-all whitespace-nowrap">
-              Contacter le support
+            <button className="group bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5 hover:shadow-md hover:border-gray-200 transition-all text-center">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <p className="text-sm sm:text-base font-semibold text-gray-900">Paramètres</p>
+            </button>
+
+            <button className="group bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5 hover:shadow-md hover:border-gray-200 transition-all text-center">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-sm sm:text-base font-semibold text-gray-900">Aide</p>
             </button>
           </div>
+        </div>
+
+        {/* Liste des services */}
+        <div>
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+              Mes services
+            </h2>
+            <Link 
+              to="/services"
+              className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Voir tout →
+            </Link>
+          </div>
+          
+          {loading ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 sm:p-16 text-center">
+              <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
+              <p className="text-gray-600 mt-4">Chargement...</p>
+            </div>
+          ) : services.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 sm:p-16 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+              </div>
+              <p className="text-gray-900 font-semibold mb-2">Aucun service disponible</p>
+              <p className="text-sm text-gray-500">Les services apparaîtront ici une fois configurés</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="divide-y divide-gray-100">
+                {services.map((service) => (
+                  <a
+                    key={service.slug}
+                    href={service.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-4 sm:p-5 hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                      <div className="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm sm:text-base font-semibold text-gray-900 truncate mb-0.5">
+                          {service.name}
+                        </p>
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">
+                          {service.description}
+                        </p>
+                      </div>
+                    </div>
+                    <svg 
+                      className="w-5 h-5 text-gray-400 group-hover:text-gray-700 group-hover:translate-x-1 transition-all flex-shrink-0 ml-2" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
