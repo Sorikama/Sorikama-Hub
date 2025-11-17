@@ -256,7 +256,7 @@ export default function Login() {
                 className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900 focus:ring-2"
               />
               <label htmlFor="remember" className="ml-2 text-sm text-gray-600">
-                Se souvenir de moi (30 jours)
+                Se souvenir de moi
               </label>
             </div>
 

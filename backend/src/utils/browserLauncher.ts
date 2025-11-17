@@ -18,8 +18,6 @@ export class BrowserLauncher {
       const launchCount = this.getLaunchCount();
       
       if (launchCount >= MAX_AUTO_LAUNCHES) {
-        logger.info(`🚫 Lancement automatique désactivé (${launchCount}/${MAX_AUTO_LAUNCHES} tentatives atteintes)`);
-        logger.info(`💡 Accédez manuellement à: http://localhost:${port}`);
         return;
       }
 
@@ -27,9 +25,6 @@ export class BrowserLauncher {
       this.incrementLaunchCount();
       
       const url = `http://localhost:${port}/portal/login`;
-      logger.info(`🌐 Lancement automatique du navigateur (${launchCount + 1}/${MAX_AUTO_LAUNCHES})`);
-      logger.info(`🔑 Page de connexion: ${url}`);
-      
       // Lancer le navigateur selon l'OS
       await this.openBrowser(url);
       
@@ -62,7 +57,6 @@ export class BrowserLauncher {
           logger.warn('⚠️ Impossible d\'ouvrir le navigateur automatiquement');
           reject(error);
         } else {
-          logger.info('✅ Navigateur ouvert avec succès');
           resolve();
         }
       });
@@ -104,9 +98,8 @@ export class BrowserLauncher {
       if (fs.existsSync(LAUNCH_COUNT_FILE)) {
         fs.unlinkSync(LAUNCH_COUNT_FILE);
       }
-      logger.info('🔄 Compteur de lancement remis à zéro');
     } catch (error) {
-      logger.error('❌ Erreur reset compteur:', error);
+      // Silencieux
     }
   }
 

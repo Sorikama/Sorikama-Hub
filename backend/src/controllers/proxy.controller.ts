@@ -42,7 +42,7 @@ export const proxyRequest = async (req: any, res: Response, next: NextFunction) 
     const encryptedUserId = UserEncryptionService.encryptUserId(userId, serviceId);
 
     // Construire l'URL complète du service externe
-    const targetUrl = `${service.url}${endpoint}`;
+    const targetUrl = `${service.backendUrl}${endpoint}`;
 
     // Préparer les headers à envoyer au service externe
     const proxyHeaders: any = {

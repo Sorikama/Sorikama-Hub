@@ -4,69 +4,51 @@
 
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [hoveredService, setHoveredService] = useState(null);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Services Sorikama
-  const services = [
-    {
-      name: 'SoriStore',
-      icon: '🛍️',
-      description: 'Marketplace e-commerce',
-      color: 'from-blue-500 to-cyan-500',
-      bgColor: 'from-blue-50 to-cyan-50',
-      link: '#',
-      stats: '2.5k produits'
-    },
-    {
-      name: 'SoriPay',
-      icon: '💳',
-      description: 'Solution de paiement',
-      color: 'from-purple-500 to-pink-500',
-      bgColor: 'from-purple-50 to-pink-50',
-      link: '#',
-      stats: 'Sécurisé'
-    },
-    {
-      name: 'SoriWallet',
-      icon: '💰',
-      description: 'Portefeuille numérique',
-      color: 'from-pink-500 to-rose-500',
-      bgColor: 'from-pink-50 to-rose-50',
-      link: '#',
-      stats: 'Multi-devises'
-    },
-    {
-      name: 'SoriLearn',
-      icon: '📚',
-      description: 'Plateforme d\'apprentissage',
-      color: 'from-yellow-500 to-orange-500',
-      bgColor: 'from-yellow-50 to-orange-50',
-      link: '#',
-      stats: '150+ cours'
-    },
-    {
-      name: 'SoriHealth',
-      icon: '🏥',
-      description: 'Gestion de santé',
-      color: 'from-green-500 to-emerald-500',
-      bgColor: 'from-green-50 to-emerald-50',
-      link: '#',
-      stats: '24/7 disponible'
-    },
-    {
-      name: 'SoriAccess',
-      icon: '♿',
-      description: 'Solutions d\'accessibilité',
-      color: 'from-indigo-500 to-blue-500',
-      bgColor: 'from-indigo-50 to-blue-50',
-      link: '#',
-      stats: 'Inclusif'
-    }
-  ];
+  // Charger les services depuis le backend
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await fetch('http://localhost:7000/api/v1/system/services/public');
+        const data = await response.json();
+        
+        if (data.success && data.data.services) {
+          const colors = [
+            { color: 'from-blue-500 to-cyan-500', bgColor: 'from-blue-50 to-cyan-50' },
+            { color: 'from-purple-500 to-pink-500', bgColor: 'from-purple-50 to-pink-50' },
+            { color: 'from-pink-500 to-rose-500', bgColor: 'from-pink-50 to-rose-50' },
+            { color: 'from-yellow-500 to-orange-500', bgColor: 'from-yellow-50 to-orange-50' },
+            { color: 'from-green-500 to-emerald-500', bgColor: 'from-green-50 to-emerald-50' },
+            { color: 'from-indigo-500 to-blue-500', bgColor: 'from-indigo-50 to-blue-50' }
+          ];
+          
+          const mappedServices = data.data.services.map((service, index) => ({
+            name: service.name,
+            icon: '🔗',
+            description: service.description || 'Service externe',
+            ...colors[index % colors.length],
+            link: service.url,
+            stats: 'Disponible'
+          }));
+          setServices(mappedServices);
+        }
+      } catch (error) {
+        console.error('Erreur chargement services:', error);
+        setServices([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
 
   const quickActions = [
     {

@@ -216,7 +216,7 @@ router.get('/sessions', async (req, res) => {
       {
         _id: '1',
         userId: '37707ab0-9693-4d71-ae1a-9acd3d56a1ae',
-        serviceId: 'soristore',
+        serviceId: 'masebuy',
         sessionToken: 'sess_abc123',
         expiresAt: new Date(Date.now() + 86400000),
         isActive: true,

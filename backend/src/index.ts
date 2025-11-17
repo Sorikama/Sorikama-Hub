@@ -54,53 +54,27 @@ const server = http.createServer(app);
 
 const startServer = async () => {
   try {
-    // Affichage du banner
-    await Banner.displayBanner();
+    console.log('\n🚀 Démarrage Sorikama Gateway...\n');
 
-    // Étape 0: Préparation du port
-    Banner.displayStartupStep('Préparation du port', 'loading');
+    // Préparation du port
     await PortManager.preparePort(7000);
-    Banner.displayStartupStep('Port prêt', 'success', `Port 7000`);
 
-    // Étape 1: Démarrage de Redis
-    Banner.displayStartupStep('Démarrage de Redis', 'loading');
-    const redisStarted = await RedisManager.startRedis();
+    // Démarrage de Redis
+    await RedisManager.startRedis();
 
-    if (redisStarted) {
-      Banner.displayStartupStep('Redis démarré avec succès', 'success', 'Port 6379');
-    } else {
-      Banner.displayStartupStep('Redis non disponible', 'error', 'Mode dégradé activé');
-    }
-
-    // Étape 2: Connexion à la base de données
-    Banner.displayStartupStep('Connexion à MongoDB', 'loading');
+    // Connexion à MongoDB
     await connectDB();
-    Banner.displayStartupStep('MongoDB connecté', 'success');
 
-    // Étape 2.5: Initialisation du compte admin
-    Banner.displayStartupStep('Vérification compte admin', 'loading');
+    // Initialisation du compte admin
     await seedAdmin();
-    Banner.displayStartupStep('Compte admin prêt', 'success', 'admin@admin.fr');
 
-    // Étape 2.6: Initialisation des permissions et rôles
-    Banner.displayStartupStep('Chargement permissions & rôles', 'loading');
+    // Initialisation des permissions et rôles
     const { seedPermissions } = require('./database/seeders/permissions.seeder');
-    const permResult = await seedPermissions();
-    Banner.displayStartupStep('Permissions & rôles prêts', 'success', `${permResult.permissionsCount} permissions, ${permResult.rolesCount} rôles`);
+    await seedPermissions();
 
-    // Étape 2.7: Initialisation des services externes
-    Banner.displayStartupStep('Initialisation des services externes', 'loading');
+    // Initialisation des services externes
     const { seedServices } = require('./database/seeders/services.seeder');
-    const servicesResult = await seedServices();
-    if (servicesResult) {
-      const { created, skipped, total, enabled } = servicesResult;
-      const statusMsg = created > 0
-        ? `${created} créé(s), ${total} disponible(s)`
-        : `${total} service(s) disponible(s)`;
-      Banner.displayStartupStep('Services externes prêts', 'success', statusMsg);
-    } else {
-      Banner.displayStartupStep('Services externes', 'success', 'Aucun service configuré');
-    }
+    await seedServices();
 
     app.use(
       helmet({
@@ -210,11 +184,9 @@ const startServer = async () => {
 
     app.use(express.static(path.join(__dirname, '../public')));
 
-    // Étape 3: Initialisation des données
-    Banner.displayStartupStep('Initialisation des données', 'loading');
+    // Initialisation des données
     const { runSeeders, createSeederRoutes } = require('./database/seeders/index');
     await runSeeders();
-    Banner.displayStartupStep('Données initialisées', 'success');
 
     // Route pour relancer les seeders manuellement
     createSeederRoutes(app);
@@ -228,21 +200,10 @@ const startServer = async () => {
 
       const swaggerPath = path.join(__dirname, '../openapi.yaml');
 
-      console.log('🔍 Chemin du fichier YAML:', swaggerPath);
-      console.log('🔍 Fichier existe?', fs.existsSync(swaggerPath));
-
       let swaggerSpec;
       if (fs.existsSync(swaggerPath)) {
-        console.log('📝 Lecture du fichier YAML...');
         const yamlContent = fs.readFileSync(swaggerPath, 'utf8');
-        console.log('📝 Taille du contenu YAML:', yamlContent.length, 'caractères');
-        console.log('📝 Début du contenu:', yamlContent.substring(0, 100));
-
         swaggerSpec = YAML.load(yamlContent) as any;
-        console.log('📝 Parsing YAML terminé');
-
-        console.log('📝 Contenu YAML chargé:', Object.keys(swaggerSpec));
-        console.log('📝 Paths trouvés:', Object.keys(swaggerSpec.paths || {}));
 
         // Améliorer la spec existante
         if (!swaggerSpec.components) swaggerSpec.components = {};
@@ -267,9 +228,7 @@ const startServer = async () => {
           ];
         }
 
-        console.log('✅ Fichier OpenAPI YAML chargé avec succès');
       } else {
-        console.log('⚠️ Fichier OpenAPI YAML non trouvé, utilisation du schéma par défaut');
         swaggerSpec = {
           openapi: '3.0.0',
           info: {
@@ -290,12 +249,7 @@ const startServer = async () => {
           security: [{ bearerAuth: [] }],
           paths: {}
         };
-        console.log('⚠️ Fichier OpenAPI YAML non trouvé, utilisation du schéma par défaut');
       }
-
-      console.log('📝 Spec finale - Titre:', swaggerSpec.info?.title);
-      console.log('📝 Spec finale - Paths:', Object.keys(swaggerSpec.paths || {}));
-      console.log('📝 Spec finale - Components:', Object.keys(swaggerSpec.components || {}));
 
       app.use('/api-docs', verifyPortalSession, (req, res, next) => {
         res.removeHeader('Content-Security-Policy');
@@ -462,40 +416,27 @@ const startServer = async () => {
     app.use(handleUnauthorizedAttempts);
     app.use(errorHandler);
 
-    // Étape 4: Initialisation des logs
-    Banner.displayStartupStep('Initialisation des logs', 'loading');
+    // Initialisation des logs
     LogsGenerator.initialize();
     logSystemEvent('Système de logs initialisé', 'info');
-    Banner.displayStartupStep('Logs initialisés', 'success');
 
-    // Étape 5: Démarrage du monitoring (désactivé temporairement)
-    // Banner.displayStartupStep('Démarrage du monitoring', 'loading');
-    // MonitoringService.startMonitoring(5); // Monitoring toutes les 5 minutes
-    // Banner.displayStartupStep('Monitoring démarré', 'success');
-
-    // Étape 5: Démarrage du serveur
-    Banner.displayStartupStep('Démarrage du serveur HTTP', 'loading');
-
+    // Démarrage du serveur
     server.listen(7000, () => {
-      Banner.displayStartupStep('Serveur HTTP démarré', 'success', `Port 7000`);
+      console.log(`\n✅ Serveur démarré sur http://localhost:${PORT}`);
+      console.log(`📖 Documentation: ${BACKEND_URL}/api-docs`);
+      console.log(`🌐 Portail: ${BACKEND_URL}/portal/login\n`);
+      
       logSystemEvent(`Serveur HTTP démarré sur le port 7000`, 'info');
+      logSystemEvent('Démarrage complet du système Sorikama Hub', 'info', { port: PORT });
 
-      // Attendre un peu pour les connexions Redis
-      setTimeout(async () => {
-        await Banner.displayStartupComplete(PORT);
-        logger.info(`🌐 Accès au portail: ${BACKEND_URL}/portal/login`);
-        logSystemEvent('Démarrage complet du système Sorikama Hub', 'info', { port: PORT });
-
-        // Lancement automatique du navigateur
-        setTimeout(() => {
-          BrowserLauncher.autoLaunch(PORT);
-        }, 2000);
-      }, 1000);
+      // Lancement automatique du navigateur
+      setTimeout(() => {
+        BrowserLauncher.autoLaunch(PORT);
+      }, 2000);
     });
 
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-    Banner.displayStartupStep('Erreur critique', 'error', errorMessage);
+    console.error('\n❌ Erreur lors du démarrage:', error);
     logger.error('❌ Erreur lors du démarrage du serveur:', error);
     process.exit(1);
   }

@@ -54,18 +54,14 @@ let cacheRetryCount = 0;
 let metricsRetryCount = 0;
 
 // Instance Redis principale pour le cache
-logger.info('🚀 Initialisation Redis Cache...');
-redisLogger.info('REDIS_INIT', { type: 'cache', config: { host: redisConfig.host, port: redisConfig.port, db: 0 } });
 export const redisClient = new Redis({
   ...redisConfig,
   retryStrategy: (times: number) => {
     cacheRetryCount = times;
     const delay = Math.min(times * 50, 2000);
-    logger.warn(`🔄 Redis Cache - Tentative ${times}/10 dans ${delay}ms`);
     redisLogger.warn('CACHE_RETRY_ATTEMPT', { attempt: times, delay, maxAttempts: 10 });
     
     if (times > 10) {
-      logger.error('❌ Redis Cache - Échec définitif après 10 tentatives');
       redisLogger.error('CACHE_CONNECTION_FAILED', { totalAttempts: times });
       return null;
     }
@@ -74,19 +70,15 @@ export const redisClient = new Redis({
 });
 
 // Instance Redis dédiée aux métriques
-logger.info('📊 Initialisation Redis Métriques...');
-metricsLogger.info('REDIS_METRICS_INIT', { type: 'metrics', config: { host: redisConfig.host, port: redisConfig.port, db: 1 } });
 export const redisMetrics = new Redis({
   ...redisConfig,
   db: 1,
   retryStrategy: (times: number) => {
     metricsRetryCount = times;
     const delay = Math.min(times * 50, 2000);
-    logger.warn(`🔄 Redis Métriques - Tentative ${times}/10 dans ${delay}ms`);
     metricsLogger.warn('METRICS_RETRY_ATTEMPT', { attempt: times, delay, maxAttempts: 10 });
     
     if (times > 10) {
-      logger.error('❌ Redis Métriques - Échec définitif après 10 tentatives');
       metricsLogger.error('METRICS_CONNECTION_FAILED', { totalAttempts: times });
       return null;
     }
@@ -94,10 +86,8 @@ export const redisMetrics = new Redis({
   }
 });
 
-// Gestion des événements de connexion Redis Cache
+// Gestion des événements de connexion Redis Cache (silencieux)
 redisClient.on('connect', () => {
-  const msg = `🔗 Redis Cache - Connexion en cours vers ${redisConfig.host}:${redisConfig.port}`;
-  logger.info(msg);
   redisLogger.info('CACHE_CONNECTING', {
     host: redisConfig.host,
     port: redisConfig.port,
@@ -108,20 +98,17 @@ redisClient.on('connect', () => {
 });
 
 redisClient.on('ready', () => {
-  const msg = `✅ Redis Cache connecté avec succès après ${cacheRetryCount > 0 ? cacheRetryCount + ' tentatives' : '1 tentative'}`;
-  logger.info(msg);
   redisLogger.info('CACHE_READY', {
     status: 'connected',
     db: 0,
     totalAttempts: cacheRetryCount + 1,
     connectionTime: new Date().toISOString()
   });
-  cacheRetryCount = 0; // Reset counter
+  cacheRetryCount = 0;
 });
 
 redisClient.on('error', (error) => {
-  const msg = `❌ Redis Cache - Erreur: ${error.message}`;
-  logger.error(msg);
+  // Silencieux - logs dans fichier uniquement
   redisLogger.error('CACHE_ERROR', {
     error: error.message,
     code: error.code,
@@ -134,8 +121,6 @@ redisClient.on('error', (error) => {
 });
 
 redisClient.on('close', () => {
-  const msg = '⚠️ Redis Cache - Connexion fermée';
-  logger.warn(msg);
   redisLogger.warn('CACHE_CLOSE', {
     reason: 'connection_closed',
     timestamp: new Date().toISOString()
@@ -143,8 +128,6 @@ redisClient.on('close', () => {
 });
 
 redisClient.on('reconnecting', (delay) => {
-  const msg = `🔄 Redis Cache - Reconnexion dans ${delay}ms (tentative ${cacheRetryCount + 1})`;
-  logger.info(msg);
   redisLogger.info('CACHE_RECONNECTING', {
     delay,
     attempt: cacheRetryCount + 1,
@@ -152,10 +135,8 @@ redisClient.on('reconnecting', (delay) => {
   });
 });
 
-// Gestion des événements Redis Métriques
+// Gestion des événements Redis Métriques (silencieux)
 redisMetrics.on('connect', () => {
-  const msg = `📊 Redis Métriques - Connexion en cours vers ${redisConfig.host}:${redisConfig.port}/db1`;
-  logger.info(msg);
   metricsLogger.info('METRICS_CONNECTING', {
     host: redisConfig.host,
     port: redisConfig.port,
@@ -166,20 +147,17 @@ redisMetrics.on('connect', () => {
 });
 
 redisMetrics.on('ready', () => {
-  const msg = `✅ Redis Métriques connecté avec succès après ${metricsRetryCount > 0 ? metricsRetryCount + ' tentatives' : '1 tentative'}`;
-  logger.info(msg);
   metricsLogger.info('METRICS_READY', {
     status: 'connected',
     db: 1,
     totalAttempts: metricsRetryCount + 1,
     connectionTime: new Date().toISOString()
   });
-  metricsRetryCount = 0; // Reset counter
+  metricsRetryCount = 0;
 });
 
 redisMetrics.on('error', (error) => {
-  const msg = `❌ Redis Métriques - Erreur: ${error.message}`;
-  logger.error(msg);
+  // Silencieux - logs dans fichier uniquement
   metricsLogger.error('METRICS_ERROR', {
     error: error.message,
     code: error.code,
@@ -192,8 +170,6 @@ redisMetrics.on('error', (error) => {
 });
 
 redisMetrics.on('close', () => {
-  const msg = '⚠️ Redis Métriques - Connexion fermée';
-  logger.warn(msg);
   metricsLogger.warn('METRICS_CLOSE', {
     reason: 'connection_closed',
     timestamp: new Date().toISOString()
@@ -201,8 +177,6 @@ redisMetrics.on('close', () => {
 });
 
 redisMetrics.on('reconnecting', (delay) => {
-  const msg = `🔄 Redis Métriques - Reconnexion dans ${delay}ms (tentative ${metricsRetryCount + 1})`;
-  logger.info(msg);
   metricsLogger.info('METRICS_RECONNECTING', {
     delay,
     attempt: metricsRetryCount + 1,
@@ -224,10 +198,9 @@ export const getRedisStatus = () => {
   };
 };
 
-// Log initial du statut
+// Log initial du statut (silencieux)
 setTimeout(() => {
   const status = getRedisStatus();
-  logger.info(`📊 Statut Redis - Cache: ${status.cache.status}, Métriques: ${status.metrics.status}`);
   redisLogger.info('REDIS_STATUS_CHECK', status);
 }, 2000);
 
@@ -250,8 +223,7 @@ export class CacheService {
       await redisClient.setex(key, ttlSeconds, serializedData);
       logger.debug(`📦 Cache SET: ${key} (TTL: ${ttlSeconds}s)`);
     } catch (error) {
-      logger.error(`❌ Erreur cache SET ${key}:`, error);
-      redisLogger.error('CACHE_SET_ERROR', { key, error: error.message });
+      // Silencieux si Redis non disponible
     }
   }
 
@@ -275,8 +247,7 @@ export class CacheService {
         return data;
       }
     } catch (error) {
-      logger.error(`❌ Erreur cache GET ${key}:`, error);
-      redisLogger.error('CACHE_GET_ERROR', { key, error: error.message });
+      // Silencieux si Redis non disponible
       return null;
     }
   }
@@ -290,7 +261,7 @@ export class CacheService {
       await redisClient.del(...keys);
       logger.debug(`🗑️ Cache DELETE: ${keys.join(', ')}`);
     } catch (error) {
-      logger.error(`❌ Erreur cache DELETE:`, error);
+      // Silencieux si Redis non disponible
     }
   }
 
@@ -304,7 +275,7 @@ export class CacheService {
       const result = await redisClient.exists(key);
       return result === 1;
     } catch (error) {
-      logger.error(`❌ Erreur cache EXISTS ${key}:`, error);
+      // Silencieux si Redis non disponible
       return false;
     }
   }
@@ -327,8 +298,7 @@ export class MetricsService {
       // Définir une expiration de 24h pour éviter l'accumulation
       await redisMetrics.expire(metric, 86400);
     } catch (error) {
-      logger.error(`❌ Erreur métrique INCREMENT ${metric}:`, error);
-      metricsLogger.error('METRICS_INCREMENT_ERROR', { metric, error: error.message });
+      // Silencieux si Redis non disponible
     }
   }
 
@@ -351,7 +321,7 @@ export class MetricsService {
       // Expiration de 24h
       await redisMetrics.expire(key, 86400);
     } catch (error) {
-      logger.error(`❌ Erreur métrique TIME_SERIES ${metric}:`, error);
+      // Silencieux si Redis non disponible
     }
   }
 
@@ -368,7 +338,7 @@ export class MetricsService {
       const value = await redisMetrics.get(metric);
       return value ? parseInt(value) : 0;
     } catch (error) {
-      logger.error(`❌ Erreur métrique GET ${metric}:`, error);
+      // Silencieux si Redis non disponible
       return 0;
     }
   }
@@ -392,7 +362,7 @@ export class MetricsService {
         };
       });
     } catch (error) {
-      logger.error(`❌ Erreur métrique GET_TIME_SERIES ${metric}:`, error);
+      // Silencieux si Redis non disponible
       return [];
     }
   }

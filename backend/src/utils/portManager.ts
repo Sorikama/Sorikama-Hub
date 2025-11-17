@@ -74,53 +74,26 @@ export class PortManager {
    */
   static async freePort(port: number): Promise<boolean> {
     try {
-      logger.info(`🔍 Vérification du port ${port}...`);
-      
       const isInUse = await this.isPortInUse(port);
-      if (!isInUse) {
-        logger.info(`✅ Port ${port} disponible`);
-        return true;
-      }
+      if (!isInUse) return true;
 
-      logger.warn(`⚠️ Port ${port} occupé, recherche du processus...`);
-      
       const pid = await this.getProcessOnPort(port);
-      if (!pid) {
-        logger.error(`❌ Impossible de trouver le processus sur le port ${port}`);
-        return false;
-      }
+      if (!pid) return false;
 
       const processName = await this.getProcessName(pid);
-      logger.warn(`🔍 Processus trouvé: ${processName || 'Inconnu'} (PID: ${pid})`);
-
+      
       // Vérifier si c'est notre propre processus Node.js
       if (processName && (processName.toLowerCase().includes('node') || processName.toLowerCase().includes('sorikama'))) {
-        logger.info(`🔄 Arrêt du processus Node.js précédent (PID: ${pid})...`);
-        
         const killed = await this.killProcess(pid);
         if (killed) {
-          // Attendre un peu que le port se libère
           await new Promise(resolve => setTimeout(resolve, 2000));
-          
           const stillInUse = await this.isPortInUse(port);
-          if (!stillInUse) {
-            logger.info(`✅ Port ${port} libéré avec succès`);
-            return true;
-          } else {
-            logger.error(`❌ Le port ${port} est toujours occupé après l'arrêt du processus`);
-            return false;
-          }
-        } else {
-          logger.error(`❌ Impossible d'arrêter le processus ${pid}`);
-          return false;
+          return !stillInUse;
         }
-      } else {
-        logger.warn(`⚠️ Le port ${port} est utilisé par un autre processus (${processName})`);
-        logger.warn(`💡 Vous pouvez l'arrêter manuellement avec: taskkill /PID ${pid} /F`);
         return false;
       }
+      return false;
     } catch (error) {
-      logger.error(`Erreur lors de la libération du port ${port}:`, error);
       return false;
     }
   }

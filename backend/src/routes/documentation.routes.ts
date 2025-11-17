@@ -107,43 +107,13 @@ router.get('/', (req: Request, res: Response) => {
             </div>
             
             <div class="section">
-                <h2>🛠️ Services Sorikama</h2>
-                <p>Tous les services nécessitent une API Key valide.</p>
+                <h2>🛠️ Services Externes</h2>
+                <p>Les services sont gérés dynamiquement. Consultez <a href="/api/v1/system/services">/api/v1/system/services</a> pour la liste complète.</p>
                 
                 <div class="endpoint">
                     <span class="method get">GET</span>
-                    <strong>/api/v1/soristore/*</strong>
-                    <p>Marketplace e-commerce</p>
-                </div>
-                
-                <div class="endpoint">
-                    <span class="method get">GET</span>
-                    <strong>/api/v1/soripay/*</strong>
-                    <p>Système de paiement</p>
-                </div>
-                
-                <div class="endpoint">
-                    <span class="method get">GET</span>
-                    <strong>/api/v1/soriwallet/*</strong>
-                    <p>Portefeuille numérique</p>
-                </div>
-                
-                <div class="endpoint">
-                    <span class="method get">GET</span>
-                    <strong>/api/v1/sorilearn/*</strong>
-                    <p>Plateforme d'apprentissage</p>
-                </div>
-                
-                <div class="endpoint">
-                    <span class="method get">GET</span>
-                    <strong>/api/v1/sorihealth/*</strong>
-                    <p>Suivi santé</p>
-                </div>
-                
-                <div class="endpoint">
-                    <span class="method get">GET</span>
-                    <strong>/api/v1/soriaccess/*</strong>
-                    <p>Accessibilité</p>
+                    <strong>/api/v1/proxy/:serviceId/*</strong>
+                    <p>Proxy vers les services externes enregistrés</p>
                 </div>
             </div>
         </div>

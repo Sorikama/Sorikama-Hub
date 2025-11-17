@@ -58,9 +58,26 @@ const getUserPermissions = async (userId: string): Promise<Set<string>> => {
   }
 };
 
+// Helper pour créer des règles simples à partir de strings
+export const createSimpleRule = (permission: string): AuthorizationRule => {
+  const [action, resource] = permission.split(':');
+  return { resource, action };
+};
+
 // Middleware d'autorisation avancé
-export const authorize = (rules: AuthorizationRule | AuthorizationRule[]) => {
-  const ruleArray = Array.isArray(rules) ? rules : [rules];
+export const authorize = (rules: AuthorizationRule | AuthorizationRule[] | string | string[]) => {
+  // Convertir les strings en AuthorizationRule
+  let ruleArray: AuthorizationRule[];
+  
+  if (typeof rules === 'string') {
+    ruleArray = [createSimpleRule(rules)];
+  } else if (Array.isArray(rules)) {
+    ruleArray = rules.map(rule => 
+      typeof rule === 'string' ? createSimpleRule(rule) : rule
+    );
+  } else {
+    ruleArray = [rules];
+  }
   
   return async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {

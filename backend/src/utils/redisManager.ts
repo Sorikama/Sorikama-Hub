@@ -37,20 +37,14 @@ export class RedisManager {
    */
   static async startRedis(): Promise<boolean> {
     try {
-      logger.info('🔍 Vérification de Redis...');
-      redisLogger.info('REDIS_CHECK_START', { timestamp: new Date().toISOString() });
-
       const isRunning = await this.checkRedisConnection();
       
       if (isRunning) {
-        logger.info('✅ Redis déjà en cours d\'exécution');
-        redisLogger.info('REDIS_ALREADY_RUNNING', { port: 6379 });
         this.isRedisRunning = true;
         return true;
       }
 
-      logger.info('🚀 Démarrage automatique de Redis...');
-      redisLogger.info('REDIS_AUTO_START', { timestamp: new Date().toISOString() });
+      // Démarrage silencieux de Redis
 
       return new Promise((resolve) => {
         // Démarrer Redis en arrière-plan
@@ -64,19 +58,8 @@ export class RedisManager {
         this.redisProcess.stdout.on('data', (data: Buffer) => {
           const output = data.toString();
           
-          if (output.includes('Redis is starting')) {
-            logger.info('🔄 Redis - Initialisation en cours...');
-            redisLogger.info('REDIS_STARTING', { pid: this.redisProcess.pid });
-          }
-          
-          if (output.includes('Server initialized')) {
-            logger.info('⚙️ Redis - Serveur initialisé');
-            redisLogger.info('REDIS_INITIALIZED', { pid: this.redisProcess.pid });
-          }
-          
           if (output.includes('Ready to accept connections') && !startupComplete) {
             startupComplete = true;
-            logger.info('✅ Redis démarré avec succès sur le port 6379');
             redisLogger.info('REDIS_READY', { 
               port: 6379, 
               pid: this.redisProcess.pid,
@@ -89,12 +72,10 @@ export class RedisManager {
 
         this.redisProcess.stderr.on('data', (data: Buffer) => {
           const error = data.toString();
-          logger.error('❌ Erreur Redis:', error);
           redisLogger.error('REDIS_STARTUP_ERROR', { error });
         });
 
         this.redisProcess.on('error', (error: Error) => {
-          logger.error('❌ Impossible de démarrer Redis:', error.message);
           redisLogger.error('REDIS_SPAWN_ERROR', { error: error.message });
           resolve(false);
         });
@@ -102,7 +83,6 @@ export class RedisManager {
         // Timeout de 10 secondes
         setTimeout(() => {
           if (!startupComplete) {
-            logger.error('❌ Timeout - Redis n\'a pas démarré dans les temps');
             redisLogger.error('REDIS_STARTUP_TIMEOUT', { timeout: 10000 });
             resolve(false);
           }
@@ -110,7 +90,6 @@ export class RedisManager {
       });
 
     } catch (error) {
-      logger.error('❌ Erreur lors du démarrage de Redis:', error);
       redisLogger.error('REDIS_START_EXCEPTION', { error: error.message });
       return false;
     }
@@ -121,13 +100,9 @@ export class RedisManager {
    */
   static async stopRedis(): Promise<void> {
     if (this.redisProcess && this.isRedisRunning) {
-      logger.info('🛑 Arrêt de Redis...');
       redisLogger.info('REDIS_STOPPING', { pid: this.redisProcess.pid });
-      
       this.redisProcess.kill('SIGTERM');
       this.isRedisRunning = false;
-      
-      logger.info('✅ Redis arrêté');
       redisLogger.info('REDIS_STOPPED');
     }
   }

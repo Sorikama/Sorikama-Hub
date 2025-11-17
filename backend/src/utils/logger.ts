@@ -60,13 +60,17 @@ const transportsConfig: winston.transport[] = [
     })
 ];
 
+// Mode silencieux pour le démarrage (peut être contrôlé par variable d'environnement)
+const SILENT_MODE = process.env.SILENT_LOGS === 'true' || NODE_ENV === 'development';
+
 // Création de l'instance du logger
 export const logger = winston.createLogger({
-    level: NODE_ENV === 'production' ? 'info' : 'debug',
+    level: SILENT_MODE ? 'error' : (NODE_ENV === 'production' ? 'info' : 'debug'),
     levels,
     format, // Pour la console
     transports: transportsConfig,
     exitOnError: false,
+    silent: false,
 });
 
 // Loggers spécialisés pour différents types

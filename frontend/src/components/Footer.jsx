@@ -51,12 +51,7 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-6">Services</h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-200">SoriStore</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-200">SoriPay</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-200">SoriWallet</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-200">SoriLearn</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-200">SoriHealth</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-200">SoriAccess</a></li>
+              <li><a href="/services" className="text-gray-300 hover:text-white transition-colors duration-200">Voir tous les services</a></li>
             </ul>
           </div>
 

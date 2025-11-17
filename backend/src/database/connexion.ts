@@ -5,25 +5,19 @@ import { MONGO_URI } from '../config';
 
 export const connectDB = async () => {
   if (!MONGO_URI) {
-    logger.error('MONGO_URI n\'est pas défini dans les variables d\'environnement.');
+    console.error('❌ MONGO_URI non défini');
     process.exit(1);
   }
 
   try {
-    // Configurer Mongoose
-    mongoose.set('strictQuery', false); // Préparer pour Mongoose 7
-
-    // Options de connexion
+    mongoose.set('strictQuery', false);
     const options = {
-      serverSelectionTimeoutMS: 5000, // Timeout réduit à 5 secondes
+      serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
     };
-
     await mongoose.connect(MONGO_URI, options);
-    logger.info('✅ Connexion à MongoDB réussie.');
   } catch (error) {
-    logger.error('❌ Erreur de connexion à MongoDB:', error);
-    logger.error('💡 Vérifiez que MongoDB est démarré: mongod --dbpath ./data/db');
+    console.error('❌ Erreur MongoDB:', error);
     process.exit(1);
   }
 };

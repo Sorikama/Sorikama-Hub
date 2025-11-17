@@ -11,10 +11,25 @@ const Services = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await api.get('/system/services');
-        setServices(response.data.services || []);
+        // Utiliser la route publique pour récupérer les services
+        const response = await fetch('http://localhost:7000/api/v1/system/services/public');
+        const data = await response.json();
+        
+        if (data.success && data.data.services) {
+          // Mapper les services avec des icônes par défaut
+          const mappedServices = data.data.services.map(service => ({
+            name: service.name,
+            description: service.description || 'Service externe',
+            icon: '🔗',
+            url: service.url,
+            slug: service.slug,
+            status: 'active'
+          }));
+          setServices(mappedServices);
+        }
       } catch (error) {
         console.error('Erreur lors du chargement des services:', error);
+        setServices([]);
       } finally {
         setLoading(false);
       }
@@ -22,53 +37,6 @@ const Services = () => {
 
     fetchServices();
   }, []);
-
-  const defaultServices = [
-    {
-      name: 'SoriStore',
-      description: 'Marketplace e-commerce',
-      icon: '🛍️',
-      url: 'http://localhost:3001',
-      status: 'active'
-    },
-    {
-      name: 'SoriPay',
-      description: 'Système de paiement',
-      icon: '💳',
-      url: 'http://localhost:3002',
-      status: 'active'
-    },
-    {
-      name: 'SoriWallet',
-      description: 'Portefeuille numérique',
-      icon: '💰',
-      url: 'http://localhost:3003',
-      status: 'active'
-    },
-    {
-      name: 'SoriLearn',
-      description: 'Plateforme d\'apprentissage',
-      icon: '📚',
-      url: 'http://localhost:3004',
-      status: 'maintenance'
-    },
-    {
-      name: 'SoriHealth',
-      description: 'Gestion de santé',
-      icon: '🏥',
-      url: 'http://localhost:3005',
-      status: 'maintenance'
-    },
-    {
-      name: 'SoriAccess',
-      description: 'Accessibilité et inclusion',
-      icon: '♿',
-      url: 'http://localhost:3006',
-      status: 'maintenance'
-    }
-  ];
-
-  const servicesToShow = services.length > 0 ? services : defaultServices;
 
   const handleServiceClick = (service) => {
     if (service.status !== 'active') return;
@@ -104,8 +72,15 @@ const Services = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {servicesToShow.map((service, index) => (
+        {services.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🔗</div>
+            <h3 className="text-xl font-semibold mb-2">Aucun service disponible</h3>
+            <p className="text-muted-foreground">Les services seront affichés ici une fois configurés.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {services.map((service, index) => (
             <div
               key={index}
               onClick={() => handleServiceClick(service)}
@@ -135,8 +110,9 @@ const Services = () => {
                 )}
               </div>
             </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

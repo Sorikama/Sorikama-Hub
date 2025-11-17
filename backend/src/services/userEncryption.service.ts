@@ -7,8 +7,8 @@
  * 
  * Exemple :
  * - User ID: "abc123"
- * - Service: "soristore"
- * - Encrypted ID: "enc_soristore_xyz789..."
+ * - Service: "masebuy"
+ * - Encrypted ID: "enc_masebuy_xyz789..."
  */
 
 import crypto from 'crypto';
@@ -27,7 +27,7 @@ export class UserEncryptionService {
    * 
    * @param userId - ID de l'utilisateur Sorikama
    * @param serviceId - ID du service externe
-   * @returns Identifiant crypté (ex: "enc_soristore_abc123xyz...")
+   * @returns Identifiant crypté (ex: "enc_masebuy_abc123xyz...")
    */
   static encryptUserId(userId: string, serviceId: string): string {
     try {
@@ -76,7 +76,7 @@ export class UserEncryptionService {
   /**
    * Décrypte un identifiant crypté pour retrouver l'ID utilisateur original
    * 
-   * @param encryptedId - Identifiant crypté (ex: "enc_soristore_abc123...")
+   * @param encryptedId - Identifiant crypté (ex: "enc_masebuy_abc123...")
    * @param serviceId - ID du service externe
    * @returns ID utilisateur original
    */
@@ -137,7 +137,7 @@ export class UserEncryptionService {
    * 
    * @param userId - ID de l'utilisateur
    * @param serviceId - ID du service
-   * @returns Hash stable (ex: "hash_soristore_abc123...")
+   * @returns Hash stable (ex: "hash_masebuy_abc123...")
    */
   static hashUserId(userId: string, serviceId: string): string {
     const hash = crypto

@@ -21,8 +21,6 @@ export class PerformanceOptimizer {
     setInterval(() => {
       this.forceGarbageCollection();
     }, 300000); // 5 minutes
-
-    logger.info('🔧 Optimiseur de performance démarré');
   }
 
   /**
@@ -71,16 +69,7 @@ export class PerformanceOptimizer {
     }
 
     if (global.gc) {
-      const beforeMem = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
       global.gc();
-      const afterMem = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
-      
-      logger.info('🧹 Garbage collection effectué', {
-        before: `${beforeMem}MB`,
-        after: `${afterMem}MB`,
-        freed: `${beforeMem - afterMem}MB`
-      });
-      
       this.lastGC = now;
     }
   }
@@ -96,8 +85,6 @@ export class PerformanceOptimizer {
 
     // Optimiser les événements
     process.setMaxListeners(20);
-
-    logger.info('⚡ Optimisations Node.js appliquées');
   }
 
   /**
@@ -111,8 +98,6 @@ export class PerformanceOptimizer {
     if (global.gc) {
       global.gc();
     }
-
-    logger.info('🧽 Nettoyage des ressources effectué');
   }
 }
 

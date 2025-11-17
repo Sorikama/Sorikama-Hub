@@ -32,90 +32,40 @@ export class RoutingEngine {
   private connectionCounts: Map<string, number> = new Map();
 
   constructor() {
-    this.initializeRoutes();
+    this.initializeRoutes().catch(console.error);
     this.startHealthChecks();
   }
 
-  private initializeRoutes(): void {
-    const routes: ServiceRoute[] = [
-      {
-        name: 'soristore',
-        path: '/soristore',
-        target: process.env.SORISTORE_SERVICE_URL || 'http://localhost:3001',
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        permissions: ['read:soristore'],
+  private async initializeRoutes(): Promise<void> {
+    // Charger les routes dynamiquement depuis la base de données
+    try {
+      const { ServiceModel } = require('../database/models/service.model');
+      const services = await ServiceModel.find({ enabled: true });
+      
+      const routes: ServiceRoute[] = services.map((service: any) => ({
+        name: service.slug,
+        path: `/${service.proxyPath}`,
+        target: service.backendUrl,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+        permissions: [`read:${service.slug}`],
         rateLimit: { windowMs: 15 * 60 * 1000, max: 100 },
         healthCheck: '/health',
         timeout: 30000,
         retries: 3,
         circuitBreaker: { failureThreshold: 5, resetTimeout: 60000 }
-      },
-      {
-        name: 'soripay',
-        path: '/soripay',
-        target: process.env.SORIPAY_SERVICE_URL || 'http://localhost:3002',
-        methods: ['GET', 'POST', 'PUT'],
-        permissions: ['read:soripay'],
-        rateLimit: { windowMs: 15 * 60 * 1000, max: 200 },
-        healthCheck: '/health',
-        timeout: 45000,
-        retries: 2,
-        circuitBreaker: { failureThreshold: 3, resetTimeout: 30000 }
-      },
-      {
-        name: 'soriwallet',
-        path: '/soriwallet',
-        target: process.env.SORIWALLET_SERVICE_URL || 'http://localhost:3003',
-        methods: ['GET', 'POST', 'PUT'],
-        permissions: ['read:soriwallet'],
-        rateLimit: { windowMs: 15 * 60 * 1000, max: 150 },
-        healthCheck: '/health',
-        timeout: 30000,
-        retries: 3
-      },
-      {
-        name: 'sorilearn',
-        path: '/sorilearn',
-        target: process.env.SORILEARN_SERVICE_URL || 'http://localhost:3004',
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        permissions: ['read:sorilearn'],
-        rateLimit: { windowMs: 15 * 60 * 1000, max: 300 },
-        healthCheck: '/health',
-        timeout: 60000,
-        retries: 2
-      },
-      {
-        name: 'sorihealth',
-        path: '/sorihealth',
-        target: process.env.SORIHEALTH_SERVICE_URL || 'http://localhost:3005',
-        methods: ['GET', 'POST', 'PUT'],
-        permissions: ['read:sorihealth'],
-        rateLimit: { windowMs: 15 * 60 * 1000, max: 100 },
-        healthCheck: '/health',
-        timeout: 30000,
-        retries: 3
-      },
-      {
-        name: 'soriaccess',
-        path: '/soriaccess',
-        target: process.env.SORIACCESS_SERVICE_URL || 'http://localhost:3006',
-        methods: ['GET', 'POST', 'PUT'],
-        permissions: ['read:soriaccess'],
-        rateLimit: { windowMs: 15 * 60 * 1000, max: 50 },
-        healthCheck: '/health',
-        timeout: 30000,
-        retries: 3
-      }
-    ];
+      }));
 
-    routes.forEach(route => {
-      this.routes.set(route.path, route);
-      this.healthStatus.set(route.name, true);
-      this.roundRobinCounters.set(route.name, 0);
-      this.connectionCounts.set(route.name, 0);
-    });
+      routes.forEach(route => {
+        this.routes.set(route.path, route);
+        this.healthStatus.set(route.name, true);
+        this.roundRobinCounters.set(route.name, 0);
+        this.connectionCounts.set(route.name, 0);
+      });
 
-    logger.info(`[ROUTING] ${routes.length} routes initialisées`);
+      logger.info(`[ROUTING] ${routes.length} routes initialisées`);
+    } catch (error) {
+      console.error('Erreur chargement routes:', error);
+    }
   }
 
   public findRoute(req: Request): ServiceRoute | null {

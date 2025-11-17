@@ -140,11 +140,24 @@ export function AuthProvider({ children }) {
         // Token invalide ou expiré - nettoyer et déconnecter
         authUtils.clearStorage();
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
+        toast.warning('Votre session a expiré. Veuillez vous reconnecter.');
       }
     };
 
     initializeAuth();
-  }, []);
+
+    // Vérifier périodiquement si le token est toujours valide (toutes les 5 minutes)
+    const checkAuthInterval = setInterval(() => {
+      if (!authUtils.isAuthenticated()) {
+        logger.warn('⚠️ Token manquant - déconnexion automatique');
+        authUtils.clearStorage();
+        dispatch({ type: AUTH_ACTIONS.LOGOUT });
+        toast.warning('Votre session a expiré. Veuillez vous reconnecter.');
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(checkAuthInterval);
+  }, [toast]);
 
   /**
    * Actions d'authentification disponibles dans le contexte

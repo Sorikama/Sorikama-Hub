@@ -9,10 +9,40 @@ import {
   getSystemHealth,
   getSystemMetrics
 } from '../controllers/system.controller';
+import { ServiceModel } from '../database/models/service.model';
 
 const router = Router();
 
-// Toutes les routes nécessitent une authentification JWT
+/**
+ * Route publique pour lister les services disponibles (sans authentification)
+ * Retourne uniquement les noms des services actifs
+ */
+router.get('/services/public', async (req, res) => {
+  try {
+    const services = await ServiceModel.find({ enabled: true })
+      .select('name slug description frontendUrl')
+      .lean();
+    
+    res.json({
+      success: true,
+      data: {
+        services: services.map(service => ({
+          name: service.name,
+          slug: service.slug,
+          description: service.description,
+          url: service.frontendUrl
+        }))
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération des services'
+    });
+  }
+});
+
+// Toutes les autres routes nécessitent une authentification JWT
 router.use(protect);
 
 /**

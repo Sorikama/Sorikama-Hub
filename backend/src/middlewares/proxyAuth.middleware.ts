@@ -33,7 +33,7 @@ export const verifyServiceAuthorization = async (req: any, res: Response, next: 
     }
 
     // Vérifier que le service existe et est actif
-    const service = await ServiceModel.findOne({ id: serviceId });
+    const service = await ServiceModel.findOne({ slug: serviceId });
     
     if (!service) {
       logger.warn('❌ Service non trouvé', { serviceId, userId });
@@ -43,20 +43,11 @@ export const verifyServiceAuthorization = async (req: any, res: Response, next: 
       );
     }
 
-    if (service.status !== 'active') {
-      logger.warn('❌ Tentative d\'accès à un service inactif', { serviceId, userId, status: service.status });
+    if (!service.enabled) {
+      logger.warn('❌ Tentative d\'accès à un service inactif', { serviceId, userId, enabled: service.enabled });
       throw new AppError(
-        `Le service ${service.name} est actuellement ${service.status === 'maintenance' ? 'en maintenance' : 'inactif'}`,
+        `Le service ${service.name} est actuellement inactif`,
         StatusCodes.SERVICE_UNAVAILABLE
-      );
-    }
-
-    // Vérifier que le proxy est activé pour ce service
-    if (!service.ssoEnabled) {
-      logger.warn('❌ Proxy non activé pour ce service', { serviceId, userId });
-      throw new AppError(
-        'Le proxy n\'est pas activé pour ce service',
-        StatusCodes.FORBIDDEN
       );
     }
 

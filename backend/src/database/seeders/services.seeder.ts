@@ -23,17 +23,6 @@ const defaultServices = [
         requireAuth: true,
         allowedRoles: ['admin', 'user']
     },
-    {
-        name: 'Service Demo',
-        slug: 'service-demo',
-        description: 'Service de démonstration pour tester le système de proxy',
-        frontendUrl: 'http://localhost:3002',
-        backendUrl: 'http://localhost:4002',
-        proxyPath: 'demo',
-        enabled: true,
-        requireAuth: false,
-        allowedRoles: []
-    }
 ];
 
 /**

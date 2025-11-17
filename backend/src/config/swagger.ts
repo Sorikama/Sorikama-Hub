@@ -28,13 +28,8 @@ Cette API supporte deux méthodes d'authentification :
 
 ## 🏗️ Architecture
 
-L'API Gateway route les requêtes vers les microservices suivants :
-- **SoriStore** - Marketplace e-commerce
-- **SoriPay** - Système de paiement
-- **SoriWallet** - Portefeuille numérique
-- **SoriLearn** - Plateforme d'apprentissage
-- **SoriHealth** - Suivi santé
-- **SoriAccess** - Accessibilité
+L'API Gateway route les requêtes vers les microservices enregistrés dans la base de données.
+Les services disponibles sont gérés dynamiquement via l'interface d'administration.
 
 ## 🛡️ Sécurité
 
@@ -179,11 +174,11 @@ L'API Gateway route les requêtes vers les microservices suivants :
           properties: {
             name: {
               type: 'string',
-              example: 'soristore'
+              example: 'masebuy'
             },
             path: {
               type: 'string',
-              example: '/soristore'
+              example: '/masebuy'
             },
             target: {
               type: 'string',
@@ -201,7 +196,7 @@ L'API Gateway route les requêtes vers les microservices suivants :
               items: {
                 type: 'string'
               },
-              example: ['read:soristore']
+              example: ['read:masebuy']
             },
             healthy: {
               type: 'boolean',
@@ -250,7 +245,7 @@ L'API Gateway route les requêtes vers les microservices suivants :
               items: {
                 type: 'string'
               },
-              example: ['read:soristore', 'write:soripay']
+              example: ['read:masebuy', 'write:masebuy']
             },
             isActive: {
               type: 'boolean',
@@ -361,28 +356,8 @@ L'API Gateway route les requêtes vers les microservices suivants :
         description: 'Informations système, rôles, permissions et services'
       },
       {
-        name: 'SoriStore',
-        description: 'Marketplace e-commerce - Vente et achat de produits'
-      },
-      {
-        name: 'SoriPay',
-        description: 'Système de paiement - Transactions et factures'
-      },
-      {
-        name: 'SoriWallet',
-        description: 'Portefeuille numérique - Gestion des fonds'
-      },
-      {
-        name: 'SoriLearn',
-        description: 'Plateforme d\'apprentissage - Cours et formations'
-      },
-      {
-        name: 'SoriHealth',
-        description: 'Suivi santé - Données médicales et bien-être'
-      },
-      {
-        name: 'SoriAccess',
-        description: 'Accessibilité - Outils d\'assistance et inclusion'
+        name: 'Services',
+        description: 'Services externes enregistrés - Gérés dynamiquement'
       }
     ]
   },

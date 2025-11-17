@@ -95,7 +95,7 @@ export class LogsGenerator {
 
     const interval = setInterval(() => {
       const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
-      const services = ['SoriStore', 'SoriPay', 'SoriWallet', 'SoriLearn', 'SoriHealth', 'SoriAccess'];
+      const services = ['Masebuy'];
       const users = ['user123', 'admin', 'guest', 'john.doe', 'jane.smith'];
       
       // Générer un log aléatoire

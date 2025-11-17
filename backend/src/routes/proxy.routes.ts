@@ -4,8 +4,8 @@
  * Format : /api/v1/proxy/:serviceId/*
  * 
  * Exemple :
- * GET /api/v1/proxy/soristore/products
- * POST /api/v1/proxy/soripay/payments
+ * GET /api/v1/proxy/masebuy/products
+ * POST /api/v1/proxy/masebuy/orders
  */
 
 import { Router } from 'express';
@@ -32,7 +32,7 @@ router.all(
 
 /**
  * Route pour les requêtes sans path supplémentaire
- * Exemple : /api/v1/proxy/soristore
+ * Exemple : /api/v1/proxy/masebuy
  */
 router.all(
   '/proxy/:serviceId',

@@ -1,7 +1,6 @@
 // src/utils/banner.ts
 import chalk from 'chalk';
 import figlet from 'figlet';
-import { logger } from './logger';
 
 export class Banner {
   private static startTime = Date.now();
@@ -116,25 +115,6 @@ export class Banner {
     console.log(chalk.red('⚡ ') + chalk.white('Node.js: ') + chalk.yellow(process.version));
     console.log(chalk.cyan('💾 ') + chalk.white('Mémoire: ') + chalk.yellow(Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + ' MB'));
     console.log(chalk.magenta('⏱️ ') + chalk.white('Démarrage: ') + chalk.yellow(new Date().toLocaleTimeString('fr-FR')));
-    
-    console.log(colors.accent('═'.repeat(80)));
-    
-    // Services Sorikama
-    console.log(chalk.hex('#FF6B9D').bold('🏪 SERVICES SORIKAMA CONNECTÉS:'));
-    const services = [
-      { name: 'SoriStore', icon: '🛍️', status: 'ready' },
-      { name: 'SoriPay', icon: '💳', status: 'ready' },
-      { name: 'SoriWallet', icon: '💰', status: 'ready' },
-      { name: 'SoriLearn', icon: '📚', status: 'ready' },
-      { name: 'SoriHealth', icon: '🏥', status: 'ready' },
-      { name: 'SoriAccess', icon: '♿', status: 'ready' }
-    ];
-
-    services.forEach(service => {
-      const statusColor = service.status === 'ready' ? chalk.green : chalk.red;
-      const statusText = service.status === 'ready' ? '✅ PRÊT' : '❌ ARRÊTÉ';
-      console.log(`   ${service.icon} ${chalk.white.bold(service.name.padEnd(12))} ${statusColor(statusText)}`);
-    });
     
     console.log(colors.accent('═'.repeat(80)));
     
@@ -255,13 +235,13 @@ export class Banner {
     console.log('');
     
     // Message final selon l'environnement
-    const envMessages = {
+    const envMessages: Record<string, string> = {
       development: '🚧 Mode développement - Toutes les fonctionnalités de debug sont activées',
       test: '🧪 Mode test - Environnement de test configuré',
       production: '🚀 Mode production - Système optimisé pour la performance'
     };
     
-    console.log(colors.env(`   ${envMessages[env] || envMessages.development}   `));
+    console.log(colors.env(`   ${envMessages[env] || envMessages['development']}   `));
     console.log('');
     console.log(chalk.cyan.bold('✨ ASTUCE: Le navigateur s\'ouvrira automatiquement (max 3 fois)!'));
     
