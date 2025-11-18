@@ -10,14 +10,18 @@ export const connectDB = async () => {
   }
 
   try {
+    console.log('🔄 Tentative de connexion à MongoDB...');
     mongoose.set('strictQuery', false);
     const options = {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
     };
     await mongoose.connect(MONGO_URI, options);
+    console.log('✅ Connexion à MongoDB réussie');
+    logger.info('✅ Connexion à MongoDB réussie');
   } catch (error) {
     console.error('❌ Erreur MongoDB:', error);
+    logger.error('❌ Erreur MongoDB:', error);
     process.exit(1);
   }
 };

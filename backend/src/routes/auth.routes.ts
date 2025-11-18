@@ -14,6 +14,8 @@ import { requireApiKeyAndJWT } from '../middlewares/dualAuth.middleware';
 import activationRoutes from './auth/activation.routes';
 // Importe les routes d'autorisation OAuth
 import authorizeRoutes from './auth/authorize.routes';
+// Importe les routes de vérification auth
+import checkRoutes from './auth/check.routes';
 
 const router = Router();
 
@@ -177,13 +179,19 @@ router.post('/reset-password/:token', validateBody(schemas.resetPasswordSchema),
  * '401':
  * description: Refresh token invalide ou expiré.
  */
-// Valide la présence du refresh token avant de générer de nouveaux tokens
-router.post('/refresh-token', validateBody(schemas.refreshTokenSchema), authController.refreshToken);
+// Le refresh token est maintenant dans le cookie httpOnly, pas dans le body
+// Pas besoin de validation du body
+router.post('/refresh-token', authController.refreshToken);
 
 // ===================================================================================
 // --- 🔓 Routes d'activation de compte (publiques) ---
 // ===================================================================================
 router.use('/activation', activationRoutes);
+
+// ===================================================================================
+// --- � Rooutes de vérification auth (publiques) ---
+// ===================================================================================
+router.use('/', checkRoutes);
 
 // ===================================================================================
 // --- 🔒 Routes Protégées (nécessitent un token JWT valide) ---

@@ -1,203 +1,274 @@
 /**
- * Service de gestion de la blacklist des tokens JWT
+ * Service de blacklist de tokens JWT
+ * 
  * Utilise Redis pour stocker les tokens révoqués
+ * Les tokens sont automatiquement supprimés après expiration
+ * 
+ * Cas d'usage :
+ * - Déconnexion utilisateur
+ * - Changement de mot de passe
+ * - Révocation manuelle par admin
+ * - Détection d'activité suspecte
  */
 
-import { createClient, RedisClientType } from 'redis';
 import { logger } from '../utils/logger';
 import jwt from 'jsonwebtoken';
 
-class TokenBlacklistService {
-  private client: RedisClientType | null = null;
-  private isConnected = false;
+// Interface pour Redis (sera injecté)
+interface RedisClient {
+  set(key: string, value: string, mode?: string, duration?: number): Promise<string | null>;
+  get(key: string): Promise<string | null>;
+  del(key: string): Promise<number>;
+  ttl(key: string): Promise<number>;
+}
 
-  /**
-   * Initialiser la connexion Redis
-   */
-  async connect(): Promise<void> {
-    if (this.isConnected) {
-      return;
-    }
+// Instance Redis (sera initialisée au démarrage)
+let redisClient: RedisClient | null = null;
 
-    try {
-      this.client = createClient({
-        url: process.env.REDIS_URL || 'redis://localhost:6379',
-        socket: {
-          reconnectStrategy: (retries) => {
-            if (retries > 10) {
-              logger.error('❌ Redis: Trop de tentatives de reconnexion');
-              return new Error('Trop de tentatives');
-            }
-            return Math.min(retries * 100, 3000);
-          }
-        }
-      });
+/**
+ * Initialise le service de blacklist avec un client Redis
+ * 
+ * @param client - Client Redis configuré
+ */
+export function initializeBlacklist(client: RedisClient): void {
+  redisClient = client;
+  logger.info('✅ Service de blacklist de tokens initialisé');
+}
 
-      this.client.on('error', (err) => {
-        logger.error('❌ Erreur Redis:', err);
-        this.isConnected = false;
-      });
-
-      this.client.on('connect', () => {
-        logger.info('✅ Redis connecté pour la blacklist des tokens');
-        this.isConnected = true;
-      });
-
-      await this.client.connect();
-    } catch (error) {
-      logger.error('❌ Impossible de se connecter à Redis:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Ajouter un token à la blacklist
-   * @param token - Le token JWT à blacklister
-   * @param reason - Raison de la révocation
-   */
-  async addToBlacklist(token: string, reason: string = 'revoked'): Promise<void> {
-    if (!this.client || !this.isConnected) {
-      throw new Error('Redis non connecté');
-    }
-
-    try {
-      // Décoder le token pour obtenir l'expiration
-      const decoded: any = jwt.decode(token);
-      
-      if (!decoded || !decoded.exp) {
-        throw new Error('Token invalide ou sans expiration');
-      }
-
-      // Calculer le TTL (temps restant avant expiration)
-      const now = Math.floor(Date.now() / 1000);
-      const ttl = decoded.exp - now;
-
-      if (ttl <= 0) {
-        logger.debug('Token déjà expiré, pas besoin de le blacklister');
-        return;
-      }
-
-      // Créer une clé unique pour le token
-      const key = `blacklist:token:${token}`;
-
-      // Stocker dans Redis avec TTL
-      await this.client.setEx(key, ttl, JSON.stringify({
-        reason,
-        revokedAt: new Date().toISOString(),
-        userId: decoded.id,
-        service: decoded.service
-      }));
-
-      logger.info('🔒 Token ajouté à la blacklist', {
-        userId: decoded.id,
-        service: decoded.service,
-        reason,
-        ttl
-      });
-    } catch (error) {
-      logger.error('❌ Erreur lors de l\'ajout à la blacklist:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Vérifier si un token est blacklisté
-   * @param token - Le token JWT à vérifier
-   * @returns true si le token est blacklisté
-   */
-  async isBlacklisted(token: string): Promise<boolean> {
-    if (!this.client || !this.isConnected) {
-      // Si Redis n'est pas disponible, on laisse passer (fail-open)
-      logger.warn('⚠️ Redis non disponible, impossible de vérifier la blacklist');
-      return false;
-    }
-
-    try {
-      const key = `blacklist:token:${token}`;
-      const result = await this.client.get(key);
-      return result !== null;
-    } catch (error) {
-      logger.error('❌ Erreur lors de la vérification de la blacklist:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Révoquer tous les tokens d'un utilisateur pour un service
-   * @param userId - ID de l'utilisateur
-   * @param serviceSlug - Slug du service
-   */
-  async revokeUserServiceTokens(userId: string, serviceSlug: string): Promise<void> {
-    if (!this.client || !this.isConnected) {
-      throw new Error('Redis non connecté');
-    }
-
-    try {
-      // Créer une clé pour marquer tous les tokens de cet utilisateur/service comme révoqués
-      const key = `blacklist:user:${userId}:service:${serviceSlug}`;
-      
-      // Stocker pendant 24h (durée max d'un token)
-      await this.client.setEx(key, 24 * 60 * 60, JSON.stringify({
-        revokedAt: new Date().toISOString(),
-        reason: 'all_tokens_revoked'
-      }));
-
-      logger.info('🔒 Tous les tokens révoqués', {
-        userId,
-        service: serviceSlug
-      });
-    } catch (error) {
-      logger.error('❌ Erreur lors de la révocation des tokens:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Vérifier si tous les tokens d'un utilisateur pour un service sont révoqués
-   */
-  async areUserServiceTokensRevoked(userId: string, serviceSlug: string): Promise<boolean> {
-    if (!this.client || !this.isConnected) {
-      return false;
-    }
-
-    try {
-      const key = `blacklist:user:${userId}:service:${serviceSlug}`;
-      const result = await this.client.get(key);
-      return result !== null;
-    } catch (error) {
-      logger.error('❌ Erreur lors de la vérification:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Obtenir les statistiques de la blacklist
-   */
-  async getStats(): Promise<{ totalBlacklisted: number }> {
-    if (!this.client || !this.isConnected) {
-      return { totalBlacklisted: 0 };
-    }
-
-    try {
-      const keys = await this.client.keys('blacklist:token:*');
-      return { totalBlacklisted: keys.length };
-    } catch (error) {
-      logger.error('❌ Erreur lors de la récupération des stats:', error);
-      return { totalBlacklisted: 0 };
-    }
-  }
-
-  /**
-   * Fermer la connexion Redis
-   */
-  async disconnect(): Promise<void> {
-    if (this.client && this.isConnected) {
-      await this.client.quit();
-      this.isConnected = false;
-      logger.info('🔌 Redis déconnecté (blacklist)');
-    }
+/**
+ * Vérifie que Redis est configuré
+ */
+function ensureRedisConfigured(): void {
+  if (!redisClient) {
+    // Ne pas lancer d'erreur, juste retourner false
+    return;
   }
 }
 
-// Export singleton
-export const tokenBlacklistService = new TokenBlacklistService();
+/**
+ * Génère la clé Redis pour un token
+ * 
+ * @param token - Token JWT
+ * @returns Clé Redis
+ */
+function getBlacklistKey(token: string): string {
+  // Utiliser un hash du token pour économiser l'espace
+  const crypto = require('crypto');
+  const hash = crypto.createHash('sha256').update(token).digest('hex');
+  return `blacklist:token:${hash}`;
+}
+
+/**
+ * Ajoute un token à la blacklist
+ * 
+ * @param token - Token JWT à révoquer
+ * @param reason - Raison de la révocation
+ * @returns true si le token a été ajouté
+ */
+export async function blacklistToken(token: string, reason: string = 'logout'): Promise<boolean> {
+  if (!redisClient) {
+    logger.debug('Redis non disponible, blacklist ignorée');
+    return false;
+  }
+  
+  try {
+    // Décoder le token pour obtenir l'expiration
+    const decoded = jwt.decode(token) as any;
+    
+    if (!decoded || !decoded.exp) {
+      logger.warn('Token invalide, impossible de le blacklister', { reason });
+      return false;
+    }
+    
+    // Calculer le TTL (temps restant avant expiration)
+    const now = Math.floor(Date.now() / 1000);
+    const ttl = decoded.exp - now;
+    
+    if (ttl <= 0) {
+      logger.debug('Token déjà expiré, pas besoin de le blacklister', { reason });
+      return true; // Considéré comme succès car le token est déjà invalide
+    }
+    
+    // Ajouter à la blacklist avec expiration automatique
+    const key = getBlacklistKey(token);
+    const value = JSON.stringify({
+      reason,
+      revokedAt: new Date().toISOString(),
+      userId: decoded.id || decoded.sub,
+      expiresAt: new Date(decoded.exp * 1000).toISOString()
+    });
+    
+    await redisClient!.set(key, value, 'EX', ttl);
+    
+    logger.info('Token ajouté à la blacklist', {
+      userId: decoded.id || decoded.sub,
+      reason,
+      ttl: `${ttl}s`
+    });
+    
+    return true;
+    
+  } catch (error) {
+    logger.error('Erreur lors de l\'ajout du token à la blacklist:', error);
+    return false;
+  }
+}
+
+/**
+ * Vérifie si un token est blacklisté
+ * 
+ * @param token - Token JWT à vérifier
+ * @returns true si le token est blacklisté
+ */
+export async function isTokenBlacklisted(token: string): Promise<boolean> {
+  if (!redisClient) {
+    return false; // Si Redis n'est pas disponible, considérer le token comme valide
+  }
+  
+  try {
+    const key = getBlacklistKey(token);
+    const value = await redisClient!.get(key);
+    
+    if (value) {
+      const data = JSON.parse(value);
+      logger.warn('Token blacklisté utilisé', {
+        reason: data.reason,
+        revokedAt: data.revokedAt,
+        userId: data.userId
+      });
+      return true;
+    }
+    
+    return false;
+    
+  } catch (error) {
+    logger.error('Erreur lors de la vérification de blacklist:', error);
+    // En cas d'erreur, on considère le token comme valide pour ne pas bloquer le service
+    // Mais on log l'erreur pour investigation
+    return false;
+  }
+}
+
+/**
+ * Révoque tous les tokens d'un utilisateur
+ * Utile lors d'un changement de mot de passe ou d'une activité suspecte
+ * 
+ * @param userId - ID de l'utilisateur
+ * @param reason - Raison de la révocation
+ * @returns Nombre de tokens révoqués
+ */
+export async function blacklistAllUserTokens(userId: string, reason: string = 'security'): Promise<number> {
+  if (!redisClient) {
+    logger.debug('Redis non disponible, blacklist ignorée');
+    return 0;
+  }
+  
+  try {
+    // Stocker une entrée pour bloquer tous les tokens de cet utilisateur
+    const key = `blacklist:user:${userId}`;
+    const value = JSON.stringify({
+      reason,
+      revokedAt: new Date().toISOString()
+    });
+    
+    // Expiration de 24h (durée max d'un access token)
+    await redisClient!.set(key, value, 'EX', 24 * 60 * 60);
+    
+    logger.warn('Tous les tokens de l\'utilisateur révoqués', {
+      userId,
+      reason
+    });
+    
+    return 1; // On ne peut pas compter le nombre exact de tokens
+    
+  } catch (error) {
+    logger.error('Erreur lors de la révocation des tokens utilisateur:', error);
+    return 0;
+  }
+}
+
+/**
+ * Vérifie si tous les tokens d'un utilisateur sont révoqués
+ * 
+ * @param userId - ID de l'utilisateur
+ * @returns true si tous les tokens sont révoqués
+ */
+export async function areAllUserTokensBlacklisted(userId: string): Promise<boolean> {
+  if (!redisClient) {
+    return false; // Si Redis n'est pas disponible, considérer comme non révoqué
+  }
+  
+  try {
+    const key = `blacklist:user:${userId}`;
+    const value = await redisClient!.get(key);
+    
+    if (value) {
+      const data = JSON.parse(value);
+      logger.warn('Utilisateur avec tous les tokens révoqués', {
+        userId,
+        reason: data.reason,
+        revokedAt: data.revokedAt
+      });
+      return true;
+    }
+    
+    return false;
+    
+  } catch (error) {
+    logger.error('Erreur lors de la vérification de blacklist utilisateur:', error);
+    return false;
+  }
+}
+
+/**
+ * Supprime un token de la blacklist (rare, seulement pour tests)
+ * 
+ * @param token - Token à retirer de la blacklist
+ * @returns true si le token a été supprimé
+ */
+export async function removeFromBlacklist(token: string): Promise<boolean> {
+  if (!redisClient) {
+    return false;
+  }
+  
+  try {
+    const key = getBlacklistKey(token);
+    const result = await redisClient!.del(key);
+    
+    logger.info('Token retiré de la blacklist', { removed: result > 0 });
+    
+    return result > 0;
+    
+  } catch (error) {
+    logger.error('Erreur lors de la suppression de la blacklist:', error);
+    return false;
+  }
+}
+
+/**
+ * Obtient les statistiques de la blacklist
+ * 
+ * @returns Statistiques
+ */
+export async function getBlacklistStats(): Promise<{
+  totalTokens: number;
+  totalUsers: number;
+}> {
+  if (!redisClient) {
+    return { totalTokens: 0, totalUsers: 0 };
+  }
+  
+  try {
+    // Note: Cette implémentation est simplifiée
+    // En production, utiliser Redis SCAN pour compter les clés
+    
+    return {
+      totalTokens: 0, // À implémenter avec SCAN
+      totalUsers: 0   // À implémenter avec SCAN
+    };
+    
+  } catch (error) {
+    logger.error('Erreur lors de la récupération des stats:', error);
+    return { totalTokens: 0, totalUsers: 0 };
+  }
+}

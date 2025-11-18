@@ -58,10 +58,18 @@ const startServer = async () => {
     );
 
     const corsOptions = {
-      origin: NODE_ENV === 'development' ? '*' : 'https://www.votre-site-de-production.com',
+      origin: [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:3001',
+        'http://127.0.0.1:3001',
+        'http://localhost:7000',
+        'http://127.0.0.1:7000'
+      ],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'Accept'],
-      credentials: true
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'Accept', 'X-CSRF-Token'],
+      credentials: true,
+      exposedHeaders: ['X-CSRF-Token']
     };
     app.use(cors(corsOptions));
     app.use(express.json({ limit: '10kb' }));

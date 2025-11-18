@@ -13,7 +13,8 @@
     "db:seed": "ts-node src/scripts/db-seed.ts",
     "db:refresh-roles": "ts-node src/scripts/db-refresh-roles.ts",
     "show:roles": "ts-node src/scripts/show-roles.ts",
-    "clean:roles": "ts-node src/scripts/clean-old-roles.ts"
+    "clean:roles": "ts-node src/scripts/clean-old-roles.ts",
+    "generate-secrets": "ts-node scripts/generate-secrets.ts"
   },
   "dependencies": {
     "@types/figlet": "^1.7.0",

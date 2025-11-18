@@ -51,21 +51,33 @@ async function fetchCsrfToken() {
 /**
  * Intercepteur de requête - Ajoute automatiquement les headers d'authentification et CSRF
  * 
- * Logique d'authentification JWT uniquement
+ * 🔒 SÉCURITÉ HYBRIDE :
+ * - Access token depuis localStorage (courte durée, partagé entre onglets)
+ * - Refresh token dans cookie httpOnly (envoyé automatiquement)
  */
 api.interceptors.request.use(
   async (config) => {
     const isPublicRoute = PUBLIC_ROUTES.some(route => config.url?.includes(route));
 
-    // Les tokens sont maintenant dans les cookies httpOnly
-    // Ils sont envoyés automatiquement avec withCredentials: true
-    // Plus besoin de les ajouter manuellement
+    // ✅ Ajouter le token d'accès depuis localStorage (s'il existe)
+    if (!isPublicRoute) {
+      const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+      if (accessToken) {
+        config.headers['Authorization'] = `Bearer ${accessToken}`;
+      }
+      // Si pas de token, la requête sera envoyée sans Authorization
+      // et retournera 401, ce qui déclenchera le refresh dans l'intercepteur de réponse
+    }
 
     // Ajouter le token CSRF pour les requêtes POST/PUT/PATCH/DELETE
     if (config.method && ['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())) {
       // Récupérer le token CSRF si on ne l'a pas encore
       if (!csrfToken) {
-        await fetchCsrfToken();
+        try {
+          await fetchCsrfToken();
+        } catch (error) {
+          logger.warn('⚠️ Impossible de récupérer le token CSRF');
+        }
       }
 
       if (csrfToken) {
@@ -76,7 +88,7 @@ api.interceptors.request.use(
     // Log pour debug (désactivé en production)
     logger.debug(`📡 ${config.method?.toUpperCase()} ${config.url}`, {
       isPublic: isPublicRoute,
-      withCredentials: config.withCredentials,
+      hasAuth: !!config.headers['Authorization'],
       hasCsrf: !!config.headers['X-CSRF-Token']
     });
 
@@ -88,11 +100,27 @@ api.interceptors.request.use(
   }
 );
 
+// Flag pour éviter les refresh multiples simultanés
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+// Fonction pour notifier tous les abonnés quand le refresh est terminé
+const onRefreshed = (accessToken) => {
+  refreshSubscribers.forEach(callback => callback(accessToken));
+  refreshSubscribers = [];
+};
+
+// Fonction pour ajouter un abonné
+const addRefreshSubscriber = (callback) => {
+  refreshSubscribers.push(callback);
+};
+
 /**
  * Intercepteur de réponse - Gestion automatique du refresh token
  * 
- * Si une requête retourne 401 (non autorisé), on tente automatiquement
- * de renouveler le token d'accès avec le refresh token
+ * 🔒 SÉCURITÉ HYBRIDE :
+ * - Refresh token dans cookie httpOnly (envoyé automatiquement)
+ * - Nouveau access token sauvegardé dans sessionStorage
  */
 api.interceptors.response.use(
   (response) => {
@@ -110,40 +138,69 @@ api.interceptors.response.use(
     if (error.response?.status === 403 && error.response?.data?.message?.includes('CSRF')) {
       logger.warn('⚠️ Token CSRF invalide, récupération d\'un nouveau token...');
       csrfToken = null; // Réinitialiser le cache
-      await fetchCsrfToken();
-
-      // Retry la requête avec le nouveau token
-      if (csrfToken) {
-        originalRequest.headers['X-CSRF-Token'] = csrfToken;
-        return api(originalRequest);
+      try {
+        await fetchCsrfToken();
+        // Retry la requête avec le nouveau token
+        if (csrfToken) {
+          originalRequest.headers['X-CSRF-Token'] = csrfToken;
+          return api(originalRequest);
+        }
+      } catch (csrfError) {
+        logger.error('❌ Impossible de récupérer le token CSRF');
       }
     }
 
     // Si erreur 401 et qu'on n'a pas déjà tenté le refresh
     // ET que ce n'est pas une requête de logout ou refresh
     if (error.response?.status === 401 && !originalRequest._retry && !isLogoutRequest && !isRefreshRequest) {
+      
+      // Si un refresh est déjà en cours, attendre qu'il se termine
+      if (isRefreshing) {
+        logger.log('⏳ Refresh déjà en cours, ajout à la file d\'attente...');
+        return new Promise((resolve) => {
+          addRefreshSubscriber((accessToken) => {
+            originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+            resolve(api(originalRequest));
+          });
+        });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         logger.log('🔄 Tentative de renouvellement du token...');
 
         // Appeler l'endpoint de refresh
-        // Le refresh token est dans les cookies httpOnly, envoyé automatiquement
+        // Le refresh token est dans le cookie httpOnly, envoyé automatiquement
         const response = await api.post(ENDPOINTS.AUTH.REFRESH);
 
         logger.log('✅ Token renouvelé avec succès');
 
-        // Les nouveaux tokens sont dans les cookies httpOnly
-        // Retry la requête originale
+        // Sauvegarder le nouveau access token dans localStorage
+        const { accessToken } = response.data.data;
+        if (accessToken) {
+          localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+          
+          // Notifier tous les abonnés
+          onRefreshed(accessToken);
+        }
+
+        isRefreshing = false;
+
+        // Retry la requête originale avec le nouveau token
+        originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
         return api(originalRequest);
 
       } catch (refreshError) {
         logger.error('❌ Échec du renouvellement du token');
+        isRefreshing = false;
+        refreshSubscribers = [];
 
         // Refresh échoué - déconnecter l'utilisateur
         authUtils.clearStorage();
         
-        // Éviter l'actualisation si on est déjà sur la page de login
+        // Éviter la redirection si on est déjà sur la page de login
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login';
         }
@@ -184,17 +241,18 @@ export const authService = {
    * Valide le code reçu par email et crée le compte définitif
    * 
    * @param {Object} verificationData - Token de vérification + code
-   * @returns {Promise} Réponse avec user et tokens
+   * @returns {Promise} Réponse avec user et accessToken
    */
   async verify(verificationData) {
     try {
       logger.log('🔍 Vérification du code...');
       const response = await api.post(ENDPOINTS.AUTH.VERIFY, verificationData);
 
-      const { user, tokens } = response.data.data;
+      const { user, accessToken } = response.data.data;
 
-      // Sauvegarder toutes les données d'authentification
-      authUtils.saveAuthData(user, tokens);
+      // Sauvegarder les données d'authentification
+      // Refresh token est dans le cookie httpOnly (géré par le backend)
+      authUtils.saveAuthData(user, accessToken);
 
       logger.log('✅ Compte créé et utilisateur connecté');
       return response.data;
@@ -209,17 +267,18 @@ export const authService = {
    * Authentifie avec email/password et récupère les tokens
    * 
    * @param {Object} credentials - Email et mot de passe
-   * @returns {Promise} Réponse avec user et tokens
+   * @returns {Promise} Réponse avec user et accessToken
    */
   async login(credentials) {
     try {
       logger.log('🚪 Tentative de connexion');
       const response = await api.post(ENDPOINTS.AUTH.LOGIN, credentials);
 
-      const { user, tokens } = response.data.data;
+      const { user, accessToken } = response.data.data;
 
       // Sauvegarder les données d'authentification
-      authUtils.saveAuthData(user, tokens);
+      // Refresh token est dans le cookie httpOnly (géré par le backend)
+      authUtils.saveAuthData(user, accessToken);
 
       logger.log('✅ Connexion réussie');
       return response.data;
@@ -230,17 +289,48 @@ export const authService = {
   },
 
   /**
+   * Rafraîchir l'access token
+   * Utilise le refresh token dans le cookie httpOnly pour obtenir un nouvel access token
+   * 
+   * @returns {Promise} Réponse avec user et accessToken
+   */
+  async refreshAccessToken() {
+    try {
+      logger.log('🔄 Refresh access token...');
+      const response = await api.post(ENDPOINTS.AUTH.REFRESH);
+
+      const { user, accessToken } = response.data.data;
+
+      // Sauvegarder le nouvel access token
+      if (accessToken) {
+        localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+      }
+
+      // Sauvegarder les données utilisateur
+      if (user) {
+        localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+      }
+
+      logger.log('✅ Access token refreshé');
+      return response.data;
+    } catch (error) {
+      logger.error('❌ Erreur refresh token');
+      throw error;
+    }
+  },
+
+  /**
    * Déconnexion utilisateur
    * Invalide le refresh token côté serveur et nettoie le stockage local
-   * Gère manuellement le refresh token si nécessaire (car l'intercepteur ignore les requêtes de logout)
+   * 
+   * Le refresh token est dans le cookie httpOnly, envoyé automatiquement
    */
   async logout() {
     try {
       logger.log('🚪 Déconnexion en cours...');
 
       // Envoyer la requête de logout au serveur
-      // Le refresh token est dans les cookies httpOnly, envoyé automatiquement
-      // Le backend supprimera les cookies
+      // Le refresh token est dans le cookie httpOnly, envoyé automatiquement
       const response = await api.post(ENDPOINTS.AUTH.LOGOUT);
 
       logger.log('✅ Déconnexion validée');
@@ -354,53 +444,58 @@ export const systemService = {
 
 /**
  * Utilitaires d'authentification
- * Fonctions helper pour gérer l'état d'authentification
+ * 
+ * 🔒 SÉCURITÉ HYBRIDE :
+ * - Access token → localStorage (courte durée, partagé entre onglets)
+ * - Refresh token → Cookie httpOnly (longue durée, sécurisé, géré par backend)
+ * - User data → localStorage (données non sensibles, partagé entre onglets)
  */
 export const authUtils = {
   /**
    * Vérifier si l'utilisateur est authentifié
-   * Avec httpOnly cookies, on ne peut pas vérifier directement
-   * On fait une requête au backend pour vérifier
-   * @returns {boolean} True si probablement authentifié (basé sur le cache)
+   * @returns {boolean} True si authentifié (access token présent)
    */
   isAuthenticated() {
-    // Avec httpOnly cookies, on ne peut pas lire les cookies en JavaScript
-    // On se base sur les données utilisateur en cache
-    const userData = sessionStorage.getItem(STORAGE_KEYS.USER_DATA);
-    return !!userData;
+    const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    const userData = localStorage.getItem(STORAGE_KEYS.USER_DATA);
+    return !!(accessToken && userData);
   },
 
   /**
-   * Récupérer les données utilisateur du cache session
+   * Récupérer les données utilisateur du cache
    * @returns {Object|null} Données utilisateur ou null
    */
   getUser() {
-    const userData = sessionStorage.getItem(STORAGE_KEYS.USER_DATA);
+    const userData = localStorage.getItem(STORAGE_KEYS.USER_DATA);
     return userData ? JSON.parse(userData) : null;
   },
 
   /**
-   * Sauvegarder les données utilisateur (pas les tokens)
-   * Les tokens sont dans les cookies httpOnly
+   * Sauvegarder les données d'authentification
    * 
    * @param {Object} user - Données utilisateur
-   * @param {Object} tokens - Tokens (ignorés, ils sont dans les cookies)
+   * @param {string} accessToken - Access token JWT (courte durée)
    */
-  saveAuthData(user, tokens) {
-    // Sauvegarder uniquement les données utilisateur en sessionStorage
-    // sessionStorage est plus sécurisé que localStorage (effacé à la fermeture)
-    sessionStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+  saveAuthData(user, accessToken) {
+    // Sauvegarder l'access token dans localStorage
+    if (accessToken) {
+      localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+    }
 
-    // Les tokens sont dans les cookies httpOnly, pas besoin de les stocker
+    // Sauvegarder les données utilisateur dans localStorage
+    localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+
+    // Le refresh token est dans le cookie httpOnly (géré par le backend)
   },
 
   /**
    * Nettoyer le cache (déconnexion)
-   * Les cookies httpOnly sont supprimés par le backend
+   * Le cookie httpOnly est supprimé par le backend
    */
   clearStorage() {
-    sessionStorage.removeItem(STORAGE_KEYS.USER_DATA);
-    // Les cookies httpOnly sont supprimés automatiquement par le backend lors du logout
+    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    // Le cookie httpOnly est supprimé par le backend lors du logout
   }
 };
 

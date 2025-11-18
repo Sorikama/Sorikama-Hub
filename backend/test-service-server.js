@@ -1,7 +1,7 @@
 /**
  * 🧪 Serveur de test pour tester le callback SSO
  * 
- * Ce serveur simule un service externe (comme SoriStore)
+ * Ce serveur simule un service externe
  * qui reçoit le callback SSO du Hub Sorikama
  * 
  * Usage:

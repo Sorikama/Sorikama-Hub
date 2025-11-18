@@ -8,12 +8,13 @@ import ssoSessionsRouter from './sso-sessions.routes';
 import accountDeletionRouter from './account-deletion.routes';
 import adminUsersRouter from './admin/users.routes';
 import adminRolesRouter from './admin/roles.routes';
-import adminRateLimitRouter from './admin/rateLimit.routes';
-import adminAuditRouter from './admin/audit.routes';
-import adminWebhooksRouter from './admin/webhooks.routes';
+// import adminRateLimitRouter from './admin/rateLimit.routes'; // Supprimé
+// import adminAuditRouter from './admin/audit.routes'; // Supprimé
+// import adminWebhooksRouter from './admin/webhooks.routes'; // Supprimé
 import adminServicesRouter from './admin/services.routes';
 import authorizeRouter from './authorize.routes';
 import csrfRouter from './csrf.routes';
+import serviceUserRouter from './service-user.routes';
 import path from 'path';
 
 const router = Router();
@@ -42,17 +43,27 @@ router.use('/account', accountDeletionRouter);
 // Routes admin (gestion des utilisateurs, services, etc.)
 router.use('/admin/users', adminUsersRouter);
 router.use('/admin/roles', adminRolesRouter);
-router.use('/admin/rate-limit', adminRateLimitRouter);
-router.use('/admin/audit', adminAuditRouter);
-router.use('/admin/webhooks', adminWebhooksRouter);
+// router.use('/admin/rate-limit', adminRateLimitRouter); // Supprimé
+// router.use('/admin/audit', adminAuditRouter); // Supprimé
+// router.use('/admin/webhooks', adminWebhooksRouter); // Supprimé
 router.use('/admin/services', adminServicesRouter);
 
 // Routes d'autorisation
 router.use('/authorize', authorizeRouter);
 
+// Routes pour les services externes (accès aux données utilisateur)
+router.use('/service-user', serviceUserRouter);
+
 // Proxy dynamique pour services externes (UNIQUEMENT CELUI-CI)
 import { dynamicProxyMiddleware } from '../middlewares/dynamicProxy.middleware';
-router.use('/proxy/:proxyPath/*', dynamicProxyMiddleware);
-router.use('/proxy/:proxyPath', dynamicProxyMiddleware);
+
+// Utiliser une route simple qui capture tout après /proxy/
+router.use('/proxy/*', (req, res, next) => {
+    console.log(`🔵 [PROXY DEBUG] ${req.method} ${req.originalUrl}`);
+    console.log(`   Params:`, req.params);
+    console.log(`   Headers:`, req.headers.authorization?.substring(0, 50));
+    // Appeler directement le middleware proxy
+    dynamicProxyMiddleware(req, res, next);
+});
 
 export default router;

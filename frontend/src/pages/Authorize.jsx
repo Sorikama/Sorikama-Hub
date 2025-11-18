@@ -29,15 +29,9 @@ function Authorize() {
       return;
     }
 
-    // IMPORTANT : Vérifier l'authentification AVANT de charger les données
-    if (!authUtils.isAuthenticated()) {
-      console.log('ℹ️ Utilisateur non connecté - Redirection vers login');
-      // Rediriger vers login en gardant les paramètres
-      navigate(`/login?redirect=${encodeURIComponent(redirectUrl)}&service=${serviceSlug}`);
-      return;
-    }
-
-    // Si connecté, charger les infos
+    // Charger les infos directement
+    // Si pas de token dans sessionStorage mais refresh token dans cookie,
+    // l'intercepteur fera automatiquement le refresh
     loadServiceInfo();
   }, [redirectUrl, serviceSlug, navigate]);
 

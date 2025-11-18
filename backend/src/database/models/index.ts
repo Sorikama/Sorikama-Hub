@@ -7,4 +7,6 @@ import './user.model';
 import './refreshToken.model';
 import './service.model';
 import './serviceRequest.model';
+import './serviceAuthorization.model';
 import './ssoSession.model';
+import './proxyRequest.model';

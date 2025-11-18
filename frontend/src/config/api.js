@@ -56,9 +56,12 @@ export const PROTECTED_ROUTES = [
   ENDPOINTS.AUTH.UPDATE_PASSWORD
 ];
 
-// Clés de stockage local
+// Clés de stockage
+// 🔒 SÉCURITÉ HYBRIDE :
+// - Access token → sessionStorage (courte durée, perdu à la fermeture)
+// - Refresh token → Cookie httpOnly (longue durée, sécurisé)
+// - User data → sessionStorage (données non sensibles)
 export const STORAGE_KEYS = {
-  ACCESS_TOKEN: 'sorikama_access_token',
-  REFRESH_TOKEN: 'sorikama_refresh_token',
-  USER_DATA: 'sorikama_user'
+  ACCESS_TOKEN: 'sorikama_access_token',  // sessionStorage
+  USER_DATA: 'sorikama_user'              // sessionStorage
 };

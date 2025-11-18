@@ -128,29 +128,23 @@ export const verifyAndCreateAccount = async (req: Request, res: Response, next: 
         const payload = { id: newUser._id, roles: (newUser.roles as any[]).map(r => r.name), permissions: Array.from(permissions) };
         const tokens = await generateTokens(payload);
 
-        // Envoyer les tokens dans des cookies httpOnly
-        const isProduction = process.env.NODE_ENV === 'production';
+        // 🔒 SÉCURITÉ HYBRIDE :
+        // - Refresh token → Cookie httpOnly (sécurisé, longue durée)
+        // - Access token → JSON pour sessionStorage (courte durée, acceptable)
         
-        res.cookie('access_token', tokens.accessToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: 'strict',
-            maxAge: 60 * 60 * 1000 // 1 heure
-        });
-
         res.cookie('refresh_token', tokens.refreshToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 jours
+            httpOnly: true,                    // ✅ Inaccessible par JavaScript
+            secure: false,                     // false en dev pour HTTP
+            sameSite: 'none',                  // none pour cross-origin en dev
+            maxAge: 7 * 24 * 60 * 60 * 1000   // 7 jours
         });
 
         res.status(StatusCodes.CREATED).json({
             status: 'success',
             message: 'Compte créé et vérifié avec succès.',
             data: {
-                user: newUser
-                // tokens supprimés - ils sont dans les cookies httpOnly
+                user: newUser,
+                accessToken: tokens.accessToken // ✅ Seulement l'access token dans le JSON
             },
         });
 
@@ -270,29 +264,29 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
             loginCount: user.loginCount
         });
 
-        // Envoyer les tokens dans des cookies httpOnly (sécurisé)
-        const isProduction = process.env.NODE_ENV === 'production';
+        // 🔒 SÉCURITÉ HYBRIDE :
+        // - Refresh token → Cookie httpOnly (sécurisé, longue durée)
+        // - Access token → JSON pour sessionStorage (courte durée, acceptable)
         
-        res.cookie('access_token', tokens.accessToken, {
-            httpOnly: true,                    // Inaccessible par JavaScript
-            secure: isProduction,              // HTTPS uniquement en production
-            sameSite: 'strict',                // Protection CSRF
-            maxAge: 60 * 60 * 1000            // 1 heure
-        });
-
-        res.cookie('refresh_token', tokens.refreshToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: 'strict',
+        const cookieOptions = {
+            httpOnly: true,                    // ✅ Inaccessible par JavaScript
+            secure: false,                     // false en dev pour HTTP
+            sameSite: 'none' as const,         // none pour cross-origin en dev
             maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000 // 30 jours ou 7 jours
-        });
+        };
+        
+        logger.info('🍪 Configuration cookie refresh_token:', cookieOptions);
+        logger.info('🔑 Refresh token (premiers 50 chars):', tokens.refreshToken.substring(0, 50) + '...');
+        
+        res.cookie('refresh_token', tokens.refreshToken, cookieOptions);
+        
+        logger.info('✅ Cookie refresh_token défini dans la réponse');
 
-        // Ne plus envoyer les tokens dans le JSON (sécurité)
         res.status(StatusCodes.OK).json({
             status: 'success',
             data: {
-                user: userResponse
-                // tokens supprimés - ils sont dans les cookies httpOnly
+                user: userResponse,
+                accessToken: tokens.accessToken // ✅ Seulement l'access token dans le JSON
             },
         });
 
@@ -311,12 +305,37 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // Récupérer le refresh token depuis le cookie httpOnly
-        const refreshToken = req.cookies?.refresh_token || req.body?.refreshToken;
+        const refreshToken = req.cookies?.refresh_token;
+
+        // 🔒 SÉCURITÉ : Ajouter l'access token à la blacklist (si Redis disponible)
+        try {
+          const { blacklistToken } = require('../services/tokenBlacklist.service');
+          
+          // Extraire l'access token de la requête (header Authorization)
+          let accessToken;
+          if (req.headers.authorization?.startsWith('Bearer')) {
+            accessToken = req.headers.authorization.split(' ')[1];
+          }
+          
+          if (accessToken) {
+            await blacklistToken(accessToken, 'logout');
+            logger.info('Access token ajouté à la blacklist lors de la déconnexion', {
+              userId: req.user?._id
+            });
+          }
+        } catch (error) {
+          // Si Redis n'est pas disponible, continuer sans blacklist
+          logger.debug('Blacklist non disponible, token non révoqué');
+        }
 
         if (!refreshToken) {
-            // Pas de refresh token, mais on supprime quand même les cookies
-            res.clearCookie('access_token');
-            res.clearCookie('refresh_token');
+            // Pas de refresh token, mais on supprime quand même le cookie
+            res.clearCookie('refresh_token', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax'
+            });
+            
             return res.status(StatusCodes.OK).json({ 
                 status: 'success', 
                 message: 'Déconnexion locale réussie.' 
@@ -335,17 +354,11 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
             logger.warn(`Tentative de déconnexion avec un refresh token inconnu ou déjà invalidé.`);
         }
 
-        // Supprimer les cookies httpOnly
-        res.clearCookie('access_token', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        });
-
+        // Supprimer le cookie httpOnly
         res.clearCookie('refresh_token', {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
+            secure: false,
+            sameSite: 'none'
         });
 
         res.status(StatusCodes.OK).json({ status: 'success', message: 'Déconnexion réussie.' });
@@ -363,10 +376,28 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
  */
 export const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        // 🔍 DEBUG : Logs détaillés
+        logger.info('========================================');
+        logger.info('🔄 REFRESH TOKEN - Début');
+        logger.info('========================================');
+        logger.info('📋 Headers reçus:', {
+            cookie: req.headers.cookie,
+            origin: req.headers.origin,
+            referer: req.headers.referer
+        });
+        logger.info('🍪 Cookies parsés:', req.cookies);
+        
         // Récupérer le refresh token depuis le cookie httpOnly
-        const refreshToken = req.cookies?.refresh_token || req.body?.refreshToken;
+        const refreshToken = req.cookies?.refresh_token;
+        
+        logger.info('🔑 Refresh token extrait:', {
+            exists: !!refreshToken,
+            length: refreshToken?.length || 0,
+            preview: refreshToken ? refreshToken.substring(0, 50) + '...' : 'AUCUN'
+        });
         
         if (!refreshToken) {
+            logger.error('❌ Refresh token manquant dans les cookies !');
             return next(new AppError('Refresh token manquant.', StatusCodes.UNAUTHORIZED));
         }
         
@@ -402,29 +433,22 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
 
         logger.info(`Refresh token renouvelé pour l'utilisateur ${user.email}`);
 
-        // Envoyer les nouveaux tokens dans des cookies httpOnly
-        const isProduction = process.env.NODE_ENV === 'production';
+        // 🔒 SÉCURITÉ HYBRIDE :
+        // - Nouveau refresh token → Cookie httpOnly (sécurisé)
+        // - Nouveau access token → JSON pour sessionStorage
         
-        res.cookie('access_token', newTokens.accessToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: 'strict',
-            maxAge: 60 * 60 * 1000 // 1 heure
-        });
-
         res.cookie('refresh_token', newTokens.refreshToken, {
             httpOnly: true,
-            secure: isProduction,
-            sameSite: 'strict',
+            secure: false,                     // false en dev pour HTTP
+            sameSite: 'none',                  // none pour cross-origin en dev
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 jours
         });
 
-        // Ne plus envoyer les tokens dans le JSON
         res.status(StatusCodes.OK).json({ 
             status: 'success', 
             data: { 
-                user 
-                // tokens supprimés - ils sont dans les cookies httpOnly
+                user,
+                accessToken: newTokens.accessToken // ✅ Seulement l'access token dans le JSON
             } 
         });
     } catch (error) {

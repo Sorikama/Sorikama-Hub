@@ -58,6 +58,30 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
       return next(new AppError('Token d\'authentification requis', StatusCodes.UNAUTHORIZED));
     }
 
+    // 🔒 SÉCURITÉ : Vérifier si le token est blacklisté (si Redis disponible)
+    try {
+      const { isTokenBlacklisted, areAllUserTokensBlacklisted } = require('../services/tokenBlacklist.service');
+      
+      const isBlacklisted = await isTokenBlacklisted(token);
+      if (isBlacklisted) {
+        logger.warn(`[AUTH] Token blacklisté utilisé - IP: ${req.ip}`);
+        return next(new AppError('Token révoqué. Veuillez vous reconnecter.', StatusCodes.UNAUTHORIZED));
+      }
+
+      // Vérification du token
+      const decoded = jwt.verify(token, JWT_SECRET) as UserPayload;
+      
+      // 🔒 SÉCURITÉ : Vérifier si tous les tokens de l'utilisateur sont révoqués
+      const allTokensRevoked = await areAllUserTokensBlacklisted(decoded.id);
+      if (allTokensRevoked) {
+        logger.warn(`[AUTH] Tous les tokens de l'utilisateur révoqués - User: ${decoded.id}`);
+        return next(new AppError('Session révoquée. Veuillez vous reconnecter.', StatusCodes.UNAUTHORIZED));
+      }
+    } catch (error) {
+      // Si Redis n'est pas disponible, continuer sans vérification de blacklist
+      logger.debug('[AUTH] Blacklist non disponible, vérification ignorée');
+    }
+
     // Vérification du token
     const decoded = jwt.verify(token, JWT_SECRET) as UserPayload;
     

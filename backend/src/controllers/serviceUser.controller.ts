@@ -10,8 +10,8 @@ import { ServiceModel } from '../database/models/service.model';
 import { UserModel } from '../database/models/user.model';
 import { decryptUserId } from '../utils/encryption';
 import { logger } from '../utils/logger';
-import { logAudit } from '../services/audit.service';
-import { triggerWebhook, WEBHOOK_EVENTS } from '../services/webhook.service';
+// import { logAudit } from '../services/audit.service'; // Audit désactivé - utiliser logger
+// import { triggerWebhook, WEBHOOK_EVENTS } from '../services/webhook.service'; // Webhook désactivé
 import AppError from '../utils/AppError';
 
 /**
@@ -169,7 +169,7 @@ export const updateUserProfile = async (req: Request, res: Response, next: NextF
     await user.save();
 
     // Logger l'action
-    await logAudit({
+    // await logAudit({
       userId,
       action: 'profile_updated',
       category: 'user',
@@ -181,14 +181,14 @@ export const updateUserProfile = async (req: Request, res: Response, next: NextF
       }
     });
 
-    // Webhook
-    await triggerWebhook(WEBHOOK_EVENTS.PROFILE_UPDATED, {
-      userId: encryptedUserId,
-      email: user.email,
-      updates,
-      service: service.slug,
-      timestamp: new Date().toISOString()
-    });
+    // Webhook (désactivé)
+    // await triggerWebhook(WEBHOOK_EVENTS.PROFILE_UPDATED, {
+    //   userId: encryptedUserId,
+    //   email: user.email,
+    //   updates,
+    //   service: service.slug,
+    //   timestamp: new Date().toISOString()
+    // });
 
     logger.info('✅ Profil utilisateur mis à jour', {
       service: service.name,
@@ -298,7 +298,7 @@ export const changeUserPassword = async (req: Request, res: Response, next: Next
     await user.save();
 
     // Logger l'action
-    await logAudit({
+    // await logAudit({
       userId,
       action: 'password_changed',
       category: 'security',

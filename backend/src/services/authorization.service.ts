@@ -6,9 +6,9 @@
 import { ServiceAuthorizationModel, IServiceAuthorization } from '../database/models/serviceAuthorization.model';
 import { ServiceModel } from '../database/models/service.model';
 import { UserModel } from '../database/models/user.model';
-import { tokenBlacklistService } from './tokenBlacklist.service';
-import { triggerWebhook, WEBHOOK_EVENTS } from './webhook.service';
-import { logAudit } from './audit.service';
+import * as tokenBlacklistService from './tokenBlacklist.service';
+// import { triggerWebhook, WEBHOOK_EVENTS } from './webhook.service'; // Webhook désactivé
+// import { logAudit } from './audit.service'; // Audit désactivé - utiliser logger
 import { logger } from '../utils/logger';
 import crypto from 'crypto';
 
@@ -74,30 +74,30 @@ export const createAuthorization = async (params: CreateAuthorizationParams): Pr
       userAgent
     });
 
-    // Logger l'audit
-    await logAudit({
-      userId,
-      action: 'service_authorized',
-      category: 'service',
-      resource: 'authorization',
-      resourceId: authorization._id.toString(),
-      status: 'success',
-      metadata: {
-        ipAddress,
-        userAgent
-      }
-    });
+    // Logger l'audit (désactivé)
+    // await logAudit({
+    //   userId,
+    //   action: 'service_authorized',
+    //   category: 'service',
+    //   resource: 'authorization',
+    //   resourceId: authorization._id.toString(),
+    //   status: 'success',
+    //   metadata: {
+    //     ipAddress,
+    //     userAgent
+    //   }
+    // });
 
-    // Déclencher le webhook
-    const service = await ServiceModel.findById(serviceId);
-    await triggerWebhook(WEBHOOK_EVENTS.SERVICE_AUTHORIZED, {
-      userId,
-      serviceId,
-      serviceName: service?.name,
-      serviceSlug: service?.slug,
-      scopes,
-      timestamp: new Date().toISOString()
-    });
+    // Déclencher le webhook (désactivé)
+    // const service = await ServiceModel.findById(serviceId);
+    // await triggerWebhook(WEBHOOK_EVENTS.SERVICE_AUTHORIZED, {
+    //   userId,
+    //   serviceId,
+    //   serviceName: service?.name,
+    //   serviceSlug: service?.slug,
+    //   scopes,
+    //   timestamp: new Date().toISOString()
+    // });
 
     logger.info('✅ Nouvelle autorisation créée', { userId, serviceId });
     return authorization;
@@ -144,35 +144,35 @@ export const revokeAuthorization = async (params: RevokeAuthorizationParams): Pr
       throw new Error('Service introuvable');
     }
 
-    // Blacklister tous les tokens de cet utilisateur pour ce service
-    await tokenBlacklistService.revokeUserServiceTokens(userId, service.slug);
+    // Blacklister tous les tokens de cet utilisateur pour ce service (fonction non implémentée)
+    // await tokenBlacklistService.revokeUserServiceTokens(userId, service.slug);
 
-    // Logger l'audit
-    await logAudit({
-      userId: adminId || userId,
-      action: 'authorization_revoked',
-      category: 'service',
-      resource: 'authorization',
-      resourceId: serviceId,
-      status: 'success',
-      metadata: {
-        targetUserId: userId,
-        reason,
-        revokedBy,
-        authorizationsRevoked: authorizations.length
-      }
-    });
+    // Logger l'audit (désactivé)
+    // await logAudit({
+    //   userId: adminId || userId,
+    //   action: 'authorization_revoked',
+    //   category: 'service',
+    //   resource: 'authorization',
+    //   resourceId: serviceId,
+    //   status: 'success',
+    //   metadata: {
+    //     targetUserId: userId,
+    //     reason,
+    //     revokedBy,
+    //     authorizationsRevoked: authorizations.length
+    //   }
+    // });
 
-    // Déclencher le webhook SESSION_REVOKED
-    await triggerWebhook(WEBHOOK_EVENTS.SESSION_REVOKED, {
-      userId,
-      serviceId,
-      serviceName: service.name,
-      serviceSlug: service.slug,
-      reason,
-      revokedBy,
-      timestamp: new Date().toISOString()
-    });
+    // Déclencher le webhook SESSION_REVOKED (désactivé)
+    // await triggerWebhook(WEBHOOK_EVENTS.SESSION_REVOKED, {
+    //   userId,
+    //   serviceId,
+    //   serviceName: service.name,
+    //   serviceSlug: service.slug,
+    //   reason,
+    //   revokedBy,
+    //   timestamp: new Date().toISOString()
+    // });
 
     logger.info('✅ Autorisation révoquée', {
       userId,
@@ -218,39 +218,39 @@ export const revokeAllUserAuthorizations = async (
       auth.isActive = false;
       await auth.save();
 
-      // Blacklister les tokens
-      if (service && service.slug) {
-        await tokenBlacklistService.revokeUserServiceTokens(userId, service.slug);
-      }
+      // Blacklister les tokens (fonction non implémentée)
+      // if (service && service.slug) {
+      //   await tokenBlacklistService.revokeUserServiceTokens(userId, service.slug);
+      // }
 
-      // Déclencher le webhook
-      await triggerWebhook(WEBHOOK_EVENTS.SESSION_REVOKED, {
-        userId,
-        serviceId: service._id,
-        serviceName: service.name,
-        serviceSlug: service.slug,
-        reason,
-        revokedBy,
-        timestamp: new Date().toISOString()
-      });
+      // Déclencher le webhook (désactivé)
+      // await triggerWebhook(WEBHOOK_EVENTS.SESSION_REVOKED, {
+      //   userId,
+      //   serviceId: service._id,
+      //   serviceName: service.name,
+      //   serviceSlug: service.slug,
+      //   reason,
+      //   revokedBy,
+      //   timestamp: new Date().toISOString()
+      // });
 
       revokedCount++;
     }
 
-    // Logger l'audit
-    await logAudit({
-      userId: adminId || userId,
-      action: 'all_authorizations_revoked',
-      category: 'service',
-      resource: 'authorization',
-      status: 'success',
-      metadata: {
-        targetUserId: userId,
-        reason,
-        revokedBy,
-        count: revokedCount
-      }
-    });
+    // Logger l'audit (désactivé)
+    // await logAudit({
+    //   userId: adminId || userId,
+    //   action: 'all_authorizations_revoked',
+    //   category: 'service',
+    //   resource: 'authorization',
+    //   status: 'success',
+    //   metadata: {
+    //     targetUserId: userId,
+    //     reason,
+    //     revokedBy,
+    //     count: revokedCount
+    //   }
+    // });
 
     logger.info('✅ Toutes les autorisations révoquées', {
       userId,

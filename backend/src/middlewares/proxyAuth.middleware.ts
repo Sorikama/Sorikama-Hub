@@ -20,8 +20,23 @@ import { logger } from '../utils/logger';
  */
 export const verifyServiceAuthorization = async (req: any, res: Response, next: NextFunction) => {
   try {
+    logger.info('========================================');
+    logger.info('🔍 PROXY AUTH - Vérification autorisation');
+    logger.info('========================================');
+    logger.info('📋 Requête:', {
+      method: req.method,
+      url: req.originalUrl,
+      params: req.params,
+      hasUser: !!req.user
+    });
+    
     const { serviceId } = req.params;
     const userId = req.user?.id;
+
+    logger.info('🔑 Extraction params:', {
+      serviceId,
+      userId: userId ? userId.substring(0, 20) + '...' : 'AUCUN'
+    });
 
     // Vérifier que l'utilisateur est authentifié
     if (!userId) {

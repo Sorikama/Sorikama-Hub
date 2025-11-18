@@ -133,9 +133,9 @@ components:
     Service:
       type: object
       properties:
-        id: { type: string, example: "soristore" }
-        name: { type: string, example: "SoriStore" }
-        description: { type: string, example: "Marketplace e-commerce" }
+        id: { type: string, example: "service" }
+        name: { type: string, example: "Service Name" }
+        description: { type: string, example: "Service description" }
         url: { type: string, example: "http://localhost:3001" }
         icon: { type: string, example: "🛍️" }
         color: { type: string, example: "#3b82f6" }
@@ -703,7 +703,7 @@ paths:
             schema:
               type: object
               properties:
-                service: { type: string, example: "soristore" }
+                service: { type: string, example: "service" }
                 redirectUrl: { type: string }
       responses:
         '200':

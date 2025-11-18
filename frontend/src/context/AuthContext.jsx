@@ -109,30 +109,55 @@ export function AuthProvider({ children }) {
   /**
    * Initialisation de l'authentification au démarrage de l'app
    * Vérifie si l'utilisateur était déjà connecté
+   * 
+   * 🔒 SÉCURITÉ HYBRIDE :
+   * - Si access token dans sessionStorage → Utiliser directement
+   * - Sinon, essayer de récupérer le profil (refresh automatique avec cookie)
    */
   useEffect(() => {
     const initializeAuth = async () => {
       try {
         logger.log('🔍 Vérification de l\'authentification...');
 
-        if (authUtils.isAuthenticated()) {
-          // Token existe - récupérer les données utilisateur
+        logger.log('========================================');
+        logger.log('🔍 AUTH CONTEXT - Initialisation');
+        logger.log('========================================');
+        
+        // Vérifier si on a déjà un token dans localStorage
+        const hasToken = authUtils.isAuthenticated();
+        logger.log('📋 État localStorage:', {
+          hasAccessToken: !!localStorage.getItem('sorikama_access_token'),
+          hasUserData: !!localStorage.getItem('sorikama_user')
+        });
+        logger.log('🍪 Cookies disponibles:', document.cookie);
+        
+        if (hasToken) {
           const user = authUtils.getUser();
-
-          if (user) {
-            // Données utilisateur en cache - les utiliser
-            logger.log('✅ Utilisateur trouvé en cache');
-            dispatch({ type: AUTH_ACTIONS.SET_USER, payload: user });
-          } else {
-            // Token existe mais pas de données - récupérer le profil
-            logger.log('🔄 Récupération du profil...');
-            const profileData = await authService.getProfile();
-            dispatch({ type: AUTH_ACTIONS.SET_USER, payload: profileData.data.user });
-          }
+          logger.log('✅ Utilisateur trouvé en cache (localStorage)');
+          logger.log('👤 User:', user);
+          dispatch({ type: AUTH_ACTIONS.SET_USER, payload: user });
         } else {
-          // Pas de token - utilisateur non connecté
-          logger.log('ℹ️ Aucune authentification trouvée');
-          dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+          // Pas de token dans localStorage, mais peut-être un refresh token dans cookie
+          // Essayer de refresh directement (plus propre que passer par getProfile)
+          logger.log('⚠️ Pas de token dans localStorage, tentative de refresh avec cookie...');
+          
+          try {
+            logger.log('📡 Appel POST /auth/refresh-token...');
+            const { authService } = await import('../services/api.js');
+            const refreshResponse = await authService.refreshAccessToken();
+            
+            logger.log('✅ Refresh réussi, utilisateur authentifié');
+            logger.log('👤 User reçu:', refreshResponse.data.user);
+            
+            // Sauvegarder les données
+            authUtils.saveAuthData(refreshResponse.data.user, refreshResponse.data.accessToken);
+            dispatch({ type: AUTH_ACTIONS.SET_USER, payload: refreshResponse.data.user });
+          } catch (refreshError) {
+            // Pas de refresh token valide ou erreur
+            logger.error('❌ Erreur lors du refresh:', refreshError);
+            logger.log('ℹ️ Aucune session valide trouvée');
+            dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+          }
         }
       } catch (error) {
         logger.error('❌ Erreur initialisation auth');
@@ -140,7 +165,6 @@ export function AuthProvider({ children }) {
         // Token invalide ou expiré - nettoyer et déconnecter
         authUtils.clearStorage();
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
-        toast.warning('Votre session a expiré. Veuillez vous reconnecter.');
       }
     };
 
@@ -327,12 +351,12 @@ export function AuthProvider({ children }) {
         logger.log('✏️ Mise à jour du profil...');
         const response = await authService.updateProfile(profileData);
 
-        // Mettre à jour l'utilisateur dans l'état ET le sessionStorage
+        // Mettre à jour l'utilisateur dans l'état ET le localStorage
         const updatedUser = response.data.user;
         dispatch({ type: AUTH_ACTIONS.SET_USER, payload: updatedUser });
         
-        // Mettre à jour le sessionStorage pour que les données soient persistées
-        sessionStorage.setItem('sorikama_user_data', JSON.stringify(updatedUser));
+        // Mettre à jour le localStorage pour que les données soient persistées
+        localStorage.setItem('sorikama_user', JSON.stringify(updatedUser));
         
         logger.log('✅ Profil mis à jour');
 
