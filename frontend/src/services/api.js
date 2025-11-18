@@ -142,7 +142,11 @@ api.interceptors.response.use(
 
         // Refresh échoué - déconnecter l'utilisateur
         authUtils.clearStorage();
-        window.location.href = '/login';
+        
+        // Éviter l'actualisation si on est déjà sur la page de login
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }
@@ -294,8 +298,8 @@ export const authService = {
 
       const updatedUser = response.data.data.user;
 
-      // Mettre à jour les données utilisateur en local
-      localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(updatedUser));
+      // Mettre à jour les données utilisateur en sessionStorage
+      sessionStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(updatedUser));
 
       logger.log('✅ Profil mis à jour');
       return response.data;

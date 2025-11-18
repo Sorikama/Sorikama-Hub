@@ -30,11 +30,19 @@ export interface IUser extends Document {
     firstLoginAt?: Date; // Date de première connexion
     role: 'user' | 'admin' | 'super_admin'; // Rôle de l'utilisateur
     roles: string[] | IRole[]; // Rôles multiples (pour évolution future)
+    accountStatus: 'active' | 'pending_deletion' | 'deleted'; // Statut du compte
+    deletionScheduledAt?: Date; // Date de planification de la suppression
+    deletionReason?: string; // Raison de la suppression
+    deletionCancellationToken?: string; // Token pour annuler la suppression
+    deletionCancellationExpires?: Date; // Expiration du token d'annulation
+    deletionCodeRequestCount?: number; // Nombre de demandes de code
+    deletionCodeRequestResetAt?: Date; // Date de réinitialisation du compteur
     comparePassword(password: string): Promise<boolean>;
     passwordResetToken?: string;
     passwordResetExpires?: Date;
     createPasswordResetToken(): string;
     createActivationToken(): string;
+    createDeletionCancellationToken(): string;
 }
 
 // Schéma Mongoose pour les Utilisateurs
@@ -162,6 +170,40 @@ const userSchema = new Schema<IUser>({
         type: String,
         ref: 'Role',
     }],
+    // Statut du compte (pour gestion de suppression)
+    accountStatus: {
+        type: String,
+        enum: ['active', 'pending_deletion', 'deleted'],
+        default: 'active',
+    },
+    // Date de planification de la suppression (15 jours après la demande)
+    deletionScheduledAt: {
+        type: Date,
+    },
+    // Raison de la suppression
+    deletionReason: {
+        type: String,
+    },
+    // Token pour annuler la suppression
+    deletionCancellationToken: {
+        type: String,
+        select: false,
+    },
+    // Expiration du token d'annulation
+    deletionCancellationExpires: {
+        type: Date,
+        select: false,
+    },
+    // Limitation de taux pour les demandes de code
+    deletionCodeRequestCount: {
+        type: Number,
+        default: 0,
+        select: false,
+    },
+    deletionCodeRequestResetAt: {
+        type: Date,
+        select: false,
+    },
 }, {
     timestamps: true,
     collection: 'users',
@@ -244,6 +286,27 @@ userSchema.methods.createActivationToken = function (): string {
 
     // 4. Retourner le token NON haché pour l'envoyer par email
     return activationToken;
+};
+
+/**
+ * Créer un token d'annulation de suppression de compte
+ * Code à 6 chiffres envoyé par email
+ */
+userSchema.methods.createDeletionCancellationToken = function (): string {
+    // 1. Générer un code à 6 chiffres
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 2. Hacher le code avant de le sauvegarder en BDD
+    this.deletionCancellationToken = crypto
+        .createHash('sha256')
+        .update(code)
+        .digest('hex');
+
+    // 3. Définir une date d'expiration (15 minutes)
+    this.deletionCancellationExpires = Date.now() + 15 * 60 * 1000;
+
+    // 4. Retourner le code NON haché pour l'envoyer par email
+    return code;
 };
 
 export const UserModel = model<IUser>('User', userSchema);

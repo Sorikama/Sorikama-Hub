@@ -258,16 +258,23 @@ export function AuthProvider({ children }) {
         dispatch({ type: AUTH_ACTIONS.SET_USER, payload: response.data.user });
         logger.log('✅ Connexion réussie');
 
-        // Afficher un toast de succès
-        toast.success(`Bon retour ${response.data.user.firstName} !`);
-
         return response;
 
       } catch (error) {
-        const errorMessage = error.response?.data?.message || 'Email ou mot de passe incorrect';
+        // Gérer le cas spécial du compte en attente de suppression
+        if (error.response?.data?.code === 'ACCOUNT_PENDING_DELETION') {
+          logger.warn('⚠️ Compte en attente de suppression');
+          // Ne pas dispatcher l'erreur pour éviter l'actualisation
+          // Juste retourner l'erreur pour que la page Login la gère
+          throw error;
+        }
+
         logger.error('❌ Erreur connexion');
-        dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage });
+        // Ne pas dispatcher l'erreur pour éviter l'actualisation de la page
+        // La page Login gère l'affichage de l'erreur localement
         throw error;
+      } finally {
+        dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     },
 
@@ -320,8 +327,13 @@ export function AuthProvider({ children }) {
         logger.log('✏️ Mise à jour du profil...');
         const response = await authService.updateProfile(profileData);
 
-        // Mettre à jour l'utilisateur dans l'état
-        dispatch({ type: AUTH_ACTIONS.SET_USER, payload: response.data.user });
+        // Mettre à jour l'utilisateur dans l'état ET le sessionStorage
+        const updatedUser = response.data.user;
+        dispatch({ type: AUTH_ACTIONS.SET_USER, payload: updatedUser });
+        
+        // Mettre à jour le sessionStorage pour que les données soient persistées
+        sessionStorage.setItem('sorikama_user_data', JSON.stringify(updatedUser));
+        
         logger.log('✅ Profil mis à jour');
 
         // Afficher un toast de succès

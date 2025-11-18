@@ -4,6 +4,8 @@ import authRouter from './auth.routes';
 import proxyRouter from './proxy.routes';
 import systemRouter from './system.routes';
 import ssoRouter from './sso.routes';
+import ssoSessionsRouter from './sso-sessions.routes';
+import accountDeletionRouter from './account-deletion.routes';
 import adminUsersRouter from './admin/users.routes';
 import adminRolesRouter from './admin/roles.routes';
 import adminRateLimitRouter from './admin/rateLimit.routes';
@@ -32,6 +34,10 @@ router.use('/system', systemRouter);
 
 // Routes SSO
 router.use('/sso', ssoRouter);
+router.use('/sso', ssoSessionsRouter);
+
+// Routes gestion de compte
+router.use('/account', accountDeletionRouter);
 
 // Routes admin (gestion des utilisateurs, services, etc.)
 router.use('/admin/users', adminUsersRouter);

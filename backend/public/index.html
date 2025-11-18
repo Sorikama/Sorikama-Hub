@@ -1,619 +1,276 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorikama Hub - Enterprise API Gateway & Unified Ecosystem</title>
-    <meta name="description" content="Professional API Gateway and unified ecosystem for modern applications. Connect, secure, and scale your services with Sorikama Hub.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'sans': ['Inter', 'system-ui', 'sans-serif']
-                    },
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            900: '#1e3a8a'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            transition: all 0.3s ease;
-        }
-        
-        .theme-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .dark .gradient-bg {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
-        }
-        
-        .glass {
-            backdrop-filter: blur(16px) saturate(180%);
-            background-color: rgba(255, 255, 255, 0.75);
-            border: 1px solid rgba(209, 213, 219, 0.3);
-        }
-        
-        .dark .glass {
-            background-color: rgba(17, 25, 40, 0.75);
-            border: 1px solid rgba(255, 255, 255, 0.125);
-        }
-        
-        .feature-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-8px);
-        }
-        
-        .code-block {
-            background: #1e293b;
-            border-radius: 12px;
-            padding: 1.5rem;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            overflow-x: auto;
-        }
-        
-        .syntax-keyword { color: #c792ea; }
-        .syntax-string { color: #c3e88d; }
-        .syntax-comment { color: #546e7a; }
-        .syntax-function { color: #82aaff; }
-        .syntax-variable { color: #f07178; }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .animate-fade-in-up {
-            animation: fadeInUp 0.6s ease-out;
-        }
-        
-        .animate-delay-100 { animation-delay: 0.1s; }
-        .animate-delay-200 { animation-delay: 0.2s; }
-        .animate-delay-300 { animation-delay: 0.3s; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorikama Hub API</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .card {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      padding: 48px;
+      text-align: center;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #111827 0%, #374151 100%);
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .logo svg {
+      width: 40px;
+      height: 40px;
+      color: white;
+    }
+
+    h1 {
+      font-size: 36px;
+      font-weight: 900;
+      color: #111827;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #6b7280;
+      margin-bottom: 32px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #d1fae5;
+      color: #065f46;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      margin-bottom: 32px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .info-item {
+      background: #f9fafb;
+      padding: 20px;
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+    }
+
+    .info-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #6b7280;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .info-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .links {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background: #111827;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #374151;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #111827;
+      border: 2px solid #e5e7eb;
+    }
+
+    .btn-secondary:hover {
+      border-color: #111827;
+      transform: translateY(-2px);
+    }
+
+    .footer {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 2px solid #e5e7eb;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 32px 24px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+      }
+
+      .links {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
 </head>
-<body class="theme-transition bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+<body>
+  <div class="container">
+    <div class="card">
+      <!-- Logo -->
+      <div class="logo">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
 
-    <!-- Header -->
-    <nav class="glass fixed w-full top-0 z-50 theme-transition">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-cube text-white text-lg"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Sorikama</h1>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Enterprise Hub</p>
-                    </div>
-                </div>
-                
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#features" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">Features</a>
-                    <a href="#services" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">Services</a>
-                    <a href="#docs" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">Documentation</a>
-                    <a href="#pricing" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">Pricing</a>
-                </div>
-                
-                <div class="flex items-center space-x-4">
-                    <!-- Theme Switcher -->
-                    <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-                        <button id="theme-light" class="p-2 rounded-md transition-colors" title="Light mode">
-                            <i class="fas fa-sun text-sm"></i>
-                        </button>
-                        <button id="theme-dark" class="p-2 rounded-md transition-colors" title="Dark mode">
-                            <i class="fas fa-moon text-sm"></i>
-                        </button>
-                        <button id="theme-system" class="p-2 rounded-md transition-colors" title="System mode">
-                            <i class="fas fa-desktop text-sm"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="flex items-center space-x-2">
-                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span class="text-sm text-green-600 dark:text-green-400 font-medium hidden sm:block">Online</span>
-                    </div>
-                    
-                    <a href="/portal/login" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                        Sign In
-                    </a>
-                </div>
-            </div>
+      <!-- Titre -->
+      <h1>Sorikama Hub API</h1>
+      <p class="subtitle">Plateforme d'authentification centralisée</p>
+
+      <!-- Statut -->
+      <div class="status">
+        <span class="status-dot"></span>
+        <span>API opérationnelle</span>
+      </div>
+
+      <!-- Informations -->
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Version</div>
+          <div class="info-value">1.0.0</div>
         </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="relative min-h-screen flex items-center justify-center pt-16 gradient-bg">
-        <div class="absolute inset-0 bg-white/10 dark:bg-black/20"></div>
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            
-            <div class="animate-fade-in-up">
-                <div class="inline-flex items-center bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-4 py-2 rounded-full text-sm font-medium mb-8">
-                    <i class="fas fa-rocket mr-2"></i>
-                    Enterprise-Grade API Gateway
-                </div>
-                
-                <h1 class="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
-                    Build the Future with
-                    <span class="bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 bg-clip-text text-transparent">
-                        Sorikama
-                    </span>
-                </h1>
-                
-                <p class="text-xl md:text-2xl text-white/90 max-w-4xl mx-auto mb-8 leading-relaxed">
-                    Professional API Gateway and unified ecosystem for modern applications. 
-                    Connect, secure, and scale your services with enterprise-grade infrastructure.
-                </p>
-                
-                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-                    <a href="/portal/login" class="bg-white text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
-                        <i class="fas fa-play mr-2"></i>
-                        Get Started Free
-                    </a>
-                    <a href="#demo" class="glass text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition-all">
-                        <i class="fas fa-code mr-2"></i>
-                        View Documentation
-                    </a>
-                </div>
-                
-                <!-- Stats -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-                    <div class="text-center">
-                        <div class="text-4xl font-bold text-white mb-2">99.9%</div>
-                        <div class="text-white/70">Uptime SLA</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-4xl font-bold text-white mb-2">6</div>
-                        <div class="text-white/70">Integrated Services</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-4xl font-bold text-white mb-2">1M+</div>
-                        <div class="text-white/70">API Calls/Month</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-4xl font-bold text-white mb-2">24/7</div>
-                        <div class="text-white/70">Enterprise Support</div>
-                    </div>
-                </div>
-            </div>
+        <div class="info-item">
+          <div class="info-label">Environnement</div>
+          <div class="info-value" id="env">Production</div>
         </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="py-20 bg-gray-50 dark:bg-gray-800 theme-transition">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16 animate-fade-in-up">
-                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                    Enterprise Features
-                </h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                    Built for developers, designed for scale. Everything you need to build, deploy, and manage modern applications.
-                </p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="feature-card bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 animate-fade-in-up animate-delay-100">
-                    <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-shield-alt text-primary-600 dark:text-primary-400 text-xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Enterprise Security</h3>
-                    <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
-                        Advanced authentication, authorization, and encryption. SOC 2 compliant with enterprise-grade security controls.
-                    </p>
-                </div>
-                
-                <div class="feature-card bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 animate-fade-in-up animate-delay-200">
-                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-tachometer-alt text-green-600 dark:text-green-400 text-xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">High Performance</h3>
-                    <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
-                        Sub-millisecond latency with global CDN. Auto-scaling infrastructure that grows with your business.
-                    </p>
-                </div>
-                
-                <div class="feature-card bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 animate-fade-in-up animate-delay-300">
-                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-code text-purple-600 dark:text-purple-400 text-xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Developer First</h3>
-                    <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
-                        RESTful APIs, GraphQL support, comprehensive SDKs, and detailed documentation for rapid integration.
-                    </p>
-                </div>
-            </div>
+        <div class="info-item">
+          <div class="info-label">Uptime</div>
+          <div class="info-value" id="uptime">--</div>
         </div>
-    </section>
-    
-    <!-- Code Example Section -->
-    <section class="py-20 bg-white dark:bg-gray-900 theme-transition">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="animate-fade-in-up">
-                    <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-6">
-                        Simple Integration
-                    </h2>
-                    <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
-                        Get started in minutes with our intuitive APIs and comprehensive SDKs. 
-                        Built for developers who value simplicity and power.
-                    </p>
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-check text-green-500"></i>
-                            <span class="text-gray-700 dark:text-gray-300">RESTful API with OpenAPI 3.0 specification</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-check text-green-500"></i>
-                            <span class="text-gray-700 dark:text-gray-300">SDKs for JavaScript, Python, Go, and more</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-check text-green-500"></i>
-                            <span class="text-gray-700 dark:text-gray-300">Comprehensive documentation and examples</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="animate-fade-in-up animate-delay-200">
-                    <div class="code-block">
-<span class="syntax-comment">// Initialize Sorikama SDK</span>
-<span class="syntax-keyword">import</span> { <span class="syntax-variable">SorikamaClient</span> } <span class="syntax-keyword">from</span> <span class="syntax-string">'@sorikama/sdk'</span>;
+      </div>
 
-<span class="syntax-keyword">const</span> <span class="syntax-variable">client</span> = <span class="syntax-keyword">new</span> <span class="syntax-function">SorikamaClient</span>({
-  <span class="syntax-variable">apiKey</span>: <span class="syntax-string">'sk_live_...'</span>,
-  <span class="syntax-variable">environment</span>: <span class="syntax-string">'production'</span>
-});
+      <!-- Liens -->
+      <div class="links">
+        <a href="/api-docs" class="btn btn-primary">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Documentation API
+        </a>
+        <a href="/api/v1/system/health" class="btn btn-secondary">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          Health Check
+        </a>
+      </div>
 
-<span class="syntax-comment">// Create a payment</span>
-<span class="syntax-keyword">const</span> <span class="syntax-variable">payment</span> = <span class="syntax-keyword">await</span> <span class="syntax-variable">client</span>.<span class="syntax-function">payments</span>.<span class="syntax-function">create</span>({
-  <span class="syntax-variable">amount</span>: <span class="syntax-string">1000</span>,
-  <span class="syntax-variable">currency</span>: <span class="syntax-string">'USD'</span>,
-  <span class="syntax-variable">customer</span>: <span class="syntax-string">'cus_123'</span>
-});
+      <!-- Footer -->
+      <div class="footer">
+        <p>© 2024 Sorikama Hub - Tous droits réservés</p>
+      </div>
+    </div>
+  </div>
 
-<span class="syntax-function">console</span>.<span class="syntax-function">log</span>(<span class="syntax-string">'Payment created:'</span>, <span class="syntax-variable">payment</span>.<span class="syntax-variable">id</span>);
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Services Section -->
-    <section id="services" class="py-20 bg-gray-50 dark:bg-gray-800 theme-transition">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16 animate-fade-in-up">
-                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                    Integrated Services
-                </h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                    Six powerful services, one unified platform. Build complete solutions with our integrated ecosystem.
-                </p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                
-                <div class="feature-card bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 group animate-fade-in-up">
-                    <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fas fa-store text-blue-600 dark:text-blue-400 text-2xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">SoriStore</h3>
-                    <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                        Complete e-commerce platform with inventory management, payment processing, and analytics.
-                    </p>
-                    <div class="flex items-center text-blue-600 dark:text-blue-400 font-semibold">
-                        <span>Learn More</span>
-                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
-                    </div>
-                </div>
+  <script>
+    // Récupérer les informations du serveur
+    fetch('/api/v1/system/health')
+      .then(res => res.json())
+      .then(data => {
+        if (data.data) {
+          // Mettre à jour l'environnement
+          const env = data.data.environment || 'Production';
+          document.getElementById('env').textContent = env.charAt(0).toUpperCase() + env.slice(1);
 
-                <div class="feature-card bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 group animate-fade-in-up animate-delay-100">
-                    <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fas fa-credit-card text-green-600 dark:text-green-400 text-2xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">SoriPay</h3>
-                    <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                        Secure payment processing with multi-currency support and advanced fraud protection.
-                    </p>
-                    <div class="flex items-center text-green-600 dark:text-green-400 font-semibold">
-                        <span>Learn More</span>
-                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
-                    </div>
-                </div>
-
-                <div class="feature-card bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 group animate-fade-in-up animate-delay-200">
-                    <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fas fa-wallet text-yellow-600 dark:text-yellow-400 text-2xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">SoriWallet</h3>
-                    <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                        Digital wallet with expense tracking, automated savings, and investment management.
-                    </p>
-                    <div class="flex items-center text-yellow-600 dark:text-yellow-400 font-semibold">
-                        <span>Learn More</span>
-                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
-                    </div>
-                </div>
-
-                <div class="feature-card bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 group animate-fade-in-up animate-delay-300">
-                    <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fas fa-graduation-cap text-purple-600 dark:text-purple-400 text-2xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">SoriLearn</h3>
-                    <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                        Adaptive learning platform with personalized courses and professional certifications.
-                    </p>
-                    <div class="flex items-center text-purple-600 dark:text-purple-400 font-semibold">
-                        <span>Learn More</span>
-                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
-                    </div>
-                </div>
-
-                <div class="feature-card bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 group animate-fade-in-up animate-delay-100">
-                    <div class="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fas fa-heartbeat text-red-600 dark:text-red-400 text-2xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">SoriHealth</h3>
-                    <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                        Connected health platform with tracking tools, telemedicine, and personalized insights.
-                    </p>
-                    <div class="flex items-center text-red-600 dark:text-red-400 font-semibold">
-                        <span>Learn More</span>
-                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
-                    </div>
-                </div>
-
-                <div class="feature-card bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 group animate-fade-in-up animate-delay-200">
-                    <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fas fa-universal-access text-indigo-600 dark:text-indigo-400 text-2xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">SoriAccess</h3>
-                    <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                        Universal accessibility tools with adaptive interfaces and inclusive design features.
-                    </p>
-                    <div class="flex items-center text-indigo-600 dark:text-indigo-400 font-semibold">
-                        <span>Learn More</span>
-                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="py-20 gradient-bg relative">
-        <div class="absolute inset-0 bg-white/10 dark:bg-black/20"></div>
-        <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="animate-fade-in-up">
-                <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
-                    Ready to Build the Future?
-                </h2>
-                <p class="text-xl text-white/90 mb-8 leading-relaxed max-w-3xl mx-auto">
-                    Join thousands of developers and businesses who trust Sorikama for their mission-critical applications. 
-                    Start building today with our enterprise-grade platform.
-                </p>
-                
-                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                    <a href="/portal/login" class="bg-white text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
-                        <i class="fas fa-rocket mr-2"></i>
-                        Start Free Trial
-                    </a>
-                    <a href="/api-keys/manager" class="glass text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition-all">
-                        <i class="fas fa-key mr-2"></i>
-                        Manage API Keys
-                    </a>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-white/90">
-                    <div class="flex items-center justify-center space-x-2">
-                        <i class="fas fa-check-circle text-green-400"></i>
-                        <span>Free tier available</span>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2">
-                        <i class="fas fa-shield-alt text-blue-400"></i>
-                        <span>Enterprise security</span>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2">
-                        <i class="fas fa-headset text-purple-400"></i>
-                        <span>24/7 support</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 theme-transition">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <div class="col-span-1 md:col-span-2">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-cube text-white text-lg"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Sorikama</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Enterprise Hub</p>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 dark:text-gray-300 mb-6 max-w-md">
-                        Professional API Gateway and unified ecosystem for modern applications. 
-                        Built for developers, designed for scale.
-                    </p>
-                    <div class="flex items-center space-x-2">
-                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span class="text-sm text-green-600 dark:text-green-400 font-medium">All systems operational</span>
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Services</h4>
-                    <div class="space-y-3 text-sm">
-                        <a href="#" class="block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">SoriStore</a>
-                        <a href="#" class="block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">SoriPay</a>
-                        <a href="#" class="block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">SoriWallet</a>
-                        <a href="#" class="block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">SoriLearn</a>
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Developers</h4>
-                    <div class="space-y-3 text-sm">
-                        <a href="/api-keys/manager" class="block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">API Keys</a>
-                        <a href="#" class="block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Documentation</a>
-                        <a href="#" class="block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">SDKs</a>
-                        <a href="#" class="block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Support</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="border-t border-gray-200 dark:border-gray-800 pt-8">
-                <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                    <div class="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
-                        <span>© 2024 Sorikama Hub</span>
-                        <span>•</span>
-                        <span>Version 1.0.0</span>
-                        <span>•</span>
-                        <span id="current-time"></span>
-                    </div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                        Built with ❤️ in Cotonou, Benin
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // Theme Management
-        class ThemeManager {
-            constructor() {
-                this.theme = localStorage.getItem('theme') || 'system';
-                this.init();
-            }
-            
-            init() {
-                this.applyTheme();
-                this.setupEventListeners();
-                this.updateButtons();
-            }
-            
-            applyTheme() {
-                const root = document.documentElement;
-                
-                if (this.theme === 'system') {
-                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    root.classList.toggle('dark', prefersDark);
-                } else {
-                    root.classList.toggle('dark', this.theme === 'dark');
-                }
-            }
-            
-            setTheme(newTheme) {
-                this.theme = newTheme;
-                localStorage.setItem('theme', newTheme);
-                this.applyTheme();
-                this.updateButtons();
-            }
-            
-            updateButtons() {
-                const buttons = {
-                    light: document.getElementById('theme-light'),
-                    dark: document.getElementById('theme-dark'),
-                    system: document.getElementById('theme-system')
-                };
-                
-                Object.keys(buttons).forEach(key => {
-                    const button = buttons[key];
-                    if (button) {
-                        button.classList.toggle('bg-primary-100', key === this.theme);
-                        button.classList.toggle('text-primary-600', key === this.theme);
-                        button.classList.toggle('dark:bg-primary-900', key === this.theme);
-                        button.classList.toggle('dark:text-primary-400', key === this.theme);
-                    }
-                });
-            }
-            
-            setupEventListeners() {
-                document.getElementById('theme-light')?.addEventListener('click', () => this.setTheme('light'));
-                document.getElementById('theme-dark')?.addEventListener('click', () => this.setTheme('dark'));
-                document.getElementById('theme-system')?.addEventListener('click', () => this.setTheme('system'));
-                
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                    if (this.theme === 'system') {
-                        this.applyTheme();
-                    }
-                });
-            }
+          // Calculer l'uptime
+          if (data.data.uptime) {
+            const hours = Math.floor(data.data.uptime / 3600);
+            const minutes = Math.floor((data.data.uptime % 3600) / 60);
+            document.getElementById('uptime').textContent = `${hours}h ${minutes}m`;
+          }
         }
-        
-        // Time Update
-        function updateTime() {
-            const now = new Date();
-            const timeElement = document.getElementById('current-time');
-            if (timeElement) {
-                timeElement.textContent = now.toLocaleTimeString('en-US', { 
-                    hour12: false,
-                    timeZone: 'Africa/Porto-Novo'
-                });
-            }
-        }
-        
-        // Smooth Scroll
-        function initSmoothScroll() {
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'start' 
-                        });
-                    }
-                });
-            });
-        }
-        
-        // Initialize everything
-        document.addEventListener('DOMContentLoaded', function() {
-            new ThemeManager();
-            updateTime();
-            setInterval(updateTime, 1000);
-            initSmoothScroll();
-        });
-    </script>
+      })
+      .catch(err => {
+        console.error('Erreur lors de la récupération des infos:', err);
+      });
+  </script>
 </body>
 </html>

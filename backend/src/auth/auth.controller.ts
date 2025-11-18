@@ -181,10 +181,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         });
 
         if (!user) {
-            return next(new AppError('Email non trouvé.', StatusCodes.UNAUTHORIZED));
+            return next(new AppError('Adresse email incorrecte. Veuillez vérifier votre email.', StatusCodes.UNAUTHORIZED));
         }
         if (!(await user.comparePassword(password))) {
-            return next(new AppError('Mot de passe incorrect.', StatusCodes.UNAUTHORIZED));
+            return next(new AppError('Mot de passe incorrect. Veuillez réessayer.', StatusCodes.UNAUTHORIZED));
         }
 
         if (!user.isActive) {
@@ -203,6 +203,29 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
                 StatusCodes.FORBIDDEN
             ));
         }
+
+        // Vérifier si le compte est en attente de suppression
+        if (user.accountStatus === 'pending_deletion') {
+            logger.info(`Tentative de connexion d'un compte en attente de suppression`, {
+                userId: user._id,
+                email: user.email,
+                deletionScheduledAt: user.deletionScheduledAt
+            });
+            return res.status(StatusCodes.FORBIDDEN).json({
+                success: false,
+                message: 'Votre compte est en attente de suppression',
+                code: 'ACCOUNT_PENDING_DELETION',
+                data: {
+                    deletionScheduledAt: user.deletionScheduledAt,
+                    canCancel: true
+                }
+            });
+        }
+
+        // Vérifier si le compte est supprimé
+        if (user.accountStatus === 'deleted') {
+            return next(new AppError('Ce compte n\'existe plus', StatusCodes.NOT_FOUND));
+        }         
 
         // Mettre à jour les infos de connexion
         const now = new Date();

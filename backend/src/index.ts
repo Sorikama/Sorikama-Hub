@@ -37,14 +37,14 @@ import { ServiceModel } from './database/models/service.model';
 import proxyRoutes from './routes/proxy.routes';
 import swaggerRoutes from './routes/swagger.routes';
 import docsRoutes from './routes/docs.routes';
-
-import dashboardRoutes from './routes/dashboard.routes';
-import adminControlRoutes from './routes/admin-control.routes';
-import authPortalRoutes, { verifyPortalSession } from './routes/auth-portal.routes';
 import cookieParser from 'cookie-parser';
+
+// Routes du portail désactivées - imports commentés
+// import dashboardRoutes from './routes/dashboard.routes';
+// import adminControlRoutes from './routes/admin-control.routes';
+// import authPortalRoutes, { verifyPortalSession } from './routes/auth-portal.routes';
 import { responseTimeMiddleware, slowRequestTimeoutMiddleware } from './middlewares/responseTime.middleware';
 import { httpLoggingMiddleware } from './utils/applicationLogger';
-import { BrowserLauncher } from './utils/browserLauncher';
 
 import './database/models';
 import { seedAdmin } from './database/seeders/admin.seeder';
@@ -138,7 +138,15 @@ const startServer = async () => {
         }
       },
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'Accept', 'X-CSRF-Token'],
+      allowedHeaders: [
+        'Content-Type', 
+        'Authorization', 
+        'X-API-Key', 
+        'X-Service-Api-Key',  // Pour les services externes
+        'X-User-Id',          // Pour les services externes
+        'Accept', 
+        'X-CSRF-Token'
+      ],
       credentials: true
     };
     app.use(cors(corsOptions));
@@ -251,7 +259,8 @@ const startServer = async () => {
         };
       }
 
-      app.use('/api-docs', verifyPortalSession, (req, res, next) => {
+      // Documentation API accessible sans authentification
+      app.use('/api-docs', (req, res, next) => {
         res.removeHeader('Content-Security-Policy');
         next();
       });
@@ -273,92 +282,39 @@ const startServer = async () => {
     }
     // }
 
-    // Route principale - redirige selon l'état de connexion
+    // Route principale - Page d'accueil de l'API
     app.get('/', (req, res) => {
-      const sessionToken = req.cookies.sorikama_session;
-
-      if (sessionToken) {
-        const { portalSessions } = require('./routes/auth-portal.routes');
-        const session = portalSessions?.get(sessionToken);
-
-        if (session && session.expires > Date.now()) {
-          return res.redirect('/api');
-        }
-      }
-
-      res.redirect('/portal/login');
+      res.sendFile(path.join(__dirname, '../public/index.html'));
     });
 
-    // Route API - dashboard connecté
-    app.get('/api', verifyPortalSession, (req: any, res) => {
-      const user = req.portalUser;
-      const { portalSessions } = require('./routes/auth-portal.routes');
-      const session = portalSessions.get(user.sessionToken);
-
-      // Lire le fichier HTML et injecter les données
-      const fs = require('fs');
-      let dashboardHTML = fs.readFileSync(path.join(__dirname, '../public/views/dashboard.html'), 'utf8');
-
-      // Injecter les données dans le HTML
-      const sessionData = {
-        username: user.username,
-        sessionToken: user.sessionToken.substring(0, 8) + '...',
-        expiresAt: session?.expires || Date.now() + 86400000,
-        createdAt: session?.createdAt || Date.now(),
-        environment: NODE_ENV,
-        port: PORT,
-        baseUrl: BASE_URL,
-        uptime: Math.floor(process.uptime())
-      };
-
-      // Injecter les données JavaScript
-      const scriptInjection = `
-        <script>
-          window.sessionData = ${JSON.stringify(sessionData)};
-          window.serverUptime = ${Math.floor(process.uptime())};
-          
-          // Populate data on load
-          document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('username').textContent = '${sessionData.username}';
-            document.getElementById('sessionId').textContent = '${sessionData.sessionToken}';
-            document.getElementById('sessionExpires').textContent = new Date(${sessionData.expiresAt}).toLocaleString();
-            document.getElementById('environment').textContent = '${sessionData.environment}';
-            document.getElementById('port').textContent = '${sessionData.port}';
-            document.getElementById('baseUrl').textContent = '${sessionData.baseUrl}';
-            document.getElementById('uptime').textContent = formatUptime(${sessionData.uptime});
-          });
-        </script>
-      `;
-
-      // Injecter le script avant la fermeture du body
-      dashboardHTML = dashboardHTML.replace('</body>', scriptInjection + '</body>');
-
-      res.send(dashboardHTML);
-    });
-
+    // Routes de documentation uniquement
     app.use('/swagger', swaggerRoutes);
     app.use('/docs', docsRoutes);
-    app.use('/dashboard', verifyPortalSession, dashboardRoutes);
-    app.use('/portal', authPortalRoutes);
+    
+    // Routes du portail désactivées - utiliser le frontend React à la place
+    // app.use('/dashboard', verifyPortalSession, dashboardRoutes);
+    // app.use('/portal', authPortalRoutes);
 
-    // Route de démonstration sécurité (accessible sans authentification pour les tests)
-    app.get('/security-demo', (req, res) => {
-      res.sendFile(path.join(__dirname, '../public/views/security-demo.html'));
-    });
+    // Routes de démonstration désactivées
+    // app.get('/security-demo', (req, res) => {
+    //   res.sendFile(path.join(__dirname, '../public/views/security-demo.html'));
+    // });
 
     // Nouvelles routes
     const dependenciesRoutes = require('./routes/dependencies.routes').default;
     const systemHealthRoutes = require('./routes/system-health.routes').default;
     const logsViewerRoutes = require('./routes/logs-viewer.routes').default;
 
-    app.use('/dependencies', verifyPortalSession, dependenciesRoutes);
-    app.use('/system', verifyPortalSession, systemHealthRoutes);
-    app.use('/logs', verifyPortalSession, logsViewerRoutes);
+    // Routes du portail désactivées
+    // app.use('/dependencies', verifyPortalSession, dependenciesRoutes);
+    // app.use('/system', verifyPortalSession, systemHealthRoutes);
+    // app.use('/logs', verifyPortalSession, logsViewerRoutes);
 
     const servicesManagerRoutes = require('./routes/services-manager.routes').default;
     const monitoringRoutes = require('./routes/monitoring.routes').default;
-    app.use('/services', verifyPortalSession, servicesManagerRoutes);
-    app.use('/monitoring', verifyPortalSession, monitoringRoutes);
+    // Routes du portail désactivées
+    // app.use('/services', verifyPortalSession, servicesManagerRoutes);
+    // app.use('/monitoring', verifyPortalSession, monitoringRoutes);
 
     app.get('/api/v1/system/health', (req, res) => {
       res.json({
@@ -387,21 +343,23 @@ const startServer = async () => {
     // Routes de performance (protégées)
     const performanceRoutes = require('./routes/performance.routes').default;
     const performanceDashboardRoutes = require('./routes/performance-dashboard.routes').default;
-    app.use('/performance', performanceRoutes);
-    app.use('/performance', performanceDashboardRoutes);
+    // Routes du portail désactivées
+    // app.use('/performance', performanceRoutes);
+    // app.use('/performance', performanceDashboardRoutes);
 
     // Routes admin (protégées)
     const adminPublicRoutes = require('./routes/admin-public.routes').default;
-    app.use('/admin', verifyPortalSession, adminPublicRoutes);
-    app.use('/admin', adminControlRoutes);
+    // Routes du portail admin désactivées
+    // app.use('/admin', verifyPortalSession, adminPublicRoutes);
+    // app.use('/admin', adminControlRoutes);
 
     // Routes de callbacks des services externes
     const serviceCallbackRoutes = require('./routes/serviceCallback.routes').default;
-    app.use('/api/service-callback', serviceCallbackRoutes);
+    app.use('/api/v1/service-callback', serviceCallbackRoutes);
 
     // Routes de gestion utilisateur pour les services externes
     const serviceUserRoutes = require('./routes/serviceUser.routes').default;
-    app.use('/api/service-user', serviceUserRoutes);
+    app.use('/api/v1/service-user', serviceUserRoutes);
 
     // Proxy dynamique pour les services externes
     // Format: /{proxyPath}/* → redirige vers le backend du service
@@ -423,16 +381,11 @@ const startServer = async () => {
     // Démarrage du serveur
     server.listen(7000, () => {
       console.log(`\n✅ Serveur démarré sur http://localhost:${PORT}`);
-      console.log(`📖 Documentation: ${BACKEND_URL}/api-docs`);
-      console.log(`🌐 Portail: ${BACKEND_URL}/portal/login\n`);
+      console.log(`📖 Documentation API: ${BACKEND_URL}/api-docs`);
+      console.log(`Page d'accueil: ${BACKEND_URL}/\n`);
       
       logSystemEvent(`Serveur HTTP démarré sur le port 7000`, 'info');
       logSystemEvent('Démarrage complet du système Sorikama Hub', 'info', { port: PORT });
-
-      // Lancement automatique du navigateur
-      setTimeout(() => {
-        BrowserLauncher.autoLaunch(PORT);
-      }, 2000);
     });
 
   } catch (error) {

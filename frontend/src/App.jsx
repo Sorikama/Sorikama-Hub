@@ -15,6 +15,8 @@ import Profile from './pages/Profile';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Authorize from './pages/Authorize';
+import ConnectedServices from './pages/ConnectedServices';
+import CancelDeletion from './pages/CancelDeletion';
 import ServicesAdmin from './pages/ServicesAdmin';
 import UsersManagement from './pages/admin/UsersManagement';
 import RolesPermissions from './pages/admin/RolesPermissions';
@@ -49,6 +51,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/activate-account/:token" element={<ActivateAccount />} />
+            <Route path="/cancel-deletion" element={<CancelDeletion />} />
 
             {/* Routes protégées */}
             <Route
@@ -72,6 +75,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Authorize />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/connected-services"
+              element={
+                <ProtectedRoute>
+                  <ConnectedServices />
                 </ProtectedRoute>
               }
             />

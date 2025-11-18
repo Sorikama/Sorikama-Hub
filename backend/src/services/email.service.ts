@@ -297,8 +297,35 @@ export const sendPasswordResetEmail = async (
   }
 };
 
+/**
+ * Fonction générique pour envoyer un email
+ */
+export const sendEmail = async (options: {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}): Promise<void> => {
+  try {
+    const mailOptions = {
+      from: `"Sorikama Hub" <${process.env.SMTP_USER}>`,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text || options.html.replace(/<[^>]*>/g, ''), // Fallback texte sans HTML
+    };
+
+    await transporter.sendMail(mailOptions);
+    logger.info(`✅ Email envoyé à ${options.to}`);
+  } catch (error) {
+    logger.error('❌ Erreur envoi email:', error);
+    throw new Error('Erreur lors de l\'envoi de l\'email');
+  }
+};
+
 export default {
   sendActivationEmail,
   sendWelcomeEmail,
   sendPasswordResetEmail,
+  sendEmail,
 };

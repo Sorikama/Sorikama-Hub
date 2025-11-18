@@ -13,7 +13,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { login, isLoading, error, user } = useAuth();
+  const { login, isLoading, user } = useAuth();
 
   const [credentials, setCredentials] = useState({
     email: '',
@@ -23,6 +23,8 @@ export default function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [hasRedirected, setHasRedirected] = useState(false);
+  const [pendingDeletion, setPendingDeletion] = useState(null);
+  const [localError, setLocalError] = useState('');
 
   // ============================================
   // RÉCUPÉRER LES PARAMÈTRES SSO
@@ -63,6 +65,9 @@ export default function Login() {
       ...credentials,
       [e.target.name]: e.target.value
     });
+    // Réinitialiser les erreurs quand l'utilisateur modifie un champ
+    if (localError) setLocalError('');
+    if (pendingDeletion) setPendingDeletion(null);
   };
 
   const handleSubmit = async (e) => {
@@ -116,6 +121,25 @@ export default function Login() {
     } catch (error) {
       console.error('❌ Erreur connexion:', error);
       setHasRedirected(false); // Réinitialiser en cas d'erreur
+
+      // Gérer le cas du compte en attente de suppression
+      if (error.response?.data?.code === 'ACCOUNT_PENDING_DELETION') {
+        setPendingDeletion(error.response.data.data);
+        setLocalError('');
+      } else {
+        // Afficher un message d'erreur clair
+        const errorMessage = error.response?.data?.message || error.message || 'Erreur de connexion';
+        
+        if (errorMessage.includes('Email') || errorMessage.includes('email')) {
+          setLocalError('Adresse email incorrecte. Veuillez vérifier votre email.');
+        } else if (errorMessage.includes('Mot de passe') || errorMessage.includes('password')) {
+          setLocalError('Mot de passe incorrect. Veuillez réessayer.');
+        } else if (errorMessage.includes('désactivé') || errorMessage.includes('bloqué')) {
+          setLocalError(errorMessage);
+        } else {
+          setLocalError('Email ou mot de passe incorrect. Veuillez vérifier vos identifiants.');
+        }
+      }
     }
   };
 
@@ -161,13 +185,39 @@ export default function Login() {
         {/* Formulaire */}
         <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-100">
 
-          {error && (
-            <div className="mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg animate-slide-in-up">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Alerte compte en attente de suppression */}
+          {pendingDeletion && (
+            <div className="mb-6 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 px-4 py-3 rounded-lg">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold mb-2">Votre compte est en attente de suppression</p>
+                  <p className="text-xs mb-3">
+                    Suppression prévue le {new Date(pendingDeletion.deletionScheduledAt).toLocaleDateString('fr-FR')}
+                  </p>
+                  <button
+                    onClick={() => navigate('/cancel-deletion')}
+                    className="text-xs font-semibold text-yellow-900 hover:text-yellow-700 underline"
+                  >
+                    Annuler la suppression
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {localError && !pendingDeletion && (
+            <div className="mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-sm font-medium">{error}</span>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{localError}</p>
+                  <p className="text-xs mt-1 text-red-600">Vérifiez vos identifiants et réessayez.</p>
+                </div>
               </div>
             </div>
           )}
@@ -307,16 +357,6 @@ export default function Login() {
               </Link>
             </p>
           </div>
-        </div>
-
-        {/* Info sécurité */}
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500 flex items-center justify-center gap-1">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            Connexion sécurisée avec chiffrement SSL
-          </p>
         </div>
       </div>
     </div>
