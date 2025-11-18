@@ -371,6 +371,7 @@ export const dynamicProxyMiddleware = async (
             proxyReq.setHeader('X-Forwarded-Host', req.hostname);
             
             // 🔒 SÉCURITÉ : Supprimer TOUS les headers sensibles (whitelist plutôt que blacklist)
+            // IMPORTANT : Faire ça AVANT d'écrire le body
             const allowedHeaders = new Set([
               'content-type',
               'content-length',
@@ -391,6 +392,23 @@ export const dynamicProxyMiddleware = async (
             proxyReq.removeHeader('authorization');
             proxyReq.removeHeader('cookie');
             proxyReq.removeHeader('x-api-key');
+            
+            // ============================================
+            // GESTION DU BODY POUR POST/PUT/PATCH
+            // ============================================
+            if (req.body && (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH')) {
+              console.log('🔵 [DEBUG] Requête avec body, méthode:', req.method);
+              const bodyData = JSON.stringify(req.body);
+              console.log('🔵 [DEBUG] Body size:', bodyData.length, 'bytes');
+              
+              // Mettre à jour les headers de contenu
+              proxyReq.setHeader('Content-Type', 'application/json');
+              proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+              
+              // Écrire le body dans la requête proxy
+              proxyReq.write(bodyData);
+              console.log('🔵 [DEBUG] Body écrit dans proxyReq');
+            }
             
             console.log('🔵 [DEBUG] onProxyReq terminé, envoi vers:', currentService.backendUrl);
             logger.info('📤 Requête envoyée au service', {
