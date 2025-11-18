@@ -297,16 +297,45 @@ export const dynamicProxyMiddleware = async (
             email: user.email
           });
         },
-        onProxyRes: (proxyRes: any, req: any) => {
+        onProxyRes: (proxyRes: any, req: any, res: any) => {
           const responseTime = Date.now() - startTime;
+          const contentType = proxyRes.headers['content-type'] || '';
           
           // Ajouter des headers de réponse
           proxyRes.headers['X-Proxied-By'] = 'Sorikama-Hub';
           proxyRes.headers['X-Response-Time'] = `${responseTime}ms`;
           
+          // ⚠️ DÉTECTER SI LE BACKEND RETOURNE DU HTML AU LIEU DE JSON
+          if (contentType.includes('text/html') && !contentType.includes('application/json')) {
+            logger.warn('⚠️ Le backend retourne du HTML au lieu de JSON !', {
+              service: service.name,
+              statusCode: proxyRes.statusCode,
+              contentType,
+              url: req.originalUrl,
+              target: service.backendUrl,
+              userId: req.user._id
+            });
+            
+            // Si c'est une erreur 404 ou 500, c'est probablement que le backend n'est pas démarré
+            if (proxyRes.statusCode === 404) {
+              logger.error('❌ Le backend MaseBuy semble ne pas avoir cette route', {
+                service: service.name,
+                path: req.path,
+                target: service.backendUrl
+              });
+            } else if (proxyRes.statusCode >= 500) {
+              logger.error('❌ Le backend MaseBuy a une erreur serveur', {
+                service: service.name,
+                statusCode: proxyRes.statusCode,
+                target: service.backendUrl
+              });
+            }
+          }
+          
           logger.info('📥 Réponse reçue du service', {
             service: service.name,
             statusCode: proxyRes.statusCode,
+            contentType,
             responseTime: `${responseTime}ms`,
             userId: req.user._id
           });

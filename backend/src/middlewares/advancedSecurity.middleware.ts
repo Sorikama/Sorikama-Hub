@@ -41,7 +41,13 @@ const getCspDirectives = () => {
     
     imgSrc: ["'self'", "data:", "https:"],
     
-    connectSrc: ["'self'"],
+    connectSrc: [
+      "'self'",
+      "http://localhost:7000",  // Sorikama Hub
+      "http://localhost:3001",  // Frontend MaseBuy
+      "http://localhost:4001",  // Backend MaseBuy
+      ...(isDev ? ["http://localhost:*", "ws://localhost:*"] : [])
+    ],
     
     frameSrc: ["'none'"],
     
