@@ -50,11 +50,9 @@ router.use('/admin/services', adminServicesRouter);
 // Routes d'autorisation
 router.use('/authorize', authorizeRouter);
 
-// Routes de proxy vers les microservices
-router.use('/', proxyRouter);
-
-// Proxy dynamique pour services externes (doit être après les autres routes)
+// Proxy dynamique pour services externes (UNIQUEMENT CELUI-CI)
 import { dynamicProxyMiddleware } from '../middlewares/dynamicProxy.middleware';
-router.use('/proxy/*', dynamicProxyMiddleware);
+router.use('/proxy/:proxyPath/*', dynamicProxyMiddleware);
+router.use('/proxy/:proxyPath', dynamicProxyMiddleware);
 
 export default router;

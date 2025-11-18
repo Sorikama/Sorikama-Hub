@@ -70,8 +70,22 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
       }
     }
 
+    // Déchiffrer l'ID utilisateur si nécessaire (tokens OAuth)
+    let userId = decoded.id;
+    if (userId.includes(':')) {
+      // L'ID est chiffré (format: iv:encrypted)
+      try {
+        const { decryptUserId } = require('../utils/encryption');
+        userId = decryptUserId(userId);
+        logger.debug(`[AUTH] ID utilisateur déchiffré pour token OAuth`);
+      } catch (error) {
+        logger.error(`[AUTH] Erreur déchiffrement ID utilisateur:`, error);
+        return next(new AppError('Token invalide', StatusCodes.UNAUTHORIZED));
+      }
+    }
+
     // Récupération des données utilisateur complètes
-    const user = await UserModel.findById(decoded.id)
+    const user = await UserModel.findById(userId)
       .populate({
         path: 'roles',
         populate: { path: 'permissions' }
@@ -93,7 +107,13 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
     req.sessionId = decoded.sessionId;
     
     // Log de l'activité
-    logger.info(`[AUTH] Accès autorisé - User: ${user._id} - IP: ${req.ip} - URL: ${req.originalUrl}`);
+    logger.info(`[AUTH] Accès autorisé`, {
+      userId: user._id,
+      email: user.email,
+      ip: req.ip,
+      url: req.originalUrl,
+      method: req.method
+    });
     
     next();
   } catch (error) {

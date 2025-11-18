@@ -7,6 +7,7 @@ export interface ISSOSession extends Document {
   serviceId: string;
   accessToken: string;
   refreshToken?: string;
+  scopes?: string[];
   expiresAt: Date;
   redirectUrl?: string;
   state?: string;
@@ -21,6 +22,7 @@ const SSOSessionSchema = new Schema<ISSOSession>({
   serviceId: { type: String, required: true, index: true },
   accessToken: { type: String, required: true },
   refreshToken: { type: String },
+  scopes: { type: [String], default: ['profile', 'email'] },
   expiresAt: { type: Date, required: true, index: true },
   redirectUrl: { type: String },
   state: { type: String },

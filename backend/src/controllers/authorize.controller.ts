@@ -5,6 +5,7 @@ import crypto from 'crypto';
 
 import { ServiceModel } from '../database/models/service.model';
 import { UserModel } from '../database/models/user.model';
+import { SSOSessionModel } from '../database/models/ssoSession.model';
 import AppError from '../utils/AppError';
 import { logger } from '../utils/logger';
 import { JWT_SECRET } from '../config';
@@ -424,6 +425,13 @@ export const exchangeAuthorizationCode = async (req: Request, res: Response, nex
     // ============================================
 
     const encryptedUserId = encryptUserId(user._id.toString());
+    
+    logger.info('🔐 ID utilisateur chiffré pour le token:', {
+      originalId: user._id.toString(),
+      encryptedId: encryptedUserId,
+      encryptedLength: encryptedUserId.length,
+      hasSeparator: encryptedUserId.includes(':')
+    });
 
     // ============================================
     // 8. GÉNÉRER LE TOKEN JWT
@@ -476,7 +484,36 @@ export const exchangeAuthorizationCode = async (req: Request, res: Response, nex
     });
 
     // ============================================
-    // 11. RETOURNER LE TOKEN
+    // 11. CRÉER UNE SESSION SSO
+    // ============================================
+    
+    const sessionId = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 heures
+
+    await SSOSessionModel.create({
+      sessionId,
+      userId: user._id.toString(),
+      serviceId: service.slug,
+      accessToken: token,
+      scopes: ['profile', 'email'],
+      expiresAt,
+      userInfo: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role
+      }
+    });
+
+    logger.info(`✅ Session SSO créée`, {
+      userId: user._id,
+      serviceId: service.slug,
+      sessionId,
+      expiresAt
+    });
+
+    // ============================================
+    // 12. RETOURNER LE TOKEN
     // ============================================
 
     res.status(StatusCodes.OK).json({

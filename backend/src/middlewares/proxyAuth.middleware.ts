@@ -33,15 +33,29 @@ export const verifyServiceAuthorization = async (req: any, res: Response, next: 
     }
 
     // Vérifier que le service existe et est actif
+    logger.info('🔍 Recherche du service', { slug: serviceId, userId });
     const service = await ServiceModel.findOne({ slug: serviceId });
     
     if (!service) {
-      logger.warn('❌ Service non trouvé', { serviceId, userId });
+      // Lister tous les services disponibles pour déboguer
+      const allServices = await ServiceModel.find({}, 'slug name enabled').lean();
+      logger.warn('❌ Service non trouvé', { 
+        serviceId, 
+        userId,
+        availableServices: allServices.map(s => ({ slug: s.slug, name: s.name, enabled: s.enabled }))
+      });
       throw new AppError(
         'Service non trouvé',
         StatusCodes.NOT_FOUND
       );
     }
+    
+    logger.info('✅ Service trouvé', { 
+      serviceId, 
+      serviceName: service.name, 
+      enabled: service.enabled,
+      backendUrl: service.backendUrl 
+    });
 
     if (!service.enabled) {
       logger.warn('❌ Tentative d\'accès à un service inactif', { serviceId, userId, enabled: service.enabled });

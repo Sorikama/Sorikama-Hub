@@ -362,9 +362,9 @@ const startServer = async () => {
     app.use('/api/v1/service-user', serviceUserRoutes);
 
     // Proxy dynamique pour les services externes
-    // Format: /{proxyPath}/* → redirige vers le backend du service
+    // Format: /api/v1/proxy/{proxyPath}/* → redirige vers le backend du service
     const { dynamicProxyMiddleware } = require('./middlewares/dynamicProxy.middleware');
-    app.use('/:proxyPath/*', dynamicProxyMiddleware);
+    app.use('/api/v1/proxy/:proxyPath/*', dynamicProxyMiddleware);
 
     app.all('*', (req: Request, res: Response, next: NextFunction) => {
       const err = new AppError(`La route ${req.originalUrl} n'existe pas sur ce serveur.`, StatusCodes.NOT_FOUND);

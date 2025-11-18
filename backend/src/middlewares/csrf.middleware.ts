@@ -88,13 +88,16 @@ export const verifyCsrf = (req: Request, res: Response, next: NextFunction) => {
       return next();
     }
 
-    // Ignorer pour les routes d'échange OAuth (appelées par les backends externes)
+    // Ignorer pour les routes d'échange OAuth et proxy (appelées par les backends externes)
     const exemptRoutes = [
       '/api/v1/auth/exchange',
-      '/api/v1/auth/refresh-token'
+      '/api/v1/auth/refresh-token',
+      '/api/v1/proxy/',              // Proxy dynamique
+      '/api/v1/service-user/',       // Services externes - profil
+      '/api/v1/service-callback/'    // Services externes - callbacks
     ];
 
-    if (exemptRoutes.some(route => req.path === route || req.originalUrl.includes(route))) {
+    if (exemptRoutes.some(route => req.originalUrl.includes(route))) {
       logger.debug('Route exemptée de CSRF:', req.originalUrl);
       return next();
     }
