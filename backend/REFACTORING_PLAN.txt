@@ -1,0 +1,167 @@
+═══════════════════════════════════════════════════════════════════
+  PLAN DE REFACTORISATION - SORIKAMA HUB BACKEND
+═══════════════════════════════════════════════════════════════════
+
+Date : 18 novembre 2024
+Objectif : Code propre, structure claire, pas de duplication
+
+═══════════════════════════════════════════════════════════════════
+  📁 FICHIERS À SUPPRIMER
+═══════════════════════════════════════════════════════════════════
+
+RACINE :
+☐ src/index_fixed.ts (doublon)
+☐ .env.secrets.tmp (temporaire)
+☐ .launch-count (temporaire)
+☐ dump.rdb (Redis dump)
+☐ test-service-server.js (test)
+☐ start-clean.js (script dev)
+☐ start-dev.js (script dev)
+
+MIDDLEWARES REDONDANTS :
+☐ dynamicProxy.middleware.ts (utilise proxy/proxyMiddleware.ts)
+☐ serviceProxy.middleware.ts (doublon)
+☐ proxyAuth.middleware.ts (logique dans proxy/)
+
+CONTROLLERS DOUBLONS :
+☐ service-user.controller.ts (garder serviceUser.controller.ts)
+☐ proxy.controller.ts (pas utilisé, logique dans middleware)
+
+ROUTES DOUBLONS :
+☐ service-user.routes.ts (garder serviceUser.routes.ts)
+☐ admin-control.routes.ts (fusionner avec admin.routes.ts)
+☐ admin-public.routes.ts (fusionner avec admin.routes.ts)
+☐ auth-portal.routes.ts (fusionner avec auth.routes.ts)
+☐ auth-redirect.routes.ts (fusionner avec auth.routes.ts)
+☐ dashboard.routes.ts (pas utilisé)
+☐ dependencies.routes.ts (pas utilisé)
+☐ logs-viewer.routes.ts (pas utilisé)
+☐ metrics-dashboard.routes.ts (fusionner avec monitoring.routes.ts)
+☐ performance-dashboard.routes.ts (fusionner avec performance.routes.ts)
+☐ services-manager.routes.ts (fusionner avec services.routes.ts)
+☐ system-health.routes.ts (fusionner avec system.routes.ts)
+
+UTILS REDONDANTS :
+☐ applicationLogger.ts (utilise logger.ts)
+☐ redisLogger.ts (utilise logger.ts)
+☐ redisManager.ts (utilise redis.service.ts)
+☐ crypto.ts (fusionner avec encryption.ts)
+☐ email.ts (doublon avec email.service.ts)
+
+═══════════════════════════════════════════════════════════════════
+  🔄 RÉORGANISATION
+═══════════════════════════════════════════════════════════════════
+
+MIDDLEWARES :
+src/middlewares/
+├── auth/
+│   ├── auth.middleware.ts
+│   ├── adminAuth.middleware.ts
+│   ├── dualAuth.middleware.ts
+│   └── tokenBlacklist.middleware.ts
+├── security/
+│   ├── csrf.middleware.ts
+│   ├── advancedSecurity.middleware.ts
+│   ├── oauth.security.middleware.ts
+│   └── inputValidation.middleware.ts
+├── rate-limit/
+│   ├── rateLimiter.middleware.ts
+│   ├── advancedRateLimit.middleware.ts
+│   └── clientRateLimit.middleware.ts
+├── proxy/
+│   ├── proxyMiddleware.ts
+│   ├── proxyAuth.ts
+│   ├── proxyCache.ts
+│   ├── proxyConfig.ts
+│   ├── proxyHeaders.ts
+│   └── proxyRateLimit.ts
+├── monitoring/
+│   ├── metrics.middleware.ts
+│   ├── responseTime.middleware.ts
+│   └── realLogging.middleware.ts
+└── core/
+    ├── errorHandler.middleware.ts
+    ├── validation.middleware.ts
+    ├── authorization.middleware.ts
+    ├── decryptId.middleware.ts
+    ├── requestFilter.middleware.ts
+    ├── swaggerAuth.middleware.ts
+    └── unauthorizedHandler.middleware.ts
+
+ROUTES :
+src/routes/
+├── auth/
+│   ├── auth.routes.ts (fusionné)
+│   └── authorize.routes.ts
+├── admin/
+│   ├── users.routes.ts
+│   ├── roles.routes.ts
+│   └── services.routes.ts
+├── sso/
+│   ├── sso.routes.ts
+│   └── sso-sessions.routes.ts
+├── system/
+│   ├── system.routes.ts (fusionné)
+│   └── monitoring.routes.ts (fusionné)
+├── proxy/
+│   └── proxy.routes.ts
+├── account/
+│   ├── account-deletion.routes.ts
+│   └── serviceUser.routes.ts
+├── docs/
+│   ├── swagger.routes.ts
+│   ├── docs.routes.ts
+│   └── documentation.routes.ts
+├── security/
+│   └── csrf.routes.ts
+└── index.ts
+
+SERVICES :
+src/services/
+├── auth/
+│   └── authorization.service.ts
+├── email/
+│   └── email.service.ts
+├── monitoring/
+│   ├── monitoring.service.ts
+│   └── logsGenerator.service.ts
+├── proxy/
+│   ├── proxy.service.ts
+│   └── routingEngine.service.ts
+├── redis/
+│   └── redis.service.ts
+├── security/
+│   ├── tokenBlacklist.service.ts
+│   └── userEncryption.service.ts
+└── system/
+    └── serviceManager.service.ts
+
+UTILS :
+src/utils/
+├── errors/
+│   └── AppError.ts
+├── logging/
+│   └── logger.ts (fusionné)
+├── security/
+│   ├── encryption.ts (fusionné)
+│   └── hmacSignature.ts
+├── system/
+│   ├── banner.ts
+│   ├── browserLauncher.ts
+│   ├── portManager.ts
+│   ├── performanceOptimizer.ts
+│   └── secretsManager.ts
+└── index.ts (exports)
+
+═══════════════════════════════════════════════════════════════════
+  ✅ ACTIONS À EFFECTUER
+═══════════════════════════════════════════════════════════════════
+
+1. Supprimer les fichiers inutilisés
+2. Créer la nouvelle structure de dossiers
+3. Déplacer et fusionner les fichiers
+4. Mettre à jour les imports
+5. Tester que tout fonctionne
+6. Supprimer les anciens fichiers
+
+═══════════════════════════════════════════════════════════════════

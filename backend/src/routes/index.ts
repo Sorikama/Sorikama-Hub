@@ -54,16 +54,10 @@ router.use('/authorize', authorizeRouter);
 // Routes pour les services externes (accès aux données utilisateur)
 router.use('/service-user', serviceUserRouter);
 
-// Proxy dynamique pour services externes (UNIQUEMENT CELUI-CI)
-import { dynamicProxyMiddleware } from '../middlewares/dynamicProxy.middleware';
+// Proxy dynamique pour services externes (version refactorisée)
+import { dynamicProxyMiddleware } from '../middlewares/proxy';
 
-// Utiliser une route simple qui capture tout après /proxy/
-router.use('/proxy/*', (req, res, next) => {
-    console.log(`🔵 [PROXY DEBUG] ${req.method} ${req.originalUrl}`);
-    console.log(`   Params:`, req.params);
-    console.log(`   Headers:`, req.headers.authorization?.substring(0, 50));
-    // Appeler directement le middleware proxy
-    dynamicProxyMiddleware(req, res, next);
-});
+// Route proxy dynamique - capture toutes les requêtes vers /proxy/*
+router.use('/proxy/*', dynamicProxyMiddleware);
 
 export default router;

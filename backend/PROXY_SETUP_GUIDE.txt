@@ -1,0 +1,213 @@
+═══════════════════════════════════════════════════════════════════
+  GUIDE DE CONFIGURATION DU PROXY SORIKAMA HUB
+═══════════════════════════════════════════════════════════════════
+
+Ce guide explique comment configurer et utiliser le système de proxy
+sécurisé avec Redis et vérification HMAC.
+
+═══════════════════════════════════════════════════════════════════
+  1. CONFIGURATION DE BASE
+═══════════════════════════════════════════════════════════════════
+
+Copiez .env.example vers .env et configurez les variables :
+
+# Sécurité HMAC
+HMAC_SECRET=votre-secret-partagé-avec-masebuy
+VERIFY_HMAC_SIGNATURE=true
+SIGNATURE_MAX_AGE=300
+
+# Timeouts
+PROXY_TIMEOUT=30000
+PROXY_CONNECTION_TIMEOUT=5000
+PROXY_RESPONSE_TIMEOUT=30000
+
+# Rate Limiting
+RATE_LIMIT_ENABLED=true
+RATE_LIMIT_WINDOW=60000
+RATE_LIMIT_MAX_REQUESTS=100
+RATE_LIMIT_USE_REDIS=false  # Mettre true en production
+
+# Cache
+PROXY_CACHE_ENABLED=true
+PROXY_CACHE_TTL=0
+PROXY_CACHE_USE_REDIS=false  # Mettre true en production
+
+═══════════════════════════════════════════════════════════════════
+  2. CONFIGURATION REDIS (PRODUCTION)
+═══════════════════════════════════════════════════════════════════
+
+Pour activer Redis en production :
+
+1. Installer Redis :
+   - Windows : https://redis.io/docs/getting-started/installation/install-redis-on-windows/
+   - Linux : sudo apt-get install redis-server
+   - macOS : brew install redis
+
+2. Démarrer Redis :
+   redis-server
+
+3. Configurer les variables d'environnement :
+   REDIS_URL=redis://localhost:6379
+   REDIS_KEY_PREFIX=sorikama:proxy:
+   REDIS_CONNECT_TIMEOUT=5000
+   RATE_LIMIT_USE_REDIS=true
+   PROXY_CACHE_USE_REDIS=true
+
+4. Initialiser Redis au démarrage de l'application :
+   import { redisService } from './services/redis.service';
+   await redisService.connect();
+
+═══════════════════════════════════════════════════════════════════
+  3. VÉRIFICATION HMAC CÔTÉ MASEBUY
+═══════════════════════════════════════════════════════════════════
+
+MaseBuy doit vérifier que les requêtes proviennent bien de Sorikama Hub.
+
+1. Configurer le même secret HMAC dans masebuy/backend/.env :
+   HMAC_SECRET=votre-secret-partagé-avec-sorikama
+
+2. Utiliser le middleware de vérification :
+   import { verifyHmacMiddleware } from './utils/hmacVerification';
+   
+   app.use('/api', verifyHmacMiddleware);
+
+3. Les données utilisateur seront disponibles dans req.user :
+   {
+     id: "user123",
+     email: "user@example.com",
+     role: "user"
+   }
+
+═══════════════════════════════════════════════════════════════════
+  4. FLUX DE SÉCURITÉ
+═══════════════════════════════════════════════════════════════════
+
+1. L'utilisateur fait une requête à Sorikama Hub avec son JWT
+2. Sorikama Hub vérifie le JWT et charge l'utilisateur
+3. Sorikama Hub crée une signature HMAC avec :
+   - User ID (chiffré)
+   - Email
+   - Role
+   - Service slug
+   - Timestamp
+4. La signature est envoyée dans les headers X-*
+5. MaseBuy vérifie la signature HMAC
+6. Si valide, MaseBuy traite la requête
+
+═══════════════════════════════════════════════════════════════════
+  5. HEADERS ENVOYÉS PAR LE PROXY
+═══════════════════════════════════════════════════════════════════
+
+Headers sécurisés :
+- X-User-Id : ID utilisateur chiffré
+- X-User-Email : Email de l'utilisateur
+- X-User-Role : Rôle de l'utilisateur
+- X-Service-Slug : Slug du service
+- X-Signature : Signature HMAC
+- X-Timestamp : Timestamp de la signature
+
+Headers additionnels :
+- X-Session-Id : ID de session SSO
+- X-Service-Name : Nom du service
+- X-Proxy-Timestamp : Timestamp du proxy
+- X-Forwarded-For : IP du client
+- X-Forwarded-Proto : Protocole (http/https)
+- X-Forwarded-Host : Hostname
+
+═══════════════════════════════════════════════════════════════════
+  6. RATE LIMITING
+═══════════════════════════════════════════════════════════════════
+
+Le rate limiting est appliqué par utilisateur et par service :
+
+Mode mémoire (développement) :
+- Utilise une Map JavaScript
+- Données perdues au redémarrage
+- Pas de synchronisation entre instances
+
+Mode Redis (production) :
+- Persistant et partagé entre instances
+- Compteurs atomiques
+- Expiration automatique
+
+Configuration :
+RATE_LIMIT_WINDOW=60000        # 1 minute
+RATE_LIMIT_MAX_REQUESTS=100    # 100 requêtes/minute
+
+═══════════════════════════════════════════════════════════════════
+  7. CACHE DES PROXIES
+═══════════════════════════════════════════════════════════════════
+
+Le cache évite de recréer les proxies à chaque requête :
+
+Mode mémoire (développement) :
+- Utilise une Map JavaScript
+- Rapide mais limité à une instance
+
+Mode Redis (production) :
+- Partagé entre instances
+- TTL configurable
+- Invalidation possible
+
+Configuration :
+PROXY_CACHE_TTL=0              # 0 = infini, sinon en secondes
+
+═══════════════════════════════════════════════════════════════════
+  8. TESTS
+═══════════════════════════════════════════════════════════════════
+
+Exécuter les tests HMAC :
+
+# Sorikama Hub (création de signatures)
+npm test -- hmacSignature.test.ts
+
+# MaseBuy (vérification de signatures)
+npm test -- hmacVerification.test.ts
+
+═══════════════════════════════════════════════════════════════════
+  9. MONITORING
+═══════════════════════════════════════════════════════════════════
+
+Vérifier la santé de Redis :
+GET /api/v1/system/health
+
+Réponse :
+{
+  "redis": {
+    "status": "healthy",
+    "latency": 2
+  }
+}
+
+═══════════════════════════════════════════════════════════════════
+  10. DÉPANNAGE
+═══════════════════════════════════════════════════════════════════
+
+Problème : "Redis non connecté"
+Solution : Vérifier que Redis est démarré et accessible
+
+Problème : "Signature invalide"
+Solution : Vérifier que HMAC_SECRET est identique sur les deux services
+
+Problème : "Signature expirée"
+Solution : Vérifier la synchronisation des horloges système
+
+Problème : "Rate limit dépassé"
+Solution : Augmenter RATE_LIMIT_MAX_REQUESTS ou RATE_LIMIT_WINDOW
+
+═══════════════════════════════════════════════════════════════════
+  11. MIGRATION VERS PRODUCTION
+═══════════════════════════════════════════════════════════════════
+
+Checklist :
+☐ Installer et configurer Redis
+☐ Activer RATE_LIMIT_USE_REDIS=true
+☐ Activer PROXY_CACHE_USE_REDIS=true
+☐ Configurer HMAC_SECRET (même valeur partout)
+☐ Activer VERIFY_HMAC_SIGNATURE=true
+☐ Configurer les timeouts appropriés
+☐ Tester la vérification HMAC
+☐ Monitorer les performances Redis
+☐ Configurer les logs (PROXY_LOG_LEVEL=info)
+
+═══════════════════════════════════════════════════════════════════
