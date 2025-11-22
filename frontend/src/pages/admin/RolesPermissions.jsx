@@ -298,14 +298,14 @@ export default function RolesPermissions() {
           <p className="text-gray-600 dark:text-gray-400 mt-1">Gérez les rôles et leurs permissions</p>
         </div>
         <div className="flex items-center gap-3">
-          <ImportExportButtons
+          {/* <ImportExportButtons
             entityName={rolesImportExportConfig.entityName}
             entityNamePlural={rolesImportExportConfig.entityNamePlural}
             onExport={handleExportRoles}
             onImport={handleImportRoles}
             exportConfig={rolesImportExportConfig.export}
             importConfig={rolesImportExportConfig.import}
-          />
+          /> */}
           <button
             onClick={() => {
               setFormData({ name: '', description: '', permissions: [] });
