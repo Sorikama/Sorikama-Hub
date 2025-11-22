@@ -47,7 +47,8 @@ export default function AdminLayout() {
       items: [
         { title: 'Dashboard', icon: FiHome, path: '/admin/dashboard' },
         { title: 'Utilisateurs', icon: FiUsers, path: '/admin/users' },
-        { title: 'Documentation', icon: FiFileText, path: '/admin/documentation' },
+        { title: 'Documentation Utilisateur', icon: FiFileText, path: '/admin/documentation' },
+        { title: 'Documentation Technique', icon: FiFileText, path: '/admin/technical-docs' },
       ]
     },
     {
@@ -111,24 +112,6 @@ export default function AdminLayout() {
 
             {/* Right: Actions */}
             <div className="flex items-center gap-3">
-
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                {theme === 'light' ? (
-                  <FiMoon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                ) : (
-                  <FiSun className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                )}
-              </button>
-
-              {/* Status */}
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-xs text-green-700 dark:text-green-400 font-medium">En ligne</span>
-              </div>
 
               {/* User Menu */}
               <div className="relative">

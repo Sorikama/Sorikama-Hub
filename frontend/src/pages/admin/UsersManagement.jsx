@@ -242,7 +242,7 @@ export default function UsersManagement() {
           <p className="text-gray-600 dark:text-gray-400 mt-1">Gérez tous les utilisateurs de la plateforme</p>
         </div>
         <div className="flex items-center gap-3">
-          <ImportExportButtons
+          {/* <ImportExportButtons
             entityName={usersImportExportConfig.entityName}
             entityNamePlural={usersImportExportConfig.entityNamePlural}
             onExport={handleExport}
@@ -250,7 +250,7 @@ export default function UsersManagement() {
             exportConfig={usersImportExportConfig.export}
             importConfig={usersImportExportConfig.import}
             currentFilters={{ search, role: roleFilter, status: statusFilter }}
-          />
+          /> */}
           <button
             onClick={() => setShowAddUserModal(true)}
             className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/30"

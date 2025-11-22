@@ -97,12 +97,6 @@ export default function UserTable({ users, isLoading, onViewDetails, onBlock, on
                     </span>
                   )}
                   
-                  {/* Indicateur de compte non activé */}
-                  {!user.isActivated && !user.isBlocked && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
-                      ⏳ En attente d'activation
-                    </span>
-                  )}
                 </div>
               </td>
               <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{user.loginCount || 0}</td>
