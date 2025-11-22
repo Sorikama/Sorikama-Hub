@@ -47,14 +47,13 @@ export default function AdminLayout() {
       items: [
         { title: 'Dashboard', icon: FiHome, path: '/admin/dashboard' },
         { title: 'Utilisateurs', icon: FiUsers, path: '/admin/users' },
+        { title: 'Documentation', icon: FiFileText, path: '/admin/documentation' },
       ]
     },
     {
       title: 'Sécurité & Accès',
       items: [
         { title: 'Rôles & Permissions', icon: FiShield, path: '/admin/roles' },
-        // { title: 'Rate Limiting', icon: FiClock, path: '/admin/rate-limit' },
-        // { title: 'Audit Trail', icon: FiFileText, path: '/admin/audit' },
       ]
     },
     {
@@ -63,21 +62,6 @@ export default function AdminLayout() {
         { title: 'Gestion Services', icon: FiPackage, path: '/admin/services' },
       ]
     },
-    // {
-    //   title: 'Intégrations',
-    //   items: [
-    //     { title: 'Webhooks', icon: FiBell, path: '/admin/webhooks' },
-    //   ]
-    // },
-    // {
-    //   title: 'Système & Monitoring',
-    //   items: [
-    //     { title: 'Logs Système', icon: FiActivity, path: '/admin/logs' },
-    //     { title: 'Performances', icon: FiZap, path: '/admin/performance' },
-    //     { title: 'Santé Système', icon: FiHeart, path: '/admin/health' },
-    //     { title: 'Dépendances', icon: FiPackage, path: '/admin/dependencies' },
-    //   ]
-    // }
   ];
 
   const isActive = (path) => location.pathname === path;

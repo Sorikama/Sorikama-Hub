@@ -29,6 +29,7 @@ import LogsViewer from './pages/admin/LogsViewer';
 import SystemHealth from './pages/admin/SystemHealth';
 import PerformanceMetrics from './pages/admin/PerformanceMetrics';
 import Dependencies from './pages/admin/Dependencies';
+import Documentation from './pages/Documentation';
 
 // Layouts
 import AdminLayout from './layouts/AdminLayout';
@@ -106,6 +107,7 @@ function App() {
               <Route path="performance" element={<PerformanceMetrics />} />
               <Route path="dependencies" element={<Dependencies />} />
               <Route path="services" element={<ServicesManagement />} />
+              <Route path="documentation" element={<Documentation />} />
             </Route>
 
             {/* Services Admin (sans layout pour l'instant) */}
