@@ -2,8 +2,8 @@
  * Seeder pour créer le compte administrateur unique
  * 
  * Ce script crée automatiquement un compte admin avec :
- * - Email : admin@admin.fr
- * - Password : Admin@123
+ * - Email : depuis DEFAULT_ADMIN_EMAIL (.env)
+ * - Password : depuis DEFAULT_ADMIN_PASSWORD (.env)
  * - Role : admin
  * 
  * Le compte est créé seulement s'il n'existe pas déjà
@@ -12,15 +12,16 @@
 import { UserModel } from '../models/user.model';
 import { logger } from '../../utils/logger';
 import { createBlindIndex } from '../../utils/crypto';
+import { DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_PASSWORD } from '../../config';
 
 /**
  * Fonction pour créer le compte admin
  */
 export async function seedAdmin() {
   try {
-    // Email et mot de passe du compte admin
-    const adminEmail = 'admin@admin.fr';
-    const adminPassword = 'Admin@123';
+    // Email et mot de passe du compte admin depuis .env
+    const adminEmail = DEFAULT_ADMIN_EMAIL || 'admin@sorikama.com';
+    const adminPassword = DEFAULT_ADMIN_PASSWORD || 'Admin@123';
 
     // Vérifier si le compte admin existe déjà en utilisant le blind index
     const emailHash = createBlindIndex(adminEmail.toLowerCase());
@@ -50,7 +51,7 @@ export async function seedAdmin() {
       role: admin.role
     });
 
-    logger.info('🔑 Identifiants: admin@admin.fr / Admin@123');
+    logger.info(`🔑 Identifiants: ${adminEmail} / ${adminPassword}`);
 
     return admin;
 
@@ -65,7 +66,7 @@ export async function seedAdmin() {
  */
 export async function removeAdmin() {
   try {
-    const adminEmail = 'admin@admin.fr';
+    const adminEmail = DEFAULT_ADMIN_EMAIL || 'admin@sorikama.com';
     const emailHash = createBlindIndex(adminEmail.toLowerCase());
     const result = await UserModel.deleteOne({ emailHash });
 

@@ -44,7 +44,7 @@ export async function seedDatabase() {
     console.log('\n' + '═'.repeat(50));
     console.log('🎉 BASE DE DONNÉES INITIALISÉE AVEC SUCCÈS\n');
     console.log('📝 Identifiants admin:');
-    console.log('   Email: admin@admin.fr');
+    console.log(`   Email: ${admin.email}`);
     console.log('   Mot de passe: Admin@123\n');
 
     return {

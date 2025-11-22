@@ -36,23 +36,42 @@ export async function verifyToken(authHeader: string | undefined): Promise<any> 
 export async function loadUser(decoded: any): Promise<any> {
   // Déchiffrer l'ID utilisateur si nécessaire
   let userId = decoded.id;
+  
+  logger.info('🔍 Chargement utilisateur', { 
+    originalId: decoded.id,
+    isEncrypted: isEncryptedId(decoded.id) 
+  });
+  
   if (isEncryptedId(decoded.id)) {
-    userId = decryptUserId(decoded.id);
-    logger.debug('ID utilisateur déchiffré');
+    try {
+      userId = decryptUserId(decoded.id);
+      logger.info('✅ ID utilisateur déchiffré', { userId });
+    } catch (error: any) {
+      logger.error('❌ Erreur déchiffrement ID', { 
+        error: error.message,
+        originalId: decoded.id 
+      });
+      throw new Error('ID utilisateur invalide');
+    }
   }
 
   // Charger l'utilisateur
   const user = await UserModel.findById(userId);
 
   if (!user) {
+    logger.error('❌ Utilisateur non trouvé', { userId });
     throw new Error('Utilisateur non trouvé');
   }
 
   if (!user.isActive) {
+    logger.error('❌ Compte désactivé', { userId, email: user.email });
     throw new Error('Compte désactivé');
   }
 
-  logger.debug('Utilisateur chargé', { email: user.email });
+  logger.info('✅ Utilisateur chargé', { 
+    userId: user._id,
+    email: user.email 
+  });
   return user;
 }
 
@@ -74,17 +93,34 @@ export async function verifyService(serviceSlug: string): Promise<any> {
 }
 
 /**
- * Vérifier la session SSO
+ * Vérifier ou créer la session SSO
  */
 export async function verifySession(userId: string, serviceSlug: string): Promise<any> {
-  const ssoSession = await SSOSessionModel.findOne({
+  // Chercher une session SSO existante
+  let ssoSession = await SSOSessionModel.findOne({
     userId: userId,
     serviceId: serviceSlug,
     expiresAt: { $gt: new Date() }
   });
 
+  // Si pas de session, en créer une automatiquement
   if (!ssoSession) {
-    throw new Error('Session SSO expirée');
+    logger.info('Création automatique d\'une session SSO', { userId, serviceSlug });
+    
+    const crypto = require('crypto');
+    const sessionId = crypto.randomBytes(32).toString('hex');
+    const accessToken = crypto.randomBytes(32).toString('hex');
+    
+    ssoSession = await SSOSessionModel.create({
+      sessionId,
+      userId,
+      serviceId: serviceSlug,
+      accessToken,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+      createdAt: new Date()
+    });
+    
+    logger.info('✅ Session SSO créée automatiquement', { sessionId });
   }
 
   logger.debug('Session SSO vérifiée', { sessionId: ssoSession.sessionId });

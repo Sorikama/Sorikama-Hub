@@ -28,7 +28,12 @@ export const dynamicProxyMiddleware = async (
     // ============================================
     const fullProxyPath = req.params.proxyPath || req.params[0];
     
+    console.log('🔍 [PROXY] fullProxyPath:', fullProxyPath);
+    console.log('🔍 [PROXY] req.params:', req.params);
+    console.log('🔍 [PROXY] req.originalUrl:', req.originalUrl);
+    
     if (!fullProxyPath) {
+      console.log('❌ [PROXY] Service non spécifié');
       return res.status(400).json({
         success: false,
         message: 'Service non spécifié'
@@ -39,6 +44,8 @@ export const dynamicProxyMiddleware = async (
       ? fullProxyPath.split('/')[0] 
       : fullProxyPath;
 
+    console.log('✅ [PROXY] serviceSlug:', serviceSlug);
+    
     logger.info('🔄 Requête proxy reçue', {
       serviceSlug,
       method: req.method,
@@ -48,12 +55,25 @@ export const dynamicProxyMiddleware = async (
     // ============================================
     // 2. AUTHENTIFICATION ET AUTORISATION
     // ============================================
+    console.log('🔐 [PROXY] Vérification token...');
     const decoded = await verifyToken(req.headers.authorization);
-    const user = await loadUser(decoded);
-    const service = await verifyService(serviceSlug);
-    const ssoSession = await verifySession(user._id.toString(), serviceSlug);
+    console.log('✅ [PROXY] Token vérifié, decoded:', decoded);
     
+    console.log('👤 [PROXY] Chargement utilisateur...');
+    const user = await loadUser(decoded);
+    console.log('✅ [PROXY] Utilisateur chargé:', user.email);
+    
+    console.log('🔌 [PROXY] Vérification service...');
+    const service = await verifyService(serviceSlug);
+    console.log('✅ [PROXY] Service vérifié:', service.name);
+    
+    console.log('🎫 [PROXY] Vérification session SSO...');
+    const ssoSession = await verifySession(user._id.toString(), serviceSlug);
+    console.log('✅ [PROXY] Session SSO vérifiée');
+    
+    console.log('🔒 [PROXY] Vérification rôles...');
     verifyRoles(user, service);
+    console.log('✅ [PROXY] Rôles vérifiés');
 
     logger.info('✅ Authentification réussie', {
       userId: user._id,
@@ -171,6 +191,9 @@ export const dynamicProxyMiddleware = async (
   } catch (error: any) {
     const responseTime = Date.now() - startTime;
     
+    console.log('❌ [PROXY] ERREUR:', error.message);
+    console.log('❌ [PROXY] Stack:', error.stack);
+    
     logger.error('❌ Erreur middleware proxy', {
       error: error.message,
       responseTime: `${responseTime}ms`
@@ -181,6 +204,8 @@ export const dynamicProxyMiddleware = async (
       : error.message.includes('Permissions') ? 403
       : error.message.includes('Service') ? 404
       : 500;
+    
+    console.log('❌ [PROXY] Status code:', statusCode);
     
     return res.status(statusCode).json({
       success: false,

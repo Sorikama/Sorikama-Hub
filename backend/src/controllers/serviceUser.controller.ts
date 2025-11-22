@@ -170,16 +170,16 @@ export const updateUserProfile = async (req: Request, res: Response, next: NextF
 
     // Logger l'action
     // await logAudit({
-      userId,
-      action: 'profile_updated',
-      category: 'user',
-      resource: 'profile',
-      status: 'success',
-      metadata: {
-        service: service.name,
-        updates
-      }
-    });
+    //   userId,
+    //   action: 'profile_updated',
+    //   category: 'user',
+    //   resource: 'profile',
+    //   status: 'success',
+    //   metadata: {
+    //     service: service.name,
+    //     updates
+    //   }
+    // });
 
     // Webhook (désactivé)
     // await triggerWebhook(WEBHOOK_EVENTS.PROFILE_UPDATED, {
@@ -299,15 +299,15 @@ export const changeUserPassword = async (req: Request, res: Response, next: Next
 
     // Logger l'action
     // await logAudit({
-      userId,
-      action: 'password_changed',
-      category: 'security',
-      resource: 'password',
-      status: 'success',
-      metadata: {
-        service: service.name
-      }
-    });
+    //   userId,
+    //   action: 'password_changed',
+    //   category: 'security',
+    //   resource: 'password',
+    //   status: 'success',
+    //   metadata: {
+    //     service: service.name
+    //   }
+    // });
 
     logger.info('🔒 Mot de passe changé', {
       service: service.name,

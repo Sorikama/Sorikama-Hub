@@ -14,7 +14,7 @@ import adminRolesRouter from './admin/roles.routes';
 import adminServicesRouter from './admin/services.routes';
 import authorizeRouter from './authorize.routes';
 import csrfRouter from './csrf.routes';
-import serviceUserRouter from './service-user.routes';
+import serviceUserRouter from './serviceUser.routes';
 import path from 'path';
 
 const router = Router();
